@@ -1,0 +1,183 @@
+[INFO] 20:31:56:859 SERVIDOR/(6951:6951): Dirección local: 127.0.0.1:9008
+[WARNING] 20:31:56:859 SERVIDOR/(6951:6951): El socket no está conectado a un socket remoto
+[INFO] 20:31:56:860 SERVIDOR/(6951:6951): Servidor listo para recibir al cliente
+[INFO] 20:32:18:190 SERVIDOR/(6951:6951): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 20:32:18:190 SERVIDOR/(6951:6951): Ha llegado un nuevo cliente
+[INFO] 20:32:18:191 SERVIDOR/(6951:6951): Dirección local: 127.0.0.1:9008
+[INFO] 20:32:18:191 SERVIDOR/(6951:6951): Dirección remota: 127.0.0.1:45872
+[INFO] 20:32:18:191 SERVIDOR/(6951:6951): Envío mensaje_out
+[INFO] 20:32:18:191 SERVIDOR/(6951:6951): Entro a recibir mensaje
+[INFO] 20:36:43:218 SERVIDOR/(6951:6951): Largo de lista 1
+[INFO] 20:36:43:218 SERVIDOR/(6951:6951): Protocolo: 20
+[INFO] 20:42:08:476 SERVIDOR/(7581:7581): Dirección local: 127.0.0.1:9008
+[WARNING] 20:42:08:477 SERVIDOR/(7581:7581): El socket no está conectado a un socket remoto
+[INFO] 20:42:08:477 SERVIDOR/(7581:7581): Servidor listo para recibir al cliente
+[INFO] 20:43:14:940 SERVIDOR/(7581:7581): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 20:43:14:940 SERVIDOR/(7581:7581): Ha llegado un nuevo cliente
+[INFO] 20:43:14:940 SERVIDOR/(7581:7581): Dirección local: 127.0.0.1:9008
+[INFO] 20:43:14:940 SERVIDOR/(7581:7581): Dirección remota: 127.0.0.1:45886
+[INFO] 20:43:14:941 SERVIDOR/(7581:7581): Envío mensaje_out
+[INFO] 20:43:14:941 SERVIDOR/(7581:7581): Entro a recibir mensaje
+[INFO] 23:57:53:121 SERVIDOR/(6005:6005): Dirección local: 127.0.0.1:9008
+[WARNING] 23:57:53:156 SERVIDOR/(6005:6005): El socket no está conectado a un socket remoto
+[INFO] 23:57:53:156 SERVIDOR/(6005:6005): Servidor listo para recibir al cliente
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Ha llegado un nuevo cliente
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Dirección local: 127.0.0.1:9008
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Dirección remota: 127.0.0.1:40108
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Envío mensaje_out
+[INFO] 23:57:58:597 SERVIDOR/(6005:6005): Entro a recibir mensaje
+[INFO] 00:11:08:959 SERVIDOR/(6488:6488): Dirección local: 127.0.0.1:9008
+[WARNING] 00:11:08:960 SERVIDOR/(6488:6488): El socket no está conectado a un socket remoto
+[INFO] 00:11:08:960 SERVIDOR/(6488:6488): Servidor listo para recibir al cliente
+[INFO] 00:15:22:017 SERVIDOR/(6488:6488): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 00:15:22:024 SERVIDOR/(6488:6488): Ha llegado un nuevo cliente
+[INFO] 00:15:22:024 SERVIDOR/(6488:6488): Dirección local: 127.0.0.1:9008
+[INFO] 00:15:22:024 SERVIDOR/(6488:6488): Dirección remota: 127.0.0.1:40184
+[INFO] 00:15:22:024 SERVIDOR/(6488:6488): Envío mensaje_out
+[INFO] 00:15:22:115 SERVIDOR/(6488:6488): Entro a recibir mensaje
+[INFO] 00:17:16:731 SERVIDOR/(6488:6488): Largo de lista 3
+[INFO] 00:17:16:731 SERVIDOR/(6488:6488): Protocolo: 0
+[INFO] 00:17:16:731 SERVIDOR/(6488:6488): Recibi id_ patota 1
+[INFO] 00:17:16:732 SERVIDOR/(6488:6488): Recibi cant_tripulantes 0
+[INFO] 00:26:19:389 SERVIDOR/(7233:7233): Dirección local: 127.0.0.1:9008
+[WARNING] 00:26:19:389 SERVIDOR/(7233:7233): El socket no está conectado a un socket remoto
+[INFO] 00:26:19:389 SERVIDOR/(7233:7233): Servidor listo para recibir al cliente
+[INFO] 00:26:36:202 SERVIDOR/(7233:7233): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 00:26:36:252 SERVIDOR/(7233:7233): Ha llegado un nuevo cliente
+[INFO] 00:26:36:252 SERVIDOR/(7233:7233): Dirección local: 127.0.0.1:9008
+[INFO] 00:26:36:252 SERVIDOR/(7233:7233): Dirección remota: 127.0.0.1:40198
+[INFO] 00:26:36:252 SERVIDOR/(7233:7233): Envío mensaje_out
+[INFO] 00:26:36:252 SERVIDOR/(7233:7233): Entro a recibir mensaje
+[INFO] 00:28:47:268 SERVIDOR/(7233:7233): Largo de lista 3
+[INFO] 00:28:47:269 SERVIDOR/(7233:7233): Protocolo: 0
+[INFO] 00:28:47:269 SERVIDOR/(7233:7233): Recibi id_ patota 1
+[INFO] 00:28:47:269 SERVIDOR/(7233:7233): Recibi cant_tripulantes 0
+[INFO] 00:35:34:394 SERVIDOR/(7793:7793): Dirección local: 127.0.0.1:9008
+[WARNING] 00:35:34:394 SERVIDOR/(7793:7793): El socket no está conectado a un socket remoto
+[INFO] 00:35:34:394 SERVIDOR/(7793:7793): Servidor listo para recibir al cliente
+[INFO] 00:36:15:681 SERVIDOR/(7793:7793): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 00:36:15:751 SERVIDOR/(7793:7793): Ha llegado un nuevo cliente
+[INFO] 00:36:15:751 SERVIDOR/(7793:7793): Dirección local: 127.0.0.1:9008
+[INFO] 00:36:15:751 SERVIDOR/(7793:7793): Dirección remota: 127.0.0.1:40208
+[INFO] 00:36:15:751 SERVIDOR/(7793:7793): Envío mensaje_out
+[INFO] 00:36:15:751 SERVIDOR/(7793:7793): Entro a recibir mensaje
+[INFO] 00:40:25:669 SERVIDOR/(10035:10035): Dirección local: 127.0.0.1:9008
+[WARNING] 00:40:25:669 SERVIDOR/(10035:10035): El socket no está conectado a un socket remoto
+[INFO] 00:40:25:670 SERVIDOR/(10035:10035): Servidor listo para recibir al cliente
+[INFO] 00:40:43:552 SERVIDOR/(10035:10035): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 00:40:43:600 SERVIDOR/(10035:10035): Ha llegado un nuevo cliente
+[INFO] 00:40:43:600 SERVIDOR/(10035:10035): Dirección local: 127.0.0.1:9008
+[INFO] 00:40:43:600 SERVIDOR/(10035:10035): Dirección remota: 127.0.0.1:40216
+[INFO] 00:40:43:600 SERVIDOR/(10035:10035): Envío mensaje_out
+[INFO] 00:40:43:600 SERVIDOR/(10035:10035): Entro a recibir mensaje
+[INFO] 00:47:05:490 SERVIDOR/(11955:11955): Dirección local: 127.0.0.1:9008
+[WARNING] 00:47:05:515 SERVIDOR/(11955:11955): El socket no está conectado a un socket remoto
+[INFO] 00:47:05:515 SERVIDOR/(11955:11955): Servidor listo para recibir al cliente
+[INFO] 00:47:19:667 SERVIDOR/(12060:12060): Dirección local: 127.0.0.1:9008
+[WARNING] 00:47:19:667 SERVIDOR/(12060:12060): El socket no está conectado a un socket remoto
+[INFO] 00:47:19:667 SERVIDOR/(12060:12060): Servidor listo para recibir al cliente
+[INFO] 00:47:37:233 SERVIDOR/(12160:12160): Dirección local: 127.0.0.1:9008
+[WARNING] 00:47:37:233 SERVIDOR/(12160:12160): El socket no está conectado a un socket remoto
+[INFO] 00:47:37:233 SERVIDOR/(12160:12160): Servidor listo para recibir al cliente
+[INFO] 00:49:28:671 SERVIDOR/(12160:12160): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 00:49:28:699 SERVIDOR/(12160:12160): Ha llegado un nuevo cliente
+[INFO] 00:49:28:699 SERVIDOR/(12160:12160): Dirección local: 127.0.0.1:9008
+[INFO] 00:49:28:700 SERVIDOR/(12160:12160): Dirección remota: 127.0.0.1:40228
+[INFO] 00:49:28:700 SERVIDOR/(12160:12160): Envío mensaje_out
+[INFO] 00:49:28:700 SERVIDOR/(12160:12160): Entro a recibir mensaje
+[INFO] 01:11:10:088 SERVIDOR/(16225:16225): Dirección local: 127.0.0.1:9008
+[WARNING] 01:11:10:089 SERVIDOR/(16225:16225): El socket no está conectado a un socket remoto
+[INFO] 01:11:10:089 SERVIDOR/(16225:16225): Servidor listo para recibir al cliente
+[INFO] 01:11:49:365 SERVIDOR/(16225:16225): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 01:11:49:647 SERVIDOR/(16225:16225): Ha llegado un nuevo cliente
+[INFO] 01:11:49:647 SERVIDOR/(16225:16225): Dirección local: 127.0.0.1:9008
+[INFO] 01:11:49:647 SERVIDOR/(16225:16225): Dirección remota: 127.0.0.1:40252
+[INFO] 01:11:49:647 SERVIDOR/(16225:16225): Envío mensaje_out
+[INFO] 01:11:49:647 SERVIDOR/(16225:16225): Entro a recibir mensaje
+[INFO] 01:27:57:285 SERVIDOR/(18507:18507): Dirección local: 127.0.0.1:9008
+[WARNING] 01:27:57:285 SERVIDOR/(18507:18507): El socket no está conectado a un socket remoto
+[INFO] 01:27:57:285 SERVIDOR/(18507:18507): Servidor listo para recibir al cliente
+[INFO] 01:28:26:373 SERVIDOR/(18507:18507): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 01:28:26:385 SERVIDOR/(18507:18507): Ha llegado un nuevo cliente
+[INFO] 01:28:26:385 SERVIDOR/(18507:18507): Dirección local: 127.0.0.1:9008
+[INFO] 01:28:26:385 SERVIDOR/(18507:18507): Dirección remota: 127.0.0.1:40270
+[INFO] 01:28:26:385 SERVIDOR/(18507:18507): Envío mensaje_out
+[INFO] 01:28:26:385 SERVIDOR/(18507:18507): Entro a recibir mensaje
+[INFO] 01:29:01:478 SERVIDOR/(18507:18507): Largo de lista 1
+[INFO] 01:29:01:478 SERVIDOR/(18507:18507): Protocolo: 20
+[INFO] 01:29:22:877 SERVIDOR/(19464:19464): Dirección local: 127.0.0.1:9008
+[WARNING] 01:29:22:877 SERVIDOR/(19464:19464): El socket no está conectado a un socket remoto
+[INFO] 01:29:22:877 SERVIDOR/(19464:19464): Servidor listo para recibir al cliente
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Ha llegado un nuevo cliente
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Dirección local: 127.0.0.1:9008
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Dirección remota: 127.0.0.1:40276
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Envío mensaje_out
+[INFO] 01:29:48:110 SERVIDOR/(19464:19464): Entro a recibir mensaje
+[INFO] 01:30:17:024 SERVIDOR/(19464:19464): Largo de lista 1
+[INFO] 01:30:17:024 SERVIDOR/(19464:19464): Protocolo: 20
+[INFO] 01:47:21:845 SERVIDOR/(21432:21432): Dirección local: 127.0.0.1:9008
+[WARNING] 01:47:21:905 SERVIDOR/(21432:21432): El socket no está conectado a un socket remoto
+[INFO] 01:47:21:906 SERVIDOR/(21432:21432): Servidor listo para recibir al cliente
+[INFO] 01:47:27:165 SERVIDOR/(21432:21432): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 01:47:27:165 SERVIDOR/(21432:21432): Ha llegado un nuevo cliente
+[INFO] 01:47:27:166 SERVIDOR/(21432:21432): Dirección local: 127.0.0.1:9008
+[INFO] 01:47:27:166 SERVIDOR/(21432:21432): Dirección remota: 127.0.0.1:40296
+[INFO] 01:47:27:166 SERVIDOR/(21432:21432): Envío mensaje_out
+[INFO] 01:47:27:166 SERVIDOR/(21432:21432): Entro a recibir mensaje
+[INFO] 02:14:15:698 SERVIDOR/(25185:25185): Dirección local: 127.0.0.1:9008
+[WARNING] 02:14:15:746 SERVIDOR/(25185:25185): El socket no está conectado a un socket remoto
+[INFO] 02:14:15:746 SERVIDOR/(25185:25185): Servidor listo para recibir al cliente
+[INFO] 02:16:03:153 SERVIDOR/(25185:25185): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 02:16:03:201 SERVIDOR/(25185:25185): Ha llegado un nuevo cliente
+[INFO] 02:16:03:201 SERVIDOR/(25185:25185): Dirección local: 127.0.0.1:9008
+[INFO] 02:16:03:201 SERVIDOR/(25185:25185): Dirección remota: 127.0.0.1:40326
+[INFO] 02:16:03:201 SERVIDOR/(25185:25185): Envío mensaje_out
+[INFO] 02:16:03:202 SERVIDOR/(25185:25185): Entro a recibir mensaje
+[INFO] 02:23:41:432 SERVIDOR/(25185:25185): Largo de lista 1
+[INFO] 02:23:41:432 SERVIDOR/(25185:25185): Protocolo: 20
+[INFO] 02:24:13:538 SERVIDOR/(26372:26372): Dirección local: 127.0.0.1:9008
+[WARNING] 02:24:13:538 SERVIDOR/(26372:26372): El socket no está conectado a un socket remoto
+[INFO] 02:24:13:538 SERVIDOR/(26372:26372): Servidor listo para recibir al cliente
+[INFO] 02:24:49:403 SERVIDOR/(26372:26372): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 02:24:49:457 SERVIDOR/(26372:26372): Ha llegado un nuevo cliente
+[INFO] 02:24:49:457 SERVIDOR/(26372:26372): Dirección local: 127.0.0.1:9008
+[INFO] 02:24:49:457 SERVIDOR/(26372:26372): Dirección remota: 127.0.0.1:40338
+[INFO] 02:24:49:457 SERVIDOR/(26372:26372): Envío mensaje_out
+[INFO] 02:24:49:457 SERVIDOR/(26372:26372): Entro a recibir mensaje
+[INFO] 02:26:26:314 SERVIDOR/(26372:26372): Largo de lista 5
+[INFO] 02:26:26:314 SERVIDOR/(26372:26372): Protocolo: 0
+[INFO] 02:26:26:314 SERVIDOR/(26372:26372): Recibi id_ patota 1
+[INFO] 02:26:26:315 SERVIDOR/(26372:26372): Recibi cant_tripulantes 2
+[INFO] 02:26:26:315 SERVIDOR/(26372:26372): Tarea 1: Soy la tarea 1
+[INFO] 02:26:26:315 SERVIDOR/(26372:26372): Tarea 2: Soy la tarea 2
+[ERROR] 02:51:27:848 SERVIDOR/(29662:29662): Error al crear socket. Puerto no disponible
