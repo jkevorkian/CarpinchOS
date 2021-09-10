@@ -1,7 +1,7 @@
 # Include libraries here
 LIBRARIES= commons readline pthread utils
 # Include custom library paths here
-LIBRARY_PATHS=../utils
+LIBRARY_PATHS=../../utils
 
 # ==============================================================================================================
 
