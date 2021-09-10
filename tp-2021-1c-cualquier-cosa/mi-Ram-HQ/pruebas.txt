@@ -1,0 +1,139 @@
+HEAP SUMMARY:
+==21642==     in use at exit: 46,010 bytes in 433 blocks
+==21642==   total heap usage: 4,003 allocs, 3,571 frees, 163,220 bytes allocated
+==21642== 
+==21642== 1 bytes in 1 blocks are definitely lost in loss record 1 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x804B210: main (miramhq.c:75)
+==21642== 
+==21642== 8 bytes in 1 blocks are definitely lost in loss record 9 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x404A9C8: list_filter (in /usr/lib/libcommons.so)
+==21642==    by 0x8049979: crear_segmento (segmentos.c:36)
+==21642==    by 0x804A843: iniciar_patota (patota.c:46)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 13 bytes in 1 blocks are definitely lost in loss record 12 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x41322C5: strdup (strdup.c:42)
+==21642==    by 0x404C27A: temporal_get_string_time (in /usr/lib/libcommons.so)
+==21642==    by 0x4049101: _log_write_in_level (in /usr/lib/libcommons.so)
+==21642==    by 0x4048F6D: log_info (in /usr/lib/libcommons.so)
+==21642==    by 0x804ACCA: rutina_hilos (hilos.c:77)
+==21642==    by 0x4057294: start_thread (pthread_create.c:333)
+==21642==    by 0x41A40AD: clone (clone.S:114)
+==21642== 
+==21642== 32 bytes in 2 blocks are definitely lost in loss record 20 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x804CE5B: recibir_parametro (utils-mensajes.c:66)
+==21642==    by 0x804CF76: recibir_mensaje (utils-mensajes.c:103)
+==21642==    by 0x804B340: main (miramhq.c:110)
+==21642== 
+==21642== 36 (8 direct, 28 indirect) bytes in 1 blocks are definitely lost in loss record 23 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x404A9C8: list_filter (in /usr/lib/libcommons.so)
+==21642==    by 0x80499A9: crear_segmento (segmentos.c:40)
+==21642==    by 0x804A843: iniciar_patota (patota.c:46)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 38 bytes in 1 blocks are definitely lost in loss record 24 of 79
+==21642==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x40492D4: string_append (in /usr/lib/libcommons.so)
+==21642==    by 0x4049C5A: _string_append_with_format_list (in /usr/lib/libcommons.so)
+==21642==    by 0x40493C0: string_from_vformat (in /usr/lib/libcommons.so)
+==21642==    by 0x40490EC: _log_write_in_level (in /usr/lib/libcommons.so)
+==21642==    by 0x4048F6D: log_info (in /usr/lib/libcommons.so)
+==21642==    by 0x804ACCA: rutina_hilos (hilos.c:77)
+==21642==    by 0x4057294: start_thread (pthread_create.c:333)
+==21642==    by 0x41A40AD: clone (clone.S:114)
+==21642== 
+==21642== 48 bytes in 3 blocks are definitely lost in loss record 31 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x804AA10: rutina_hilos (hilos.c:20)
+==21642==    by 0x4057294: start_thread (pthread_create.c:333)
+==21642==    by 0x41A40AD: clone (clone.S:114)
+==21642== 
+==21642== 48 (40 direct, 8 indirect) bytes in 5 blocks are definitely lost in loss record 32 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x804CEAB: recibir_mensaje (utils-mensajes.c:76)
+==21642==    by 0x804AA41: rutina_hilos (hilos.c:27)
+==21642==    by 0x4057294: start_thread (pthread_create.c:333)
+==21642==    by 0x41A40AD: clone (clone.S:114)
+==21642== 
+==21642== 80 bytes in 4 blocks are definitely lost in loss record 41 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x8049942: crear_segmento (segmentos.c:32)
+==21642==    by 0x804BA70: iniciar_tripulante (tripulante.c:13)
+==21642==    by 0x804B4CC: main (miramhq.c:142)
+==21642== 
+==21642== 84 bytes in 1 blocks are definitely lost in loss record 44 of 79
+==21642==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x40492D4: string_append (in /usr/lib/libcommons.so)
+==21642==    by 0x4049C5A: _string_append_with_format_list (in /usr/lib/libcommons.so)
+==21642==    by 0x40493C0: string_from_vformat (in /usr/lib/libcommons.so)
+==21642==    by 0x404935E: string_from_format (in /usr/lib/libcommons.so)
+==21642==    by 0x4049144: _log_write_in_level (in /usr/lib/libcommons.so)
+==21642==    by 0x4048F6D: log_info (in /usr/lib/libcommons.so)
+==21642==    by 0x804ACCA: rutina_hilos (hilos.c:77)
+==21642==    by 0x4057294: start_thread (pthread_create.c:333)
+==21642==    by 0x41A40AD: clone (clone.S:114)
+==21642== 
+==21642== 88 (48 direct, 40 indirect) bytes in 2 blocks are definitely lost in loss record 45 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x804BBBF: iniciar_tripulante (tripulante.c:35)
+==21642==    by 0x804B4CC: main (miramhq.c:142)
+==21642== 
+==21642== 100 bytes in 5 blocks are definitely lost in loss record 47 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x8049942: crear_segmento (segmentos.c:32)
+==21642==    by 0x804A7A8: iniciar_patota (patota.c:32)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 100 bytes in 5 blocks are definitely lost in loss record 48 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x8049942: crear_segmento (segmentos.c:32)
+==21642==    by 0x804A843: iniciar_patota (patota.c:46)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 128 (64 direct, 64 indirect) bytes in 8 blocks are definitely lost in loss record 52 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x404A9C8: list_filter (in /usr/lib/libcommons.so)
+==21642==    by 0x8049963: crear_segmento (segmentos.c:35)
+==21642==    by 0x804BA70: iniciar_tripulante (tripulante.c:13)
+==21642==    by 0x804B4CC: main (miramhq.c:142)
+==21642== 
+==21642== 144 (40 direct, 104 indirect) bytes in 5 blocks are definitely lost in loss record 53 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x404A9C8: list_filter (in /usr/lib/libcommons.so)
+==21642==    by 0x8049963: crear_segmento (segmentos.c:35)
+==21642==    by 0x804A843: iniciar_patota (patota.c:46)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 164 (40 direct, 124 indirect) bytes in 5 blocks are definitely lost in loss record 54 of 79
+==21642==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4049FEA: list_create (in /usr/lib/libcommons.so)
+==21642==    by 0x404A9C8: list_filter (in /usr/lib/libcommons.so)
+==21642==    by 0x8049963: crear_segmento (segmentos.c:35)
+==21642==    by 0x804A7A8: iniciar_patota (patota.c:32)
+==21642==    by 0x804B417: main (miramhq.c:123)
+==21642== 
+==21642== 272 bytes in 2 blocks are possibly lost in loss record 61 of 79
+==21642==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==21642==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==21642==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==21642==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==21642==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==21642==    by 0x804BCDE: iniciar_tripulante (tripulante.c:56)
+==21642==    by 0x804B4CC: main (miramhq.c:142)
+==21642== 
+==21642== LEAK SUMMARY:
+==21642==    definitely lost: 744 bytes in 50 blocks
+==21642==    indirectly lost: 368 bytes in 42 blocks
+==21642==      possibly lost: 272 bytes in 2 blocks
+==21642==    still reachable: 44,626 bytes in 339 blocks
+==21642==         suppressed: 0 bytes in 0 blocks

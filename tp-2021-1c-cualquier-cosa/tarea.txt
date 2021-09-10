@@ -1,0 +1,3 @@
+generar_oxigeno 1;2;3;4
+consumir_oxigeno 4;3;2;1
+vamo lo pibe 10;10;10;10
