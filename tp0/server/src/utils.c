@@ -2,9 +2,6 @@
 
 int iniciar_servidor(void)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
 	int socket_servidor;
 
 	struct addrinfo hints, *servinfo, *p;
@@ -86,7 +83,6 @@ t_list* recibir_paquete(int socket_cliente)
 		char* valor = malloc(tamanio);
 		memcpy(valor, buffer+desplazamiento, tamanio);
 		desplazamiento+=tamanio;
-		printf("%s", valor);
 		list_add(valores, valor);
 	}
 	free(buffer);
