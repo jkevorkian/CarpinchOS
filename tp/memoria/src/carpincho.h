@@ -15,7 +15,6 @@
 
 typedef struct {
 	int socket;
-	int8_t kernel;
 } data_carpincho;
 
 void *rutina_carpincho(void* info_carpincho);

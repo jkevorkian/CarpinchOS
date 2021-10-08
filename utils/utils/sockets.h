@@ -20,7 +20,8 @@
 #include <stdarg.h>
 
 typedef enum {
-	INIT_P,	SND_PO,	ER_SOC,	ER_RCV
+	INIT_P,		SND_PO,		ER_SOC,		ER_RCV,		MEM_ALLOC,
+	MEM_FREE,	MEM_READ,	MEM_WRITE
 } protocolo_msj;
 
 typedef struct {

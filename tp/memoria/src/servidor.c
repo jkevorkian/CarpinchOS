@@ -9,26 +9,28 @@ void iniciar_servidor(char *ip, int puerto) {
 	// log_info(logger, "Servidor listo");
 	bool seguir = true;
 
-	int socket_discord;
+	int fd_carpincho;
 	while(seguir) {
-		socket_discord = esperar_cliente(server_fd);
-		if(socket_discord < 0) {
+		// Espero a que llegue un nuevo carpincho
+		fd_carpincho = esperar_cliente(server_fd);
+		if(fd_carpincho < 0) {
 			seguir = false;
 			continue;
 		}
 
+		// Creo un hilo para que el carpincho se comunique de forma particular
 		pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));
-		// info_carpincho->socket = ...;
-		info_carpincho->kernel = es_cliente_kernel(info_carpincho->socket);
 
+		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
+		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
 		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
+
+		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
+		t_mensaje* mensaje_out = crear_mensaje(SND_PO);
+		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(info_carpincho->socket));
+		enviar_mensaje(fd_carpincho, mensaje_out);
+		close(fd_carpincho);
 	}
 
-
-
-}
-
-bool es_cliente_kernel(int socket) {
-	return true;
 }

@@ -236,14 +236,12 @@ t_list* recibir_mensaje(int socket) {
 	if(error == 0) {
 		op_code = ER_SOC;
 		list_add(lista_parametros, (void *)ER_SOC);
-		// fprintf(stderr, "ERROR %d: ", error);
 		// perror("read");
 	}
 
 	if(error == -1) {
 		op_code = ER_RCV;
 		list_add(lista_parametros, (void *)ER_RCV);
-		// fprintf(stderr, "ERROR %d: ", error);
 		// perror("read");
 	}
 
@@ -257,6 +255,8 @@ t_list* recibir_mensaje(int socket) {
 	case SND_PO:
 		recibir_parametros(socket, lista_parametros, "%d");
 		break;
+	case MEM_ALLOC:
+		recibir_parametros(socket, lista_parametros, "%d");
 	case ER_RCV:
 	case ER_SOC:
 	default:

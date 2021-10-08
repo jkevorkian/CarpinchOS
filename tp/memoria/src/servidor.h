@@ -6,7 +6,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>   // sprintf
+#include <stdio.h>   //sprintf
 #include <arpa/inet.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
@@ -17,7 +17,5 @@
 #include "carpincho.h"
 
 void iniciar_servidor(char *ip, int puerto);
-
-bool es_cliente_kernel(int socket);
 
 #endif /* _SERVIDOR_H_ */
