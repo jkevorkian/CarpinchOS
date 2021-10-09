@@ -257,6 +257,16 @@ t_list* recibir_mensaje(int socket) {
 		break;
 	case MEM_ALLOC:
 		recibir_parametros(socket, lista_parametros, "%d");
+		break;
+	case MEM_FREE:
+		// TODO recibir_parametros(socket, lista_parametros, "%d");
+		break;
+	case MEM_READ:
+		// TODO recibir_parametros(socket, lista_parametros, "%d");
+		break;
+	case MEM_WRITE:
+		// TODO recibir_parametros(socket, lista_parametros, "%d");
+		break;
 	case ER_RCV:
 	case ER_SOC:
 	default:
@@ -273,18 +283,22 @@ void liberar_mensaje_out(t_mensaje* mensaje) {
 }
 
 void liberar_mensaje_in(t_list* mensaje) {
-	list_remove(mensaje, 0);
+	// list_remove(mensaje, 0);
+	// Es necesario borrar los strings compartidos ni bien se los termine de usar,
+	// ya que en esta función no se hace esa tarea
 	list_destroy(mensaje);
 }
 
-bool validar_mensaje(t_list* mensaje_in, t_log* logger) {
+bool validar_mensaje(t_list* mensaje_in, void* logger) {
 	switch ((int)list_get(mensaje_in, 0)) {
 	case ER_RCV:
-		log_warning(logger, "Ha ocurrido un fallo inesperado en la recepción del mensaje.");
+		if(logger)
+			log_warning((t_log *)logger, "Ha ocurrido un fallo inesperado en la recepción del mensaje.");
 		return false;
 		break;
 	case ER_SOC:
-		log_warning(logger, "La conexión remota se ha desconectado.");
+		if(logger)
+			log_warning((t_log *)logger, "La conexión remota se ha desconectado.");
 		return false;
 		break;
 	}

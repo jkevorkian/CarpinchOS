@@ -9,6 +9,7 @@
 #define _SOCKETS_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
@@ -124,6 +125,6 @@ void liberar_mensaje_in(t_list* mensaje);
 * @DESC: Recibe la salida de un recibir_mensaje e informa si hubo errores
 * @OUTP: Devuelve true si el mensaje es válido
 */
-bool validar_mensaje(t_list* mensaje_in, t_log* logger);
+bool validar_mensaje(t_list* mensaje_in, void* logger);
 
 #endif /* _SOCKETS_H_ */

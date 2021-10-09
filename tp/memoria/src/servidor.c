@@ -30,7 +30,18 @@ void iniciar_servidor(char *ip, int puerto) {
 		t_mensaje* mensaje_out = crear_mensaje(SND_PO);
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(info_carpincho->socket));
 		enviar_mensaje(fd_carpincho, mensaje_out);
+
+		// Elimino la conexión auxiliar con el carpincho
 		close(fd_carpincho);
 	}
 
+}
+
+bool iniciar_swap(char *ip_swap, char *puerto_swap) {
+	// Obtengo un socket para comunicarme con la swap
+	int socket_swap = crear_conexion_cliente(ip_swap, puerto_swap);
+	// Creo un hilo para reslover las solicitudes de swap de los carpinchos
+	//pthread_t cliente_swap;
+	// pthread_create(&cliente_swap, NULL, rutina_swap, (void *)socket_swap);
+	return true;
 }

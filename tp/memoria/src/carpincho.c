@@ -1,7 +1,6 @@
 #include "carpincho.h"
 
 void *rutina_carpincho(void* info_carpincho) {
-
 	t_list* mensaje_in;
 	bool seguir = true;
 	int socket_carpincho = ((data_carpincho *)info_carpincho)->socket;
