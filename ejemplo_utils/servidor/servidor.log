@@ -1,0 +1,36 @@
+[INFO] 10:34:54:001 SERVIDOR/(7267:7267): Dirección local: 127.0.0.1:9008
+[WARNING] 10:34:54:002 SERVIDOR/(7267:7267): El socket no está conectado a un socket remoto
+[INFO] 10:34:54:003 SERVIDOR/(7267:7267): Servidor listo para recibir al cliente
+[INFO] 17:30:45:494 SERVIDOR/(11402:11402): Dirección local: 127.0.0.1:9008
+[WARNING] 17:30:45:495 SERVIDOR/(11402:11402): El socket no está conectado a un socket remoto
+[INFO] 17:30:45:496 SERVIDOR/(11402:11402): Servidor listo para recibir al cliente
+[INFO] 17:32:42:754 SERVIDOR/(11890:11890): Dirección local: 127.0.0.1:9008
+[WARNING] 17:32:42:755 SERVIDOR/(11890:11890): El socket no está conectado a un socket remoto
+[INFO] 17:32:42:755 SERVIDOR/(11890:11890): Servidor listo para recibir al cliente
+[INFO] 17:33:04:466 SERVIDOR/(11890:11890): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 17:33:04:469 SERVIDOR/(11890:11890): Ha llegado un nuevo cliente
+[INFO] 17:33:04:470 SERVIDOR/(11890:11890): Dirección local: 127.0.0.1:9008
+[INFO] 17:33:04:470 SERVIDOR/(11890:11890): Dirección remota: 127.0.0.1:41372
+[INFO] 17:33:04:470 SERVIDOR/(11890:11890): Envío mensaje_out
+[INFO] 17:33:04:471 SERVIDOR/(11890:11890): Entro a recibir mensaje
+[INFO] 17:33:04:473 SERVIDOR/(11890:11890): Largo de lista 3
+[INFO] 17:33:04:474 SERVIDOR/(11890:11890): Protocolo: 10
+[INFO] 17:33:04:476 SERVIDOR/(11890:11890): Recibi id_ patota 1
+[INFO] 17:33:04:476 SERVIDOR/(11890:11890): Recibi cant_tripulantes 156901952
+[INFO] 17:34:55:456 SERVIDOR/(12294:12294): Dirección local: 127.0.0.1:9008
+[WARNING] 17:34:55:457 SERVIDOR/(12294:12294): El socket no está conectado a un socket remoto
+[INFO] 17:34:55:457 SERVIDOR/(12294:12294): Servidor listo para recibir al cliente
+[INFO] 17:35:00:103 SERVIDOR/(12294:12294): Prueba puerto_desde_socket
+Servidor: 9008
+Cliente: 9008
+[INFO] 17:35:00:103 SERVIDOR/(12294:12294): Ha llegado un nuevo cliente
+[INFO] 17:35:00:104 SERVIDOR/(12294:12294): Dirección local: 127.0.0.1:9008
+[INFO] 17:35:00:105 SERVIDOR/(12294:12294): Dirección remota: 127.0.0.1:41376
+[INFO] 17:35:00:108 SERVIDOR/(12294:12294): Envío mensaje_out
+[INFO] 17:35:00:109 SERVIDOR/(12294:12294): Entro a recibir mensaje
+[INFO] 17:35:00:113 SERVIDOR/(12294:12294): Largo de lista 3
+[INFO] 17:35:00:113 SERVIDOR/(12294:12294): Protocolo: 10
+[INFO] 17:35:00:114 SERVIDOR/(12294:12294): Recibi id_ patota 1
+[INFO] 17:35:00:114 SERVIDOR/(12294:12294): Tarea 1: Soy la tarea 1

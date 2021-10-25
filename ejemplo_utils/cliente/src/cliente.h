@@ -15,7 +15,6 @@
 #include <commons/log.h>
 #include <commons/config.h>
 
-#include <utils/mensajes.h>
 #include <utils/sockets.h>
 
 #define ERROR_CONEXION -1

@@ -249,32 +249,47 @@ t_list* recibir_mensaje(int socket) {
 		list_add(lista_parametros, (void *)op_code);
 
 	switch(op_code) {
-	case INIT_P:
-		recibir_parametros(socket, lista_parametros, "%d%d%ss");
-		break;
-	case SND_PO:
-		recibir_parametros(socket, lista_parametros, "%d");
-		break;
-	case MEM_ALLOC:
-		recibir_parametros(socket, lista_parametros, "%d");
-		break;
-	case MEM_FREE:
-		// TODO recibir_parametros(socket, lista_parametros, "%d");
-		break;
-	case MEM_READ:
-		// TODO recibir_parametros(socket, lista_parametros, "%d");
-		break;
-	case MEM_WRITE:
-		// TODO recibir_parametros(socket, lista_parametros, "%d");
-		break;
+	// Validaciones
 	case ER_RCV:
 	case ER_SOC:
+	case TODOOK:
+	case NO_MEMORY:
+	case SEG_FAULT:
+		break;
+	// Inicialización
+	case MATE_INIT:
+	case MATE_CLOSE:
+		break;
+	// Memoria
+	case MEM_ALLOC:	recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);	break;
+	case MEM_FREE:	recibir_parametros(socket, lista_parametros, S_MEM_FREE);	break;
+	case MEM_READ:	recibir_parametros(socket, lista_parametros, S_MEM_READ);	break;
+	case MEM_WRITE:	recibir_parametros(socket, lista_parametros, S_MEM_WRITE);	break;
+	// SWAMP
+	case GET_PAGE:	recibir_parametros(socket, lista_parametros, S_GET_PAGE);	break;
+	case SET_PAGE:	recibir_parametros(socket, lista_parametros, S_SET_PAGE);	break;
+	case SUSPEND:	recibir_parametros(socket, lista_parametros, S_SUSPEND);	break;
+	case UNSUSPEND:	recibir_parametros(socket, lista_parametros, S_UNSUSPEND);	break;
+	case NEW_C:		recibir_parametros(socket, lista_parametros, S_NEW_C);		break;
+	case EXIT_C:	recibir_parametros(socket, lista_parametros, S_EXIT_C);		break;
+	// Semaforos
+	case SEM_INIT:	recibir_parametros(socket, lista_parametros, S_SEM_INIT);	break;
+	case SEM_WAIT:	recibir_parametros(socket, lista_parametros, S_SEM_WAIT);	break;
+	case SEM_POST:	recibir_parametros(socket, lista_parametros, S_SEM_POST);	break;
+	case SEM_DESTROY:	recibir_parametros(socket, lista_parametros, S_SEM_DESTROY);	break;
+	// I/O
+	case CALL_IO:	recibir_parametros(socket, lista_parametros, S_CALL_IO);	break;
+	// Otros
+	case DATA:	recibir_parametros(socket, lista_parametros, S_DATA);			break;
+	case SEND_PORT:	recibir_parametros(socket, lista_parametros, S_SEND_PORT);	break;
+
 	default:
 		break;
 	}
 
 	return lista_parametros;
 }
+
 
 void liberar_mensaje_out(t_mensaje* mensaje) {
 	free(mensaje->buffer->contenido);

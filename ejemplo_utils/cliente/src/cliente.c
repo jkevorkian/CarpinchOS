@@ -12,7 +12,6 @@
 
 int main() {
 	t_log* logger = log_create("cliente.log", "DISCORDIADOR", 1, LOG_LEVEL_INFO);
-    t_config* config = config_create("cliente.config");
 	int socket_cliente;
 	// char* ip = config_get_string_value(config, "IP_SERVIDOR");
 	char* ip = "127.0.0.1";
@@ -35,7 +34,7 @@ int main() {
 	mensaje_in = recibir_mensaje(socket_cliente);
 	
 	log_info(logger, "Paso a loggear la mensaje_in");
-	if((int)list_get(mensaje_in, 0) == SND_PO) {
+	if((int)list_get(mensaje_in, 0) == MEM_ALLOC) {
 		log_info(logger, "Largo de lista %d", mensaje_in->elements_count);
 		log_info(logger, "Protocolo: %d", (int)list_get(mensaje_in, 0));
 		log_info(logger, "Recibi puerto %d", (int)list_get(mensaje_in, 1));
@@ -44,11 +43,10 @@ int main() {
 		log_info(logger, "ERROR, NO SE RECIBIÓ NADA");
 	
 	char tarea1[] = "Soy la tarea 1";
-	char tarea2[] = "Soy la tarea 2";
 
 	log_info(logger, "Voy a crear mensaje");
-	mensaje_out = crear_mensaje(INIT_P);
-	agregar_a_mensaje(mensaje_out, "%d%d%s%s", 1, 2, tarea1, tarea2);
+	mensaje_out = crear_mensaje(MEM_WRITE);
+	agregar_a_mensaje(mensaje_out, "%d%s", 1, tarea1);
 	enviar_mensaje(socket_cliente, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 

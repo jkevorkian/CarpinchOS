@@ -8,7 +8,8 @@ void *rutina_carpincho(void* info_carpincho) {
 		mensaje_in = recibir_mensaje(socket_carpincho);
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
-			// mem_init(id_carpincho, tamanio);
+			// int tamanio = (int)list_get(mensaje_in, 1);
+			// mem_alloc(id_carpincho, tamanio);
 			break;
 		case MEM_FREE:
 			// mem_free(id_carpincho, dir_logica)
@@ -22,4 +23,8 @@ void *rutina_carpincho(void* info_carpincho) {
 		}
 	}
 	return NULL;
+}
+
+void mem_alloc(uint32_t id_car, uint32_t tamanio) {
+
 }

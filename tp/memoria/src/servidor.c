@@ -41,7 +41,11 @@ bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 	// Obtengo un socket para comunicarme con la swap
 	int socket_swap = crear_conexion_cliente(ip_swap, puerto_swap);
 	// Creo un hilo para reslover las solicitudes de swap de los carpinchos
-	//pthread_t cliente_swap;
-	// pthread_create(&cliente_swap, NULL, rutina_swap, (void *)socket_swap);
+	pthread_t cliente_swap;
+	pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
+
+	// Envío información protocolar (modo de asignación física o global)
+	// TODO
 	return true;
 }
+

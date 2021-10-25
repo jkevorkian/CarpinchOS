@@ -20,9 +20,42 @@
 #include <commons/collections/list.h>
 #include <stdarg.h>
 
+// Memoria
+#define S_MEM_ALLOC		"%d"
+#define S_MEM_FREE		"%d"
+#define S_MEM_READ		"%d"
+#define S_MEM_WRITE		"%d%s"
+// SWAMP
+#define S_GET_PAGE		"%d%d"
+#define S_SET_PAGE		"%d%d%s"
+#define S_SUSPEND		"%d"
+#define S_UNSUSPEND		"%d"
+#define S_NEW_C			""
+#define S_EXIT_C		"%d"
+// Semaforos
+#define S_SEM_INIT		"%s%d"
+#define S_SEM_WAIT		"%s"
+#define S_SEM_POST		"%s"
+#define S_SEM_DESTROY	"%s"
+// Otros
+#define S_CALL_IO		""
+#define S_DATA			"%s"
+#define S_SEND_PORT		"%d"
+
 typedef enum {
-	INIT_P,		SND_PO,		ER_SOC,		ER_RCV,		MEM_ALLOC,
-	MEM_FREE,	MEM_READ,	MEM_WRITE
+	// Validaciones
+	ER_SOC,		ER_RCV,		TODOOK,		NO_MEMORY,	SEG_FAULT,
+	// Inicializacion
+	MATE_INIT,	MATE_CLOSE,
+	// Memoria
+	MEM_ALLOC,	MEM_FREE,	MEM_READ,	MEM_WRITE,
+	// SWAMP
+	GET_PAGE,	SET_PAGE,	SUSPEND,	UNSUSPEND,
+	NEW_C,		EXIT_C,
+	// Semaforos
+	SEM_INIT,	SEM_WAIT,	SEM_POST,	SEM_DESTROY,
+	// Otros
+	CALL_IO,	DATA,		SEND_PORT
 } protocolo_msj;
 
 typedef struct {

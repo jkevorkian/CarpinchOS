@@ -19,7 +19,7 @@ int main(void) {
 	data_socket(socket_cliente, logger);
 
 	log_info(logger, "Envío mensaje_out");
-	t_mensaje* mensaje_out = crear_mensaje(SND_PO);
+	t_mensaje* mensaje_out = crear_mensaje(MEM_ALLOC);
 	agregar_a_mensaje(mensaje_out, "%d",4040);
 	enviar_mensaje(socket_cliente, mensaje_out);
 
@@ -29,9 +29,7 @@ int main(void) {
 	log_info(logger, "Largo de lista %d", mensaje_in->elements_count);
 	log_info(logger, "Protocolo: %d", (int)list_get(mensaje_in, 0));
 	log_info(logger, "Recibi id_ patota %d", (int)list_get(mensaje_in, 1));
-	log_info(logger, "Recibi cant_tripulantes %d", (int)list_get(mensaje_in, 2));
-	log_info(logger, "Tarea 1: %s", (char *)list_get(mensaje_in, 3));
-	log_info(logger, "Tarea 2: %s", (char *)list_get(mensaje_in, 4));
+	log_info(logger, "Tarea 1: %s", (char *)list_get(mensaje_in, 2));
 
 	liberar_mensaje_out(mensaje_out);
 	
