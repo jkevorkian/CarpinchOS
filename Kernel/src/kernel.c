@@ -1,37 +1,12 @@
 #include "kernel.h"
 
 int main() {
-	logger = log_create("discordiador.log", "DISCORDIADOR", 1, LOG_LEVEL_INFO);
-	config = config_create("discordiador.config");
-
-	//lectura de las configuraciones
-	ip_kernel 					= config_get_string_value(config, "IP_KERNEL");
-	ip_memoria 					= config_get_string_value(config, "IP_MEMORIA");
-	puerto_memoria 				= config_get_string_value(config, "PUERTO_MEMORIA");
-
-	algoritmo_planificacion 	= config_get_string_value(config, "ALGORITMO_PLANIFICACION");
-	grado_multiprogramacion 	= config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
-	grado_multiprocesamiento 	= config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
-	alfa 						= config_get_int_value(config, "ALFA");
-	estimacion_inicial 			= config_get_int_value(config, "ESTIMACION_INICIAL");
-
-	//creacion de las colas de planificacion
-	cola_new_carpinchos = queue_create();
-
-	//creacion del socket por el cual me van a llegar todos los mensajes
-	socket_kernel = crear_conexion_servidor(ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"), 1);
-
-	if(!validar_socket(socket_kernel, logger)) {
-		close(socket_kernel);
-		log_destroy(logger);
+	if(!inicializar_kernel())
 		return -1;
-	}
-
-	log_info(logger, "Kernel listo");
 
 	bool seguir = true;
 
-	//proceso de recepcion de todos los mate_init
+	//proceso de recepcion de los mate_init
 	while(seguir) {
 		int socket_auxiliar_carpincho = esperar_cliente(socket_kernel); // Espero a que llegue un nuevo carpincho
 
@@ -69,7 +44,7 @@ int main() {
 			t_list* mensaje_in = recibir_mensaje(socket_kernel);
 
 			if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-				socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (int)list_get(mensaje_in, 1));
+				socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (char*)list_get(mensaje_in, 1));
 			else
 				log_error(logger, "Error en la recepcion del puerto de la memoria");
 
@@ -84,7 +59,7 @@ int main() {
 			nuevo_carpincho->rafaga_real_anterior = 0;
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 
-			queue_push(cola_new_carpinchos, nuevo_carpincho);
+			agregar_new(nuevo_carpincho);
 		}
 	}
 
