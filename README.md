@@ -1,1 +1,0 @@
-# tp-2021-2c-AprobadOS
