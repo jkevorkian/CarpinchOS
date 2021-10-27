@@ -11,7 +11,7 @@ int main() {
 		int socket_auxiliar_carpincho = esperar_cliente(socket_kernel); // Espero a que llegue un nuevo carpincho
 
 		if(socket_auxiliar_carpincho < 0) {
-			log_error(logger, "Error en el socket recibido del carpincho que intento conectar");
+			log_error(logger, "Error en el socket recibido del carpincho que se intento conectar");
 			seguir = false;
 		}
 		else {

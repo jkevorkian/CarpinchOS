@@ -36,12 +36,15 @@ void leer_configuraciones() {
 }
 
 void crear_colas_planificacion() {
-	cola_new_carpinchos = queue_create();
+	cola_new = queue_create();
+	cola_ready = queue_create();
+	cola_suspendidosReady = queue_create();
 }
 
 void inicializar_semaforos_planificacion() {
 	pthread_mutex_init(&mutex_cola_new, NULL);
 	pthread_mutex_init(&mutex_cola_ready, NULL);
+	pthread_mutex_init(&mutex_cola_suspendidosReady, NULL);
 
 	sem_init(&carpinchos_new, 0, 0);
 	sem_init(&carpinchos_ready, 0, 0);
