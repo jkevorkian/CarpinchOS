@@ -21,7 +21,7 @@ typedef struct {
 	int socket_mateLib;
 	int rafaga_real_anterior;
 	double estimacion_proxima_rafaga;
-	int tiempo_espera;
+	char *tiempo_llegada;
 }carpincho;
 
 t_log *logger;

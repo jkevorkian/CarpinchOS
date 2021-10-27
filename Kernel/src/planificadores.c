@@ -10,10 +10,14 @@ void* planificador_largo_plazo() {
 	while(1){
 		sem_wait(&carpinchos_new);
 		sem_wait(&multiprogramacion);
-		if(!queue_is_empty(cola_suspendidosReady)){
-			agregar_ready(quitar_suspendidosReady());
-		} else
-			agregar_ready(quitar_new());
+		carpincho* carp;
+		if(!queue_is_empty(cola_suspendidosReady))
+			carp = quitar_suspendidosReady();
+		else
+			carp = quitar_new();
+
+		carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");
+		agregar_ready(carp);
 	}
 }
 

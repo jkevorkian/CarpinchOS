@@ -47,11 +47,16 @@ carpincho* quitar_ready() {
 			index--;
 		}
 	} else { //HRRN
+		char* tiempo_actual = temporal_get_string_time("%H:%M:%S:%MS");
+		float HRRN_carp = calcular_HRRN(carp, tiempo_actual);
+
 		while(index >= 0) {
 			carpincho* posible_carp = (carpincho*)list_get(lista_ready, index);
+			float HRRN_posible_carp = calcular_HRRN(posible_carp, tiempo_actual);
 
-			if(calcular_HRRN(posible_carp) >= calcular_HRRN(carp)) {
+			if(HRRN_posible_carp >= HRRN_carp) {
 				carp = posible_carp;
+				HRRN_carp = HRRN_posible_carp;
 				indice_carp = index;
 			}
 
@@ -79,7 +84,8 @@ carpincho* quitar_running() {
 	return carp;
 }
 
-int calcular_HRRN(carpincho* carp) {
-	return (carp->estimacion_proxima_rafaga + carp->tiempo_espera)/carp->estimacion_proxima_rafaga;
+float calcular_HRRN(carpincho* carp, char* tiempo_actual) {
+	int tiempo_espera = obtener_rafaga_real(carp->tiempo_llegada, tiempo_actual);
+	return 1 + (tiempo_espera / carp->estimacion_proxima_rafaga); // (s+w)/s = 1 + w/s
 }
 

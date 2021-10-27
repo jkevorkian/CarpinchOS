@@ -2,6 +2,7 @@
 #define COLAS_PLANIFICACION_H_
 
 #include "global.h"
+#include "hilos_cpu.h"
 
 void agregar_new(carpincho* carp);
 void agregar_ready(carpincho* carp);
@@ -12,6 +13,6 @@ carpincho* quitar_ready();
 carpincho* quitar_suspendidosReady();
 carpincho* quitar_running();
 
-int calcular_HRRN(carpincho* carp);
+float calcular_HRRN(carpincho* carp, char* tiempo_actual);
 
 #endif /* COLAS_PLANIFICACION_H_ */
