@@ -1,12 +1,21 @@
 #include "tlb.h"
 
-void obtener_control_tlb();
-void liberar_control_tlb();
-entrada_tlb *es_entrada(uint32_t, uint32_t, uint32_t);
+void iniciar_tlb(t_config* config){
+	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
+	if(!strcmp(algoritmo_reemplazo, "FIFO"))
+		tlb.algoritmo_reemplazo = FIFO;
+	if(!strcmp(algoritmo_reemplazo, "LRU"))
+		tlb.algoritmo_reemplazo = LRU;
 
-entrada_tlb *solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
-	entrada_tlb *entrada;
-	for(int i = 0; i < cant_entradas_tlb; i++) {
+	tlb.cant_entradas = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
+	tlb.mapa = calloc(tlb.cant_entradas, sizeof(t_entrada_tlb));
+
+	printf("TLB inicializada. Nro de entradas: %d \n", tlb.cant_entradas);
+}
+
+t_entrada_tlb *solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
+	t_entrada_tlb *entrada;
+	for(int i = 0; i < tlb.cant_entradas; i++) {
 		if((entrada = es_entrada(i, id_carpincho, nro_pagina)))
 			break;
 	}
@@ -41,8 +50,8 @@ void liberar_control_tlb() {
 	}
 }
 
-entrada_tlb *es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
-	entrada_tlb *entrada = tabla_tlb[nro_entrada];
+t_entrada_tlb *es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
+	t_entrada_tlb *entrada = tlb[nro_entrada];
 	if(entrada->id_car == id_car && entrada->pagina == nro_pagina)
 		return entrada;
 	else
