@@ -18,7 +18,11 @@ void* planificador_largo_plazo() {
 }
 
 void* planificador_corto_plazo() {
-	return 0;
+	while(1){
+		sem_wait(&carpinchos_ready);
+		sem_wait(&multiprocesamiento);
+		agregar_running(quitar_ready());
+	}
 }
 
 void* planificador_mediano_plazo() {

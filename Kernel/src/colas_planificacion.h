@@ -5,8 +5,12 @@
 
 void agregar_new(carpincho* carp);
 void agregar_ready(carpincho* carp);
+void agregar_running(carpincho* carp);
 
 carpincho* quitar_new();
+carpincho* quitar_ready();
 carpincho* quitar_suspendidosReady();
+
+int calcular_HRRN(carpincho* carp);
 
 #endif /* COLAS_PLANIFICACION_H_ */

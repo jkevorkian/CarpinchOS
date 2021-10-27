@@ -20,6 +20,7 @@ typedef struct {
 	int socket_mateLib;
 	int rafaga_real_anterior;
 	int estimacion_proxima_rafaga;
+	int tiempo_espera;
 }carpincho;
 
 t_log *logger;
@@ -31,12 +32,13 @@ int socket_memoria, socket_kernel;
 char *algoritmo_planificacion;
 int grado_multiprogramacion, grado_multiprocesamiento, alfa, estimacion_inicial;
 
-t_queue *cola_new, *cola_ready, *cola_suspendidosReady;
+t_queue *cola_new, *cola_suspendidosReady;
+t_list *lista_ready, *lista_running;
 
-sem_t carpinchos_new, carpinchos_ready;
+sem_t carpinchos_new, carpinchos_ready, carpinchos_running;
 sem_t multiprogramacion, multiprocesamiento;
 
-pthread_mutex_t mutex_cola_new, mutex_cola_ready, mutex_cola_suspendidosReady;
+pthread_mutex_t mutex_cola_new, mutex_lista_ready, mutex_lista_running, mutex_cola_suspendidosReady;
 
 pthread_t hilo_planificador_largo_plazo, hilo_planificador_corto_plazo, hilo_planificador_mediano_plazo;
 

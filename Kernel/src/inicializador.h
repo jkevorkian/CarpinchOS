@@ -7,7 +7,7 @@
 int inicializar_kernel();
 
 void leer_configuraciones();
-void crear_colas_planificacion();
+void crear_estructuras_planificacion();
 void inicializar_semaforos_planificacion();
 
 
