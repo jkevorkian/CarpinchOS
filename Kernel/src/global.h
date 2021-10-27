@@ -12,6 +12,7 @@
 #include <commons/string.h>
 #include <commons/collections/queue.h>
 #include <commons/config.h>
+#include <commons/temporal.h>
 #include <utils/sockets.h>
 
 //carpincho
@@ -19,7 +20,7 @@ typedef struct {
 	int socket_memoria;
 	int socket_mateLib;
 	int rafaga_real_anterior;
-	int estimacion_proxima_rafaga;
+	double estimacion_proxima_rafaga;
 	int tiempo_espera;
 }carpincho;
 
@@ -30,7 +31,8 @@ char *ip_memoria, *puerto_memoria, *ip_kernel;
 int socket_memoria, socket_kernel;
 
 char *algoritmo_planificacion;
-int grado_multiprogramacion, grado_multiprocesamiento, alfa, estimacion_inicial;
+int grado_multiprogramacion, grado_multiprocesamiento, estimacion_inicial;
+double alfa;
 
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
 t_list *lista_ready, *hilos_cpu;

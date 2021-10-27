@@ -32,7 +32,7 @@ void leer_configuraciones() {
 	algoritmo_planificacion 	= config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 	grado_multiprogramacion 	= config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
 	grado_multiprocesamiento 	= config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
-	alfa 						= config_get_int_value(config, "ALFA");
+	alfa 						= config_get_double_value(config, "ALFA");
 	estimacion_inicial 			= config_get_int_value(config, "ESTIMACION_INICIAL");
 }
 
