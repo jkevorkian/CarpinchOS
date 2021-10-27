@@ -10,6 +10,7 @@ void agregar_running(carpincho* carp);
 carpincho* quitar_new();
 carpincho* quitar_ready();
 carpincho* quitar_suspendidosReady();
+carpincho* quitar_running();
 
 int calcular_HRRN(carpincho* carp);
 

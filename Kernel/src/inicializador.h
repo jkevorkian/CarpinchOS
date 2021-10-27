@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "planificadores.h"
+#include "hilos_cpu.h"
 
 int inicializar_kernel();
 

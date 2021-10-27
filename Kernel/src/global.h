@@ -32,8 +32,8 @@ int socket_memoria, socket_kernel;
 char *algoritmo_planificacion;
 int grado_multiprogramacion, grado_multiprocesamiento, alfa, estimacion_inicial;
 
-t_queue *cola_new, *cola_suspendidosReady;
-t_list *lista_ready, *lista_running;
+t_queue *cola_new, *cola_suspendidosReady, *cola_running;
+t_list *lista_ready, *hilos_cpu;
 
 sem_t carpinchos_new, carpinchos_ready, carpinchos_running;
 sem_t multiprogramacion, multiprocesamiento;

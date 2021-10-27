@@ -16,7 +16,7 @@ void agregar_ready(carpincho* carp) {
 
 void agregar_running(carpincho* carp) {
 	pthread_mutex_lock(&mutex_lista_running);
-	list_add(lista_running, carp);
+	queue_push(cola_running, carp);
 	sem_post(&carpinchos_running);
 	pthread_mutex_unlock(&mutex_lista_running);
 }
@@ -30,14 +30,12 @@ carpincho* quitar_new() {
 }
 
 carpincho* quitar_ready() {
-	carpincho* carp;
+	int index = list_size(lista_ready)-1;
+	carpincho* carp = (carpincho*)list_get(lista_ready, index);
+	int indice_carp = index;
+	index--;
 
 	if(!strcmp(algoritmo_planificacion,"SJF")) {
-		int index = list_size(lista_ready)-1;
-		carp = (carpincho*)list_get(lista_ready, index);
-		int indice_carp = index;
-		index--;
-
 		while(index >= 0) {
 			carpincho* posible_carp = (carpincho*)list_get(lista_ready, index);
 
@@ -48,14 +46,7 @@ carpincho* quitar_ready() {
 
 			index--;
 		}
-
-		list_remove(lista_ready, indice_carp);
 	} else { //HRRN
-		int index = list_size(lista_ready)-1;
-		carp = (carpincho*)list_get(lista_ready, index);
-		int indice_carp = index;
-		index--;
-
 		while(index >= 0) {
 			carpincho* posible_carp = (carpincho*)list_get(lista_ready, index);
 
@@ -66,10 +57,9 @@ carpincho* quitar_ready() {
 
 			index--;
 		}
-
-		list_remove(lista_ready, indice_carp);
 	}
 
+	list_remove(lista_ready, indice_carp);
 	return carp;
 }
 
@@ -77,6 +67,14 @@ carpincho* quitar_suspendidosReady() {
 	pthread_mutex_lock(&mutex_cola_suspendidosReady);
 	carpincho* carp = (carpincho*)queue_pop(cola_suspendidosReady);
 	pthread_mutex_unlock(&mutex_cola_suspendidosReady);
+
+	return carp;
+}
+
+carpincho* quitar_running() {
+	pthread_mutex_lock(&mutex_lista_running);
+	carpincho* carp = (carpincho*)queue_pop(cola_running);
+	pthread_mutex_unlock(&mutex_lista_running);
 
 	return carp;
 }

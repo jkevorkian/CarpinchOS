@@ -17,6 +17,7 @@ int inicializar_kernel() {
 	crear_estructuras_planificacion();
 	inicializar_semaforos_planificacion();
 	iniciar_planificadores();
+	iniciar_hilos_cpu();
 
 	log_info(logger, "Kernel listo");
 
@@ -38,9 +39,10 @@ void leer_configuraciones() {
 void crear_estructuras_planificacion() {
 	cola_new = queue_create();
 	cola_suspendidosReady = queue_create();
+	cola_running = queue_create();
 
 	lista_ready = list_create();
-	lista_running = list_create();
+
 }
 
 void inicializar_semaforos_planificacion() {
