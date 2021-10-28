@@ -17,15 +17,18 @@ void* cpu() {
 
 		char *tiempo_inicio = temporal_get_string_time("%H:%M:%S:%MS"); // "12:51:59:331"
 
+		log_info(logger, "Carpincho empezando a trabajar a la hora %s", tiempo_inicio);
+
 		bool seguir = true;
 
 		//se ejecutan las tareas para cada carpincho
 
 		while(seguir) {
 			t_list* mensaje_in = recibir_mensaje(carp->socket_mateLib);
+			log_warning(logger, "Socket de escucha %d", carp->socket_mateLib);
 
 			if (!validar_mensaje(mensaje_in, logger)) {
-				log_error(logger, "Carpincho desconectado");
+				log_error(logger, "Carpincho desconectado :p");
 				seguir = false;
 			} else {
 				t_mensaje* mensaje_out;
@@ -61,6 +64,12 @@ void* cpu() {
 					case CALL_IO:
 						break;
 					case MATE_CLOSE:
+						break;
+					case TODOOK:
+						log_info(logger, "Recibi mensaje");
+						break;
+					default:
+						log_info(logger, "LLego: %d", (int)list_get(mensaje_in, 0));
 						break;
 				}
 				liberar_mensaje_in(mensaje_in);

@@ -13,11 +13,14 @@ void* planificador_largo_plazo() {
 		carpincho* carp;
 		if(!queue_is_empty(cola_suspendidosReady))
 			carp = quitar_suspendidosReady();
-		else
+		else {
 			carp = quitar_new();
+			//log_info(logger, "Carpincho quitado de new - carpinchos en new %d", queue_size(cola_new));
+		}
 
 		carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");
 		agregar_ready(carp);
+		//log_info(logger, "Carpincho agregado a ready - carpinchos en ready %d", list_size(lista_ready));
 	}
 }
 
@@ -25,7 +28,10 @@ void* planificador_corto_plazo() {
 	while(1){
 		sem_wait(&carpinchos_ready);
 		sem_wait(&multiprocesamiento);
-		agregar_running(quitar_ready());
+		carpincho* carp = quitar_ready();
+		//log_info(logger, "Carpincho quitado de ready - carpinchos en ready %d", list_size(lista_ready));
+		agregar_running(carp);
+		//log_info(logger, "Carpincho agregado a running");
 	}
 }
 

@@ -44,6 +44,8 @@ int main() {
 			char** input = string_split(buffer_consola, " ");
 			mateLib* inst = (mateLib*)list_get(instancias, atoi(input[0])-1);
 
+			log_info(logger, "Carpincho %d obtenido", atoi(input[0]));
+
 			char* listaDeStrings[]={"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE", "SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY", "CALL_IO", "MATE_CLOSE"};
 			int valor;
 
@@ -53,6 +55,8 @@ int main() {
 					break;
 				}
 			}
+
+			log_info(logger, "mensaje a enviar %s (%d)", input[1], valor);
 
 			t_mensaje* mensaje_out;
 

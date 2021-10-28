@@ -22,17 +22,21 @@ int main() {
 			int socket_memoria_carpincho;
 
 			//creo un nuevo servidor en un puerto libre que asigne el SO
-			socket_mate_carpincho = crear_conexion_servidor(ip_kernel, 0, 1);
-			if(!validar_socket(socket_mate_carpincho, logger)) {
-				close(socket_mate_carpincho);
+			int socket_aux_carpincho = crear_conexion_servidor(ip_kernel, 0, 1);
+
+			if(!validar_socket(socket_aux_carpincho, logger)) {
+				close(socket_aux_carpincho);
 				log_destroy(logger);
 			}
 
 			//comunico al carpincho el puerto por el cual me tiene que hablar
 			t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
-			agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(socket_mate_carpincho));
+			agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(socket_aux_carpincho));
 			enviar_mensaje(socket_auxiliar_carpincho, mensaje_out);
 			liberar_mensaje_out(mensaje_out);
+
+			//espero a que el carpincho me hable y ese va a ser el socket por el cual nos vamos a comunicar
+			socket_mate_carpincho = esperar_cliente(socket_aux_carpincho);
 			close(socket_auxiliar_carpincho);
 
 			if(MEMORIA_ACTIVADA) { //creo una conexion con la memoria para que esta me devuelva el puerto por el cual se comunicara el carpincho
@@ -53,6 +57,8 @@ int main() {
 				close(socket_auxiliar_memoria);
 			}
 
+
+
 			//creo la estructura para el nuevo carpincho
 			carpincho* nuevo_carpincho = malloc(sizeof(carpincho));
 
@@ -61,9 +67,10 @@ int main() {
 			nuevo_carpincho->rafaga_real_anterior = 0;
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 
+			close(socket_aux_carpincho);
 			agregar_new(nuevo_carpincho);
 
-			log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
+			//log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
 		}
 	}
 
