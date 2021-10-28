@@ -1,7 +1,7 @@
 #include "inicializador.h"
 
 int inicializar_kernel() {
-	logger = log_create("discordiador.log", "DISCORDIADOR", 1, LOG_LEVEL_INFO);
+	logger = log_create("kernel.log", "KERNEL", 1, LOG_LEVEL_INFO);
 	config = config_create("discordiador.config");
 
 	//creacion del socket por el cual me van a llegar todos los mensajes
