@@ -16,6 +16,8 @@
 #include <commons/temporal.h>
 #include <utils/sockets.h>
 
+#define MEMORIA_ACTIVADA 0
+
 //carpincho
 typedef struct {
 	int socket_memoria;

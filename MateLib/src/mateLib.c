@@ -20,10 +20,16 @@ int main() {
 			int socket_auxiliar = crear_conexion_cliente(ip_kernel, puerto_kernel); //son un define en el mateLib.h
 
 			if(validar_socket(socket_auxiliar, logger)) {
+				log_info(logger, "Socket auxiliar funcionando");
+
 				t_list *mensaje_in = recibir_mensaje(socket_auxiliar);
 
 				if((int)list_get(mensaje_in, 0) == SEND_PORT) {
-					char* puerto = (char*)list_get(mensaje_in, 1);
+					log_info(logger, "Puerto recibido");
+
+					char puerto[7];
+					sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
+
 					mateLib *inst = malloc(sizeof(mateLib));
 					inst->socket = crear_conexion_cliente(ip_kernel, puerto);
 					inst->id = id_inst;

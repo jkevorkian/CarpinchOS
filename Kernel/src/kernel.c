@@ -1,13 +1,14 @@
 #include "kernel.h"
 
 int main() {
-	if(!inicializar_kernel())
+	if(inicializar_kernel() == 1)
 		return -1;
 
 	bool seguir = true;
 
 	//proceso de recepcion de los mate_init
 	while(seguir) {
+		log_info(logger, "Kernel esperando algun carpincho");
 		int socket_auxiliar_carpincho = esperar_cliente(socket_kernel); // Espero a que llegue un nuevo carpincho
 
 		if(socket_auxiliar_carpincho < 0) {
@@ -15,7 +16,7 @@ int main() {
 			seguir = false;
 		}
 		else {
-			log_info(logger, "Se ha conectado un carpincho");
+			log_warning(logger, "Se ha conectado un carpincho");
 
 			int socket_mate_carpincho;
 			int socket_memoria_carpincho;
@@ -34,22 +35,23 @@ int main() {
 			liberar_mensaje_out(mensaje_out);
 			close(socket_auxiliar_carpincho);
 
-			//creo una conexion con la memoria para que esta me devuelva el puerto por el cual se comunicara el carpincho
-			int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
-			if(!validar_socket(socket_auxiliar_memoria, logger)) {
+			if(MEMORIA_ACTIVADA) { //creo una conexion con la memoria para que esta me devuelva el puerto por el cual se comunicara el carpincho
+				int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
+				if(!validar_socket(socket_auxiliar_memoria, logger)) {
+					close(socket_auxiliar_memoria);
+					log_error(logger, "Error en el socket generado para la memoria");
+				}
+
+				t_list* mensaje_in = recibir_mensaje(socket_kernel);
+
+				if ((int)list_get(mensaje_in, 0) == SEND_PORT)
+					socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (char*)list_get(mensaje_in, 1));
+				else
+					log_error(logger, "Error en la recepcion del puerto de la memoria");
+
+				liberar_mensaje_in(mensaje_in);
 				close(socket_auxiliar_memoria);
-				log_error(logger, "Error en el socket generado para la memoria");
 			}
-
-			t_list* mensaje_in = recibir_mensaje(socket_kernel);
-
-			if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-				socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (char*)list_get(mensaje_in, 1));
-			else
-				log_error(logger, "Error en la recepcion del puerto de la memoria");
-
-			liberar_mensaje_in(mensaje_in);
-			close(socket_auxiliar_memoria);
 
 			//creo la estructura para el nuevo carpincho
 			carpincho* nuevo_carpincho = malloc(sizeof(carpincho));
@@ -60,6 +62,8 @@ int main() {
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 
 			agregar_new(nuevo_carpincho);
+
+			log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
 		}
 	}
 

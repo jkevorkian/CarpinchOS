@@ -2,9 +2,11 @@
 
 int inicializar_kernel() {
 	logger = log_create("kernel.log", "KERNEL", 1, LOG_LEVEL_INFO);
-	config = config_create("discordiador.config");
+	config = config_create("kernel.config");
 
-	//creacion del socket por el cual me van a llegar todos los mensajes
+	leer_configuraciones();
+
+	log_info(logger, "Creando el socket en la IP %s con Puerto %d", ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"));
 	socket_kernel = crear_conexion_servidor(ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"), 1);
 
 	if(!validar_socket(socket_kernel, logger)) {
@@ -13,7 +15,8 @@ int inicializar_kernel() {
 		return 1;
 	}
 
-	leer_configuraciones();
+	log_info(logger, "Socket funcionando");
+
 	crear_estructuras_planificacion();
 	inicializar_semaforos_planificacion();
 	iniciar_planificadores();
