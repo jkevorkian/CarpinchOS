@@ -24,6 +24,7 @@
 #include <commons/config.h>
 #include <commons/temporal.h>
 #include <utils/sockets.h>
+#include <commons/temporal.h>
 
 #define ip_kernel "127.0.0.1"
 #define puerto_kernel "10216"

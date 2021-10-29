@@ -22,6 +22,8 @@ int inicializar_kernel() {
 	iniciar_planificadores();
 	iniciar_hilos_cpu();
 
+	id_proximo_carpincho = 0;
+
 	log_info(logger, "Kernel listo");
 
 	return 0;

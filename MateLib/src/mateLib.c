@@ -1,6 +1,5 @@
 #include "mateLib.h"
 
-
 char* leer_consola() {
 	char* buffer = readline(">");
 	if(buffer)
@@ -9,31 +8,13 @@ char* leer_consola() {
 	return buffer;
 }
 
-typedef struct mate_struct{
-
-}mate_struct;
-
-int mate_init(mate_instance* lib_ref,char* config){
-	lib_ref->group_info = malloc(sizeof(mate_struct));
-	config = config_create(config);
-	if(lib_ref->group_info == NULL){
-		return -1;
-	}else return 0;
-}
-
-int mate_close(mate_instance* lib_ref)
-{
-  free(lib_ref->group_info);
-  return 0;
-}
-
 int main() {
 	t_log *logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
+	t_list *instancias = list_create();
+	int id_inst = 0;
 
 	while(1) {
 		char* buffer_consola = leer_consola();
-		t_list *instancias = list_create();
-		int id_inst = 0;
 
 		if(!strcasecmp(buffer_consola, "0" )) {
 			int socket_auxiliar = crear_conexion_cliente(ip_kernel, puerto_kernel); //son un define en el mateLib.h
@@ -54,28 +35,36 @@ int main() {
 					inst->id = id_inst;
 					list_add(instancias, inst);
 					id_inst++;
+
+					log_info(logger, "Cantidad de carpinchos iniciados %d - ID proximo carpincho %d", list_size(instancias), id_inst+1);
 				} else
 					log_error(logger, "Error en la comunicacion");
 
 				close(socket_auxiliar);
 			}
+		} else if(!strcasecmp(buffer_consola, "00" )) {
+			for(int i = 0; i<list_size(instancias); i++) {
+				mateLib* inst = (mateLib*)list_get(instancias, i);
+				close(inst->socket);
+			}
+			list_clean(instancias);
+			id_inst = 0;
 		} else {
 			char** input = string_split(buffer_consola, " ");
+
 			mateLib* inst = (mateLib*)list_get(instancias, atoi(input[0])-1);
 
-			log_info(logger, "Carpincho %d obtenido", atoi(input[0]));
-
-			char* listaDeStrings[]={"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE", "SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY", "CALL_IO", "MATE_CLOSE"};
+			char* listaDeStrings[]={"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE", "SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY", "CALL_IO", "MATE_CLOSE", "1"};
 			int valor;
 
-			for(int i=0;i<10;i++){
+			for(int i=0;i<11;i++){
 				if(!strcasecmp(input[1],listaDeStrings[i])) {
 					valor = i;
 					break;
 				}
 			}
 
-			log_info(logger, "mensaje a enviar %s (%d)", input[1], valor);
+			log_info(logger, "Mensaje a enviar %s (posicion en la lista de strings %d)", input[1], valor);
 
 			t_mensaje* mensaje_out;
 
@@ -112,6 +101,10 @@ int main() {
 				case 7:
 				case 8:
 				case 9:
+				case 10:
+					mensaje_out = crear_mensaje(TODOOK);
+					enviar_mensaje(inst->socket, mensaje_out);
+					liberar_mensaje_out(mensaje_out);
 					break;
 			}
 		}
@@ -119,30 +112,3 @@ int main() {
 
 	return 0;
 }
-
-/*
-void quitar(tripulante* trip, t_list* list) {
-	int index = 0;
-	bool continuar = true;
-
-	while(continuar) {
-		tripulante* nuevo_tripulante = (tripulante*)list_get(list, index);
-
-		if(nuevo_tripulante->id_trip == trip->id_trip && nuevo_tripulante->id_patota == trip->id_patota) {
-			continuar = false;
-			list_remove(list, index);
-		}
-		index++;
-	}
-}
-
-char* listaDeStrings[]={"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-		int valor;
-
-		for(int i=0;i<10;i++){
-			if(!strcasecmp(buffer_consola,listaDeStrings[i])) {
-				valor = i;
-				break;
-			}
-		}
-*/

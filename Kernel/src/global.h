@@ -20,6 +20,7 @@
 
 //carpincho
 typedef struct {
+	int id;
 	int socket_memoria;
 	int socket_mateLib;
 	int rafaga_real_anterior;
@@ -36,6 +37,8 @@ int socket_memoria, socket_kernel;
 char *algoritmo_planificacion;
 int grado_multiprogramacion, grado_multiprocesamiento, estimacion_inicial;
 double alfa;
+
+int id_proximo_carpincho;
 
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
 t_list *lista_ready, *hilos_cpu;

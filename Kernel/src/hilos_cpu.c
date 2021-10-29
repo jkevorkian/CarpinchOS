@@ -17,7 +17,7 @@ void* cpu() {
 
 		char *tiempo_inicio = temporal_get_string_time("%H:%M:%S:%MS"); // "12:51:59:331"
 
-		log_info(logger, "Carpincho empezando a trabajar a la hora %s", tiempo_inicio);
+		log_info(logger, "Carpincho %d empezando a trabajar a la hora %s", carp->id, tiempo_inicio);
 
 		bool seguir = true;
 
@@ -25,10 +25,9 @@ void* cpu() {
 
 		while(seguir) {
 			t_list* mensaje_in = recibir_mensaje(carp->socket_mateLib);
-			log_warning(logger, "Socket de escucha %d", carp->socket_mateLib);
 
 			if (!validar_mensaje(mensaje_in, logger)) {
-				log_error(logger, "Carpincho desconectado :p");
+				log_error(logger, "Carpincho %d desconectado :p", carp->id);
 				seguir = false;
 			} else {
 				t_mensaje* mensaje_out;
@@ -66,7 +65,8 @@ void* cpu() {
 					case MATE_CLOSE:
 						break;
 					case TODOOK:
-						log_info(logger, "Recibi mensaje");
+						log_info(logger, "Recibi mensaje del carpincho &d solicitando salida", carp->id);
+						seguir = false;
 						break;
 					default:
 						log_info(logger, "LLego: %d", (int)list_get(mensaje_in, 0));
@@ -79,6 +79,10 @@ void* cpu() {
 
 		carp->rafaga_real_anterior = obtener_rafaga_real(tiempo_inicio, tiempo_fin);
 		carp->estimacion_proxima_rafaga = obtener_estimacion_proxima_rafaga(carp->rafaga_real_anterior, carp->estimacion_proxima_rafaga);
+
+		sem_post(&multiprocesamiento);
+		agregar_new(carp);
+
 	}
 }
 
