@@ -133,3 +133,189 @@ void data_socket(int socket, t_log* logger) {
 		log_warning(logger, "El socket no está conectado a un socket remoto");
 	}
 }
+
+void crear_buffer(t_mensaje* mensaje) {
+	mensaje->buffer = malloc(sizeof(t_buffer));
+	mensaje->buffer->tamanio = 0;
+	mensaje->buffer->contenido = NULL;
+}
+
+t_mensaje* crear_mensaje(protocolo_msj cod_op) {
+	t_mensaje* mensaje = malloc(sizeof(t_mensaje));
+	mensaje->op_code = cod_op;
+	crear_buffer(mensaje);
+	return mensaje;
+}
+
+void agregar_a_mensaje(t_mensaje *mensaje, char *formato, ...) {
+	char *ptr_form = formato;
+	va_list ptr_arg;
+	va_start(ptr_arg, formato);
+	void* parametro_nuevo;
+
+	while(*ptr_form) {
+		if(*ptr_form != '%') {
+			ptr_form++;
+			continue;
+		}
+		ptr_form++;
+
+		uint32_t valor_parametro;
+		uint32_t tamanio_buffer;
+		switch(*ptr_form) {
+		case 'd':
+			mensaje->buffer->contenido = realloc(mensaje->buffer->contenido, mensaje->buffer->tamanio + sizeof(uint32_t));
+			valor_parametro = va_arg(ptr_arg, uint32_t);
+			parametro_nuevo = &valor_parametro;
+			tamanio_buffer = sizeof(uint32_t);
+			break;
+		case 's':
+			parametro_nuevo = (void *)va_arg(ptr_arg, char *);
+			tamanio_buffer = strlen((char *)parametro_nuevo) + 1;
+			mensaje->buffer->contenido = realloc(mensaje->buffer->contenido, mensaje->buffer->tamanio + sizeof(uint32_t) + tamanio_buffer);
+
+			memcpy(mensaje->buffer->contenido + mensaje->buffer->tamanio, &tamanio_buffer, sizeof(uint32_t));
+			mensaje->buffer->tamanio = mensaje->buffer->tamanio + sizeof(uint32_t);
+			break;
+		}
+		memcpy(mensaje->buffer->contenido + mensaje->buffer->tamanio, parametro_nuevo, tamanio_buffer);
+		mensaje->buffer->tamanio = mensaje->buffer->tamanio + tamanio_buffer;
+	}
+}
+
+void enviar_mensaje(int socket, t_mensaje* mensaje) {
+	uint32_t tamanio_buffer = mensaje->buffer->tamanio + sizeof(uint32_t);
+	void * buffer_to_send = malloc(tamanio_buffer);
+	memcpy(buffer_to_send, &(mensaje->op_code), sizeof(uint32_t));
+	memcpy(buffer_to_send + sizeof(uint32_t), mensaje->buffer->contenido, mensaje->buffer->tamanio);
+	send(socket, buffer_to_send, tamanio_buffer, 0);
+	free(buffer_to_send);
+}
+
+void recibir_parametros(int socket, t_list* parametros, char* formato) {
+	uint32_t parametro;
+	// char *ptr_form = formato_msj[(int)list_get(parametros, 0)];
+	char *ptr_form = formato;
+
+	while(*ptr_form) {
+		if(*ptr_form != '%') {
+			ptr_form++;
+			continue;
+		}
+		ptr_form++;
+
+		uint32_t tamanio_buffer;
+		uint32_t num_cadenas;
+		switch(*ptr_form) {
+		case 'd':
+			tamanio_buffer = sizeof(uint32_t);
+			recv(socket, &parametro, tamanio_buffer, MSG_WAITALL);
+			list_add(parametros, (void *)parametro);
+			break;
+		case 's':
+			if(*(ptr_form + 1) == 's') num_cadenas = (uint32_t)list_get(parametros, list_size(parametros) - 1);
+			else num_cadenas = 1;
+			for(int i = 0; i < num_cadenas; i++) {
+				tamanio_buffer = sizeof(uint32_t);
+				recv(socket, &tamanio_buffer, tamanio_buffer, MSG_WAITALL);
+				char *buffer = malloc(tamanio_buffer * sizeof(char));
+				recv(socket, buffer, tamanio_buffer, MSG_WAITALL);
+				list_add(parametros, buffer);
+			}
+			break;
+		}
+	}
+}
+
+t_list* recibir_mensaje(int socket) {
+	protocolo_msj op_code;
+	t_list* lista_parametros = list_create();
+	int error;
+	error = recv(socket, &op_code, sizeof(uint32_t), MSG_WAITALL);
+
+	if(error == 0) {
+		op_code = ER_SOC;
+		list_add(lista_parametros, (void *)ER_SOC);
+		// perror("read");
+	}
+
+	if(error == -1) {
+		op_code = ER_RCV;
+		list_add(lista_parametros, (void *)ER_RCV);
+		// perror("read");
+	}
+
+	if(error > 0)
+		list_add(lista_parametros, (void *)op_code);
+
+	switch(op_code) {
+	// Validaciones
+	case ER_RCV:
+	case ER_SOC:
+	case TODOOK:
+	case NO_MEMORY:
+	case SEG_FAULT:
+		break;
+	// Inicialización
+	case MATE_INIT:
+	case MATE_CLOSE:
+		break;
+	// Memoria
+	case MEM_ALLOC:	recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);	break;
+	case MEM_FREE:	recibir_parametros(socket, lista_parametros, S_MEM_FREE);	break;
+	case MEM_READ:	recibir_parametros(socket, lista_parametros, S_MEM_READ);	break;
+	case MEM_WRITE:	recibir_parametros(socket, lista_parametros, S_MEM_WRITE);	break;
+	// SWAMP
+	case GET_PAGE:	recibir_parametros(socket, lista_parametros, S_GET_PAGE);	break;
+	case SET_PAGE:	recibir_parametros(socket, lista_parametros, S_SET_PAGE);	break;
+	case SUSPEND:	recibir_parametros(socket, lista_parametros, S_SUSPEND);	break;
+	case UNSUSPEND:	recibir_parametros(socket, lista_parametros, S_UNSUSPEND);	break;
+	case NEW_C:		recibir_parametros(socket, lista_parametros, S_NEW_C);		break;
+	case EXIT_C:	recibir_parametros(socket, lista_parametros, S_EXIT_C);		break;
+	// Semaforos
+	case SEM_INIT:	recibir_parametros(socket, lista_parametros, S_SEM_INIT);	break;
+	case SEM_WAIT:	recibir_parametros(socket, lista_parametros, S_SEM_WAIT);	break;
+	case SEM_POST:	recibir_parametros(socket, lista_parametros, S_SEM_POST);	break;
+	case SEM_DESTROY:	recibir_parametros(socket, lista_parametros, S_SEM_DESTROY);	break;
+	// I/O
+	case CALL_IO:	recibir_parametros(socket, lista_parametros, S_CALL_IO);	break;
+	// Otros
+	case DATA:	recibir_parametros(socket, lista_parametros, S_DATA);			break;
+	case SEND_PORT:	recibir_parametros(socket, lista_parametros, S_SEND_PORT);	break;
+
+	default:
+		break;
+	}
+
+	return lista_parametros;
+}
+
+
+void liberar_mensaje_out(t_mensaje* mensaje) {
+	free(mensaje->buffer->contenido);
+	free(mensaje->buffer);
+	free(mensaje);
+}
+
+void liberar_mensaje_in(t_list* mensaje) {
+	// list_remove(mensaje, 0);
+	// Es necesario borrar los strings compartidos ni bien se los termine de usar,
+	// ya que en esta función no se hace esa tarea
+	list_destroy(mensaje);
+}
+
+bool validar_mensaje(t_list* mensaje_in, void* logger) {
+	switch ((int)list_get(mensaje_in, 0)) {
+	case ER_RCV:
+		if(logger)
+			log_warning((t_log *)logger, "Ha ocurrido un fallo inesperado en la recepción del mensaje.");
+		return false;
+		break;
+	case ER_SOC:
+		if(logger)
+			log_warning((t_log *)logger, "La conexión remota se ha desconectado.");
+		return false;
+		break;
+	}
+	return true;
+}

@@ -8,14 +8,65 @@
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_
 
-#include<sys/socket.h>
-#include<netdb.h>
-#include<string.h>
-#include<unistd.h>
-#include<stdio.h>   // sprintf
+#include <stdlib.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>   // sprintf
 #include <arpa/inet.h>
-#include<commons/log.h>
-#include<commons/collections/list.h>
+#include <commons/log.h>
+#include <commons/collections/list.h>
+#include <stdarg.h>
+
+// Memoria
+#define S_MEM_ALLOC		"%d"
+#define S_MEM_FREE		"%d"
+#define S_MEM_READ		"%d"
+#define S_MEM_WRITE		"%d%s"
+// SWAMP
+#define S_GET_PAGE		"%d%d"
+#define S_SET_PAGE		"%d%d%s"
+#define S_SUSPEND		"%d"
+#define S_UNSUSPEND		"%d"
+#define S_NEW_C			""
+#define S_EXIT_C		"%d"
+// Semaforos
+#define S_SEM_INIT		"%s%d"
+#define S_SEM_WAIT		"%s"
+#define S_SEM_POST		"%s"
+#define S_SEM_DESTROY	"%s"
+// Otros
+#define S_CALL_IO		""
+#define S_DATA			"%s"
+#define S_SEND_PORT		"%d"
+
+typedef enum {
+	// Validaciones
+	ER_SOC,		ER_RCV,		TODOOK,		NO_MEMORY,	SEG_FAULT,
+	// Inicializacion
+	MATE_INIT,	MATE_CLOSE,
+	// Memoria
+	MEM_ALLOC,	MEM_FREE,	MEM_READ,	MEM_WRITE,
+	// SWAMP
+	GET_PAGE,	SET_PAGE,	SUSPEND,	UNSUSPEND,
+	NEW_C,		EXIT_C,
+	// Semaforos
+	SEM_INIT,	SEM_WAIT,	SEM_POST,	SEM_DESTROY,
+	// Otros
+	CALL_IO,	DATA,		SEND_PORT
+} protocolo_msj;
+
+typedef struct {
+	int tamanio;
+	void* contenido;
+} t_buffer;
+
+typedef struct {
+	protocolo_msj op_code;
+	t_buffer* buffer;
+} t_mensaje;
 
 /**
 * @NAME: crear_conexion_cliente
@@ -58,5 +109,55 @@ bool validar_socket(int socket, t_log* logger);
 * @DESC: Muestra en pantalla la información del socket recibido por parámetro
 */
 void data_socket(int socket, t_log* logger);
+
+// Funciones para manejo de mensajes
+/**
+* @NAME: crear_mensaje
+* @DESC: Crea una estructura t_mensaje con un protocolo definido por el parametro
+* @OUTP: Devuelve un puntero a la estructura t_mensaje creada
+*/
+t_mensaje* crear_mensaje(protocolo_msj cod_op);
+
+/**
+* @NAME: agregar_parametro_a_mensaje
+* @DESC: Permite agregar una serie de parametros a un mensaje
+* @NOTA: Se debe explicitar qué parametros van a pasarse
+*/
+void agregar_a_mensaje(t_mensaje* mensaje, char* formato, ...);
+
+/**
+* @NAME: enviar_mensaje
+* @DESC: Envía un mensaje a través de un socket
+*/
+void enviar_mensaje(int socket, t_mensaje* mensaje);
+
+/**
+* @NAME: recibir_mensaje
+* @DESC: Espera un mensaje desde un socket y cuando lo recibe devuelve una lista con los
+* 		parámetros del mismo.
+* @OUTP: Devuelve una lista de parametros que corresponden con el protocolo y los parametros
+* 		definidos por el emisor antes de que haya enviado el mensaje.
+* @NOTA: Si no hay conexion, CREO que devuelve NULL
+*/
+t_list* recibir_mensaje(int socket);
+
+/**
+* @NAME: liberar_mensaje_out
+* @DESC: Libera la memoria correspondiente a un mensaje de salida
+*/
+void liberar_mensaje_out(t_mensaje* mensaje);
+
+/**
+* @NAME: liberar_mensaje_in
+* @DESC: Libera la memoria correspondiente a un mensaje de entrada
+*/
+void liberar_mensaje_in(t_list* mensaje);
+
+/**
+* @NAME: validar_mensaje
+* @DESC: Recibe la salida de un recibir_mensaje e informa si hubo errores
+* @OUTP: Devuelve true si el mensaje es válido
+*/
+bool validar_mensaje(t_list* mensaje_in, void* logger);
 
 #endif /* _SOCKETS_H_ */
