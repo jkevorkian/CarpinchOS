@@ -26,5 +26,7 @@ void *rutina_carpincho(void* info_carpincho) {
 }
 
 void mem_alloc(uint32_t id_car, uint32_t tamanio) {
+	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_car, tamanio);
+
 
 }

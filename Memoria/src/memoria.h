@@ -10,6 +10,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
+#include <math.h>
 
 //#include "servidor.h"
 //#include "tlb.h"
@@ -28,33 +29,46 @@
 #define DINAMICA_GLOBAL 1
 
 typedef struct {
-    uint32_t nro_real;
-    uint32_t id_proceso;
-    uint32_t tiempo;
-    bool presencia;
-    bool uso;
-    bool modificado;
-} t_marco;
+    uint32_t tamanio_memoria;
+    uint32_t tamanio_pagina;
+    uint32_t algoritmo_reemplazo;
+    uint32_t tipo_asignacion;
+    uint32_t cant_marcos;
+} t_config_memoria;
+
+typedef struct __attribute__((packed)){
+	uint32_t alloc_prev;
+    uint32_t alloc_sig;
+    bool libre;
+} t_heap_metadata;
 
 typedef struct {
     void* inicio;
-    uint32_t tamanio_memoria;
-    uint32_t tamanio_pagina;
-    t_marco** mapa_fisico;
-    uint32_t algoritmo_reemplazo;
-    uint32_t tipo_asignacion;
+    t_heap_metadata** mapa_fisico;
     uint32_t puntero_clock;
 } t_memoria_ram;
 
 typedef struct {
-	sem_t *sem_tlb;
-}t_carpincho;
+    uint32_t nro_pagina;
+    uint32_t nro_marco;    
+    bool presencia;
+    bool uso;
+    bool modificado;
+    uint32_t tiempo;
+} t_entrada_tp;
 
-t_list *lista_carpinchos;
+typedef struct {
+    uint32_t id;
+	sem_t* sem_tlb;
+    t_list* tabla_paginas;
+} t_carpincho;
+
+t_list* lista_carpinchos;
 uint32_t cant_carpinchos;	// TODO crear función para obtener
 
 bool iniciar_memoria(t_config*);
 void iniciar_marcos(uint32_t);
+void iniciar_heap(void);
 
 void signal_handler_1(int);
 void signal_handler_2(int);
@@ -64,9 +78,16 @@ t_log* iniciar_logger(void);
 t_config* iniciar_config(void);
 void terminar_programa(t_log*, t_config*);
 
+//MEM_ALLOC
+uint32_t mem_alloc(t_carpincho*, uint32_t);
+uint32_t obtener_marco_libre(uint32_t, t_heap_metadata*);
+uint32_t cant_frames_necesarios(uint32_t);
+t_entrada_tp* crear_nueva_pagina(uint32_t);
+
 t_memoria_ram memoria_ram;
 
 t_log* logger;
 t_config* config;
+t_config_memoria config_memoria;
 
 #endif /* _MEMORIA_H_ */
