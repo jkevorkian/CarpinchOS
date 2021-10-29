@@ -1,11 +1,30 @@
 #include "mateLib.h"
 
+
 char* leer_consola() {
 	char* buffer = readline(">");
 	if(buffer)
 		add_history(buffer);
 
 	return buffer;
+}
+
+typedef struct mate_struct{
+
+}mate_struct;
+
+int mate_init(mate_instance* lib_ref,char* config){
+	lib_ref->group_info = malloc(sizeof(mate_struct));
+	config = config_create(config);
+	if(lib_ref->group_info == NULL){
+		return -1;
+	}else return 0;
+}
+
+int mate_close(mate_instance* lib_ref)
+{
+  free(lib_ref->group_info);
+  return 0;
 }
 
 int main() {
