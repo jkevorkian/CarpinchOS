@@ -42,9 +42,14 @@ typedef struct __attribute__((packed)){
     bool libre;
 } t_heap_metadata;
 
+typedef struct{
+	uint32_t nro_real;
+    bool libre;
+} t_marco;
+
 typedef struct {
     void* inicio;
-    t_heap_metadata** mapa_fisico;
+    t_marco** mapa_fisico;
     uint32_t puntero_clock;
 } t_memoria_ram;
 
@@ -80,9 +85,10 @@ void terminar_programa(t_log*, t_config*);
 
 //MEM_ALLOC
 uint32_t mem_alloc(t_carpincho*, uint32_t);
-uint32_t obtener_marco_libre(uint32_t, t_heap_metadata*);
+t_marco* obtener_marco_libre();
 uint32_t cant_frames_necesarios(uint32_t);
 t_entrada_tp* crear_nueva_pagina(uint32_t);
+t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id);
 
 t_memoria_ram memoria_ram;
 

@@ -35,10 +35,9 @@ uint32_t mem_alloc(t_carpincho* carpincho, uint32_t tamanio) {
 	uint32_t dir_logica = 0;
 
     while(nro_frames_necesarios > nro_frames_asignados) {
-		t_heap_metadata* metadata = malloc(sizeof(t_heap_metadata));
-		uint32_t nro_marco = obtener_marco_libre(tamanio, metadata);
+		t_marco* marco = obtener_marco_libre();
 		/* 
-		if(nuevo_marco == -1) { 
+		if(marco == NULL) { 
 			nuevo_marco = pedir_frame_swap(); 
 			if(nuevo_marco == NULL) { 
 				log_info(logger, "No se pudo asignar memoria");
@@ -47,19 +46,35 @@ uint32_t mem_alloc(t_carpincho* carpincho, uint32_t tamanio) {
 		}; 
 		*/
 
-		t_entrada_tp* nueva_pagina = crear_nueva_pagina(nro_marco);
+		t_entrada_tp* nueva_pagina = crear_nueva_pagina(marco->nro_real);
 		list_add(carpincho->tabla_paginas, nueva_pagina);
 
 		log_info(logger, "Asigno frame. Cant frames del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 		log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", nueva_pagina->nro_marco,nueva_pagina->presencia,nueva_pagina->modificado,nueva_pagina->uso);
 		
-		//devuelvo la direccion logica del alloc, sin contar el heap metadata
-		if(nro_frames_asignados == 0) dir_logica = metadata->alloc_prev + sizeof(t_heap_metadata); 
 		nro_frames_asignados++;
 	}
 
+    t_heap_metadata* metadata = buscar_alloc_libre(carpincho->id);
+
+    dir_logica = metadata->alloc_prev + sizeof(t_heap_metadata); 
 	log_info(logger, "Direccion logica asignada: %d", dir_logica);
 	return dir_logica;
+}
+
+t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id){
+/* if(tam < heap_actual->alloc_sig - sizeof(t_heap_metadata)) {
+
+    t_heap_metadata* nuevo_heap = malloc(sizeof(t_heap_metadata));
+    heap_actual->alloc_sig = sizeof(t_heap_metadata) + tam;
+    nuevo_heap->alloc_prev = heap_actual->alloc_prev;
+    nuevo_heap->alloc_sig = 0;
+    nuevo_heap->libre = true;
+
+    log_info(logger, "Heap metadata: |%d|%d|%d|%d|", heap_actual->alloc_prev, heap_actual->alloc_sig, nuevo_heap->alloc_prev, nuevo_heap->alloc_sig);
+}
+ return heap_actual; 
+*/
 }
 
 t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco){
@@ -73,27 +88,15 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco){
 		return pagina;
 }
 
-uint32_t obtener_marco_libre(uint32_t tam, t_heap_metadata* metadata) {
+t_marco* obtener_marco_libre() {
     for(int i = 0; i < config_memoria.cant_marcos; i++) {
-		//while(recorro todos los heap de la pag) {
-		t_heap_metadata* heap_actual = memoria_ram.mapa_fisico[i];
-		if (heap_actual->libre) {
-			heap_actual->libre = false; //mutex
-			if(tam < heap_actual->alloc_sig - sizeof(t_heap_metadata)) {
-
-				t_heap_metadata* nuevo_heap = malloc(sizeof(t_heap_metadata));
-				heap_actual->alloc_sig = sizeof(t_heap_metadata) + tam;
-				nuevo_heap->alloc_prev = heap_actual->alloc_prev;
-				nuevo_heap->alloc_sig = 0;
-				nuevo_heap->libre = true;
-
-				log_info(logger, "Heap metadata: |%d|%d|%d|%d|", heap_actual->alloc_prev, heap_actual->alloc_sig, nuevo_heap->alloc_prev, nuevo_heap->alloc_sig);
-			}
-			*metadata = *heap_actual;
-			return i; 
+        t_marco* marco = memoria_ram.mapa_fisico[i];
+		if (marco->libre) {
+			marco->libre = false; //mutex
+			return marco; 
 		}
     }
-	return -1;
+	return NULL;
 }
 
 
@@ -133,12 +136,11 @@ bool iniciar_memoria(t_config* config){
 
 void iniciar_marcos(uint32_t cant_marcos){
 	for(int i = 0; i < cant_marcos; i++) {
-		t_heap_metadata* heap = malloc(sizeof(t_heap_metadata));
-		memoria_ram.mapa_fisico[i] = heap;
+		t_marco* marco_auxiliar = malloc(sizeof(t_marco));
+		memoria_ram.mapa_fisico[i] = marco_auxiliar;
 
-		heap->libre = true;
-		heap->alloc_prev = 0;
-		heap->alloc_sig = 0;
+		marco_auxiliar->libre = true;
+		marco_auxiliar->nro_real = i;
 	}
 }
 
