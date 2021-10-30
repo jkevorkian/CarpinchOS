@@ -7,6 +7,8 @@
 #include <semaphore.h>
 #include <stdbool.h>
 
+#include "memoria.h"
+
 typedef struct {
 	uint8_t accion;
 	uint32_t id_carpincho;

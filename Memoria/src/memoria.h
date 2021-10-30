@@ -45,6 +45,9 @@ typedef struct __attribute__((packed)){
 typedef struct{
 	uint32_t nro_real;
     bool libre;
+    bool bit_uso;
+    bool bit_modificado;
+    char *temporal;
 } t_marco;
 
 typedef struct {
