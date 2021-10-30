@@ -1,14 +1,5 @@
 #include "memoria.h"
 
-void test_mem_alloc(int tam){
-	t_carpincho* test_carp = malloc(sizeof(t_carpincho));
-	test_carp->id = list_size(lista_carpinchos) + 1;
-	test_carp->tabla_paginas = list_create();
-
-	list_add(lista_carpinchos, test_carp);
-	mem_alloc(test_carp, tam);
-}
-
 int main(void) {
 	logger = iniciar_logger();
 	config = iniciar_config();
@@ -18,9 +9,6 @@ int main(void) {
 		log_info(logger, "FALLO EN EL ARCHIVO DE CONFIGURACIÓN");
 		exit(1);
 	}
-
-	test_mem_alloc(5);
-	test_mem_alloc(8);
 
 	signal(SIGUSR1, &signal_handler_1);
 	signal(SIGUSR2, &signal_handler_2);
@@ -34,7 +22,7 @@ int main(void) {
 }
 
 uint32_t cant_frames_necesarios(uint32_t tamanio) {
-	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina); //deberia restarle el size de metadata?
+	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina); 
 	uint32_t nro_frames_q = nro_frames.quot;
 	if(nro_frames.rem > 0) nro_frames_q++;
 	return nro_frames_q;
@@ -86,10 +74,8 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco){
 }
 
 uint32_t obtener_marco_libre(uint32_t tam, t_heap_metadata* metadata) {
-	// si ya tengo un carpincho adentro, me fijo la ult entrada de la tp y arranco desde ese ult heap?
-
     for(int i = 0; i < config_memoria.cant_marcos; i++) {
-		//while(recorro todos los heap del marco??) {
+		//while(recorro todos los heap de la pag) {
 		t_heap_metadata* heap_actual = memoria_ram.mapa_fisico[i];
 		if (heap_actual->libre) {
 			heap_actual->libre = false; //mutex
@@ -106,7 +92,6 @@ uint32_t obtener_marco_libre(uint32_t tam, t_heap_metadata* metadata) {
 			*metadata = *heap_actual;
 			return i; 
 		}
-        
     }
 	return -1;
 }

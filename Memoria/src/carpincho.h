@@ -8,5 +8,6 @@ typedef struct {
 } data_carpincho;
 
 void *rutina_carpincho(void* info_carpincho);
+t_carpincho* crear_carpincho(int);
 
 #endif /* _CARPINCHO_H_ */
