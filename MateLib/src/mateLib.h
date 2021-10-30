@@ -26,31 +26,23 @@
 #include <utils/sockets.h>
 
 #define ip_kernel "127.0.0.1"
+#define ip_memoria "127.0.0.1"
 #define puerto_kernel "10216"
+#define puerto_memoria "11355"  //TODO: este puerto fue elegido al azar y no funciona, para mas placer
 
-//carpincho
+t_log *logger;
+
+
 typedef struct {
 	int socket;
-	int id;
-}mateLib;
-
-char* leer_consola();
-
-typedef struct mate_instance
-{
-    void *group_info;
 } mate_instance;
 
-typedef char *mate_io_resource;
 
-typedef char *mate_sem_name;
 
 typedef int32_t mate_pointer;
 
 enum mate_errors {
-    MATE_FREE_FAULT = -5,
-    MATE_READ_FAULT = -6,
-    MATE_WRITE_FAULT = -7
+	MATE_FREE_FAULT = -5, MATE_READ_FAULT = -6, MATE_WRITE_FAULT = -7
 };
 
 // TODO: Docstrings
@@ -82,6 +74,5 @@ int mate_memfree(mate_instance *lib_ref, mate_pointer addr);
 int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size);
 
 int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size);
-
 
 #endif /* MATELIB_H_ */
