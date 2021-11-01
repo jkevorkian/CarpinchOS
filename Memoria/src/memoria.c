@@ -47,9 +47,9 @@ uint32_t mem_alloc(t_carpincho* carpincho, uint32_t tamanio) {
 		*/
 
 		t_entrada_tp* nueva_pagina = crear_nueva_pagina(marco->nro_real);
-		list_add(carpincho->tabla_paginas, nueva_pagina);
+		// list_add(carpincho->tabla_paginas, nueva_pagina);
 
-		log_info(logger, "Asigno frame. Cant frames del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
+		// log_info(logger, "Asigno frame. Cant frames del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 		log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", nueva_pagina->nro_marco,nueva_pagina->presencia,nueva_pagina->modificado,nueva_pagina->uso);
 		
 		nro_frames_asignados++;
@@ -75,6 +75,7 @@ t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id){
 }
  return heap_actual; 
 */
+	return NULL;
 }
 
 t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco){

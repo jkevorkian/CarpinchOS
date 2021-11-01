@@ -2,6 +2,7 @@
 #define _CARPINCHO_H_
 
 #include <utils/sockets.h>
+#include "memoria.h"
 
 typedef struct {
 	int socket;

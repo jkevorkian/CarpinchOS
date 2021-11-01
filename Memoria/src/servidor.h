@@ -2,6 +2,7 @@
 #define _SERVIDOR_H_
 
 #include "carpincho.h"
+#include "swap.h"
 #include <stdbool.h>
 
 void iniciar_servidor(char *ip, int puerto);

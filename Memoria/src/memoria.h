@@ -56,7 +56,10 @@ typedef struct {
     uint32_t puntero_clock;
 } t_memoria_ram;
 
+
+// Agrego id_carpincho
 typedef struct {
+	uint32_t id_carpincho;
     uint32_t nro_pagina;
     uint32_t nro_marco;    
     bool presencia;
@@ -65,10 +68,12 @@ typedef struct {
     uint32_t tiempo;
 } t_entrada_tp;
 
+// Cambio tabla de paginas
 typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
-    t_list* tabla_paginas;
+	t_entrada_tp **tabla_paginas;
+    // t_list* tabla_paginas;
 } t_carpincho;
 
 t_list* lista_carpinchos;
