@@ -21,6 +21,24 @@ void agregar_running(carpincho* carp) {
 	pthread_mutex_unlock(&mutex_lista_running);
 }
 
+void agregar_blocked(carpincho* carp) {
+	pthread_mutex_lock(&mutex_lista_blocked);
+	list_add(lista_blocked, carp);
+	pthread_mutex_unlock(&mutex_lista_blocked);
+}
+
+void agregar_suspendidosReady(carpincho* carp) {
+	pthread_mutex_lock(&mutex_cola_suspendidosReady);
+	queue_push(cola_suspendidosReady, carp);
+	pthread_mutex_unlock(&mutex_cola_suspendidosReady);
+}
+
+void agregar_suspendidosBlocked(carpincho* carp) {
+	pthread_mutex_lock(&mutex_lista_suspendidosBlocked);
+	list_add(lista_suspendidosBlocked, carp);
+	pthread_mutex_unlock(&mutex_lista_suspendidosBlocked);
+}
+
 carpincho* quitar_new() {
 	pthread_mutex_lock(&mutex_cola_new);
 	carpincho* carp = (carpincho*)queue_pop(cola_new);
@@ -76,6 +94,26 @@ carpincho* quitar_suspendidosReady() {
 	return carp;
 }
 
+carpincho* quitar_blocked(carpincho* carp_quitar) {
+	int index = encontrar_carpincho(lista_blocked, carp_quitar);
+
+	pthread_mutex_lock(&mutex_lista_blocked);
+	carpincho *carp = list_remove(lista_blocked, index);
+	pthread_mutex_unlock(&mutex_lista_blocked);
+
+	return carp;
+}
+
+carpincho* quitar_suspendidosBlocked(carpincho* carp_quitar) {
+	int index = encontrar_carpincho(lista_suspendidosBlocked, carp_quitar);
+
+	pthread_mutex_lock(&mutex_lista_suspendidosBlocked);
+	carpincho *carp = list_remove(lista_suspendidosBlocked, index);
+	pthread_mutex_unlock(&mutex_lista_suspendidosBlocked);
+
+	return carp;
+}
+
 carpincho* quitar_running() {
 	pthread_mutex_lock(&mutex_lista_running);
 	carpincho* carp = (carpincho*)queue_pop(cola_running);
@@ -83,9 +121,3 @@ carpincho* quitar_running() {
 
 	return carp;
 }
-
-float calcular_HRRN(carpincho* carp, char* tiempo_actual) {
-	int tiempo_espera = obtener_rafaga_real(carp->tiempo_llegada, tiempo_actual);
-	return 1 + (tiempo_espera / carp->estimacion_proxima_rafaga); // (s+w)/s = 1 + w/s
-}
-

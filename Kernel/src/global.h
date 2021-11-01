@@ -26,7 +26,28 @@ typedef struct {
 	int rafaga_real_anterior;
 	double estimacion_proxima_rafaga;
 	char *tiempo_llegada;
+	bool esta_suspendido;
+	bool responder_wait;
+	bool responder_IO;
 }carpincho;
+
+//semaforo
+typedef struct {
+	char *nombre;
+	int instancias_iniciadas;
+	t_queue *cola_espera;
+	pthread_mutex_t mutex_espera;
+}semaforo;
+
+//IO
+typedef struct {
+	char *nombre;
+	int duracion;
+	t_queue *cola_espera;
+	pthread_mutex_t mutex_espera;
+	sem_t carpinchos_esperando;
+	pthread_t hilo_IO;
+}IO;
 
 t_log *logger;
 t_config *config;
@@ -41,12 +62,12 @@ double alfa;
 int id_proximo_carpincho;
 
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
-t_list *lista_ready, *hilos_cpu;
+t_list *lista_ready, *hilos_cpu, *lista_blocked, *lista_suspendidosBlocked, *lista_semaforos, *lista_IO;
 
 sem_t carpinchos_new, carpinchos_ready, carpinchos_running;
 sem_t multiprogramacion, multiprocesamiento;
 
-pthread_mutex_t mutex_cola_new, mutex_lista_ready, mutex_lista_running, mutex_cola_suspendidosReady;
+pthread_mutex_t mutex_cola_new, mutex_lista_ready, mutex_lista_running, mutex_lista_blocked, mutex_cola_suspendidosReady, mutex_lista_suspendidosBlocked, mutex_lista_semaforos;
 
 pthread_t hilo_planificador_largo_plazo, hilo_planificador_corto_plazo, hilo_planificador_mediano_plazo;
 

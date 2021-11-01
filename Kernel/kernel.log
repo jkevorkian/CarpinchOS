@@ -1096,3 +1096,73 @@
 [INFO] 10:36:16:625 KERNEL/(1597:1597): Kernel esperando algun carpincho
 [WARNING] 10:36:16:984 KERNEL/(1597:1597): Se ha conectado un carpincho
 [INFO] 10:36:16:985 KERNEL/(1597:1597): Kernel esperando algun carpincho
+[INFO] 11:11:44:151 KERNEL/(2579:2579): Creando el socket en la IP 127.0.0.1 con Puerto 10216
+[INFO] 11:11:44:151 KERNEL/(2579:2579): Socket funcionando
+[INFO] 11:11:44:152 KERNEL/(2579:2579): Kernel listo
+[INFO] 11:11:44:152 KERNEL/(2579:2579): Kernel esperando algun carpincho
+[WARNING] 11:11:50:095 KERNEL/(2579:2579): Se ha conectado un carpincho
+[INFO] 11:11:50:095 KERNEL/(2579:2579): Kernel esperando algun carpincho
+[INFO] 11:11:50:095 KERNEL/(2579:2583): Carpincho 0 empezando a trabajar a la hora 11:11:50:095
+[WARNING] 11:11:51:143 KERNEL/(2579:2583): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:143 KERNEL/(2579:2583): Carpincho 0 desconectado :p
+[INFO] 11:11:51:143 KERNEL/(2579:2584): Carpincho 0 empezando a trabajar a la hora 11:11:51:143
+[WARNING] 11:11:51:143 KERNEL/(2579:2584): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:143 KERNEL/(2579:2584): Carpincho 0 desconectado :p
+[INFO] 11:11:51:143 KERNEL/(2579:2585): Carpincho 0 empezando a trabajar a la hora 11:11:51:143
+[WARNING] 11:11:51:143 KERNEL/(2579:2585): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:143 KERNEL/(2579:2585): Carpincho 0 desconectado :p
+[INFO] 11:11:51:143 KERNEL/(2579:2586): Carpincho 0 empezando a trabajar a la hora 11:11:51:143
+[WARNING] 11:11:51:143 KERNEL/(2579:2586): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:143 KERNEL/(2579:2586): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2589): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2589): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2589): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2588): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2588): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2588): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2587): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2587): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2587): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2590): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2590): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2590): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2583): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2583): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2583): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2584): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:144 KERNEL/(2579:2584): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:144 KERNEL/(2579:2584): Carpincho 0 desconectado :p
+[INFO] 11:11:51:144 KERNEL/(2579:2585): Carpincho 0 empezando a trabajar a la hora 11:11:51:144
+[WARNING] 11:11:51:145 KERNEL/(2579:2585): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2585): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2586): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:145 KERNEL/(2579:2586): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2586): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2589): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:145 KERNEL/(2579:2589): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2589): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2588): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:145 KERNEL/(2579:2588): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2588): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2587): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:145 KERNEL/(2579:2587): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2587): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2590): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:145 KERNEL/(2579:2590): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:145 KERNEL/(2579:2590): Carpincho 0 desconectado :p
+[INFO] 11:11:51:145 KERNEL/(2579:2583): Carpincho 0 empezando a trabajar a la hora 11:11:51:145
+[WARNING] 11:11:51:146 KERNEL/(2579:2583): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:146 KERNEL/(2579:2583): Carpincho 0 desconectado :p
+[INFO] 11:11:51:146 KERNEL/(2579:2584): Carpincho 0 empezando a trabajar a la hora 11:11:51:146
+[WARNING] 11:11:51:146 KERNEL/(2579:2584): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:146 KERNEL/(2579:2584): Carpincho 0 desconectado :p
+[INFO] 11:11:51:146 KERNEL/(2579:2585): Carpincho 0 empezando a trabajar a la hora 11:11:51:146
+[WARNING] 11:11:51:146 KERNEL/(2579:2585): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:146 KERNEL/(2579:2585): Carpincho 0 desconectado :p
+[INFO] 11:11:51:146 KERNEL/(2579:2586): Carpincho 0 empezando a trabajar a la hora 11:11:51:146
+[WARNING] 11:11:51:146 KERNEL/(2579:2586): La conexión remota se ha desconectado.
+[ERROR] 11:11:51:146 KERNEL/(2579:2586): Carpincho 0 desconectado :p
+[WARNING] 11:11:57:599 KERNEL/(2579:2579): Se ha conectado un carpincho
+[INFO] 11:11:57:599 KERNEL/(2579:2579): Kernel esperando algun carpincho
+[WARNING] 11:12:00:455 KERNEL/(2579:2579): Se ha conectado un carpincho
+[INFO] 11:12:00:455 KERNEL/(2579:2579): Kernel esperando algun carpincho

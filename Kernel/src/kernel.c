@@ -27,6 +27,9 @@ int main() {
 			nuevo_carpincho->rafaga_real_anterior = 0;
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 			nuevo_carpincho->id = id_proximo_carpincho;
+			nuevo_carpincho->esta_suspendido = false;
+			nuevo_carpincho->responder_wait = false;
+			nuevo_carpincho->responder_IO = false;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;

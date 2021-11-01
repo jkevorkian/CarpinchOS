@@ -20,6 +20,7 @@ void* cpu() {
 		log_info(logger, "Carpincho %d empezando a trabajar a la hora %s", carp->id, tiempo_inicio);
 
 		bool seguir = true;
+		int posicion;
 
 		//se ejecutan las tareas para cada carpincho
 
@@ -53,20 +54,79 @@ void* cpu() {
 						liberar_mensaje_in(mensaje_mateLib);
 						break;
 					case SEM_INIT:
+						iniciar_semaforo((char *)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2));
+
+						mensaje_out = crear_mensaje(TODOOK);
+						enviar_mensaje(carp->socket_memoria, mensaje_out);
+						liberar_mensaje_out(mensaje_out);
 						break;
 					case SEM_WAIT:
+						log_info(logger, "Recibi mensaje del carpincho &d solicitando bloquearse", carp->id);
+						/*
+						mensaje_out = crear_mensaje(TODOOK);
+						enviar_mensaje(carp->socket_memoria, mensaje_out);
+						liberar_mensaje_out(mensaje_out);
+						*/
+						agregar_blocked(carp);
+						seguir = false;
 						break;
 					case SEM_POST:
+						posicion = buscar(lista_semaforos, (char *)list_get(mensaje_in, 1));
+
+						if(posicion != -1) {
+							semaforo *sem = (semaforo*)list_get(lista_semaforos, posicion);
+							sem->instancias_iniciadas++;
+
+							pthread_mutex_lock(&sem->mutex_espera);
+							carpincho *carp = queue_pop(sem->cola_espera);
+							pthread_mutex_unlock(&sem->mutex_espera);
+
+							desbloquear(carp);
+							carp->responder_wait = true;
+						} else
+							log_error(logger, "El semaforo %s no se ha encontrado", (char *)list_get(mensaje_in, 1));
+
+						mensaje_out = crear_mensaje(TODOOK);
+						enviar_mensaje(carp->socket_memoria, mensaje_out);
+						liberar_mensaje_out(mensaje_out);
 						break;
 					case SEM_DESTROY:
+						posicion = buscar(lista_semaforos, (char *)list_get(mensaje_in, 1));
+
+						if(posicion != -1) {
+							pthread_mutex_lock(&mutex_lista_semaforos);
+							semaforo *sem = (semaforo*)list_remove(lista_semaforos, posicion);
+							pthread_mutex_unlock(&mutex_lista_semaforos);
+
+							if(!queue_is_empty(sem->cola_espera))
+								log_warning(logger, "El semaforo %s tiene carpinchos esperando desbloquearse", (char *)list_get(mensaje_in, 1));
+
+							queue_destroy(sem->cola_espera);
+							free(sem->nombre);
+							free(sem);
+						} else
+							log_error(logger, "El semaforo %s no se ha encontrado", (char *)list_get(mensaje_in, 1));
+
+						mensaje_out = crear_mensaje(TODOOK);
+						enviar_mensaje(carp->socket_memoria, mensaje_out);
+						liberar_mensaje_out(mensaje_out);
 						break;
 					case CALL_IO:
+						posicion = buscar(lista_IO, (char *)list_get(mensaje_in, 1));
+
+						if (posicion != -1) {
+							IO *io = (IO*) list_get(lista_IO, posicion);
+
+							pthread_mutex_lock(&io->mutex_espera);
+							queue_push(io->cola_espera, carp);
+							pthread_mutex_unlock(&io->mutex_espera);
+
+							sem_post(&io->carpinchos_esperando);
+						} else
+							log_error(logger, "El dispositivo de IO %s no se ha encontrado", (char *)list_get(mensaje_in, 1));
+
 						break;
 					case MATE_CLOSE:
-						break;
-					case TODOOK:
-						log_info(logger, "Recibi mensaje del carpincho &d solicitando salida", carp->id);
-						seguir = false;
 						break;
 					default:
 						log_info(logger, "LLego: %d", (int)list_get(mensaje_in, 0));
@@ -75,45 +135,14 @@ void* cpu() {
 				liberar_mensaje_in(mensaje_in);
 			}
 		}
-		char *tiempo_fin = temporal_get_string_time("%H:%M:%S:%MS");
+		char *tiempo_fin = temporal_get_string_time("%H:%M:%S:%MS");//todo verificar si lo tengo que hacer si el carpincho se bloquea
 
 		carp->rafaga_real_anterior = obtener_rafaga_real(tiempo_inicio, tiempo_fin);
 		carp->estimacion_proxima_rafaga = obtener_estimacion_proxima_rafaga(carp->rafaga_real_anterior, carp->estimacion_proxima_rafaga);
 
 		sem_post(&multiprocesamiento);
-		agregar_new(carp);
 
 	}
 }
-
-int obtener_rafaga_real(char *tiempo_i, char *tiempo_f) { //El tiempo tiene el formato "12:51:59:331" Hora:Minuto:Segundo:MiliSegundo
-	char** tiempo_inicio = string_split(tiempo_i, ":");
-	char** tiempo_fin = string_split(tiempo_f, ":");
-	int tiempo_rafaga[4];
-
-	for(int i=0; i<4; i++)
-		tiempo_rafaga[i] = atoi(tiempo_fin[i]) - atoi(tiempo_inicio[i]);
-
-	liberar_split(tiempo_inicio);
-	liberar_split(tiempo_fin);
-
-	return (((tiempo_rafaga[0]*60 + tiempo_rafaga[1])*60 + tiempo_rafaga[2]))*1000 + tiempo_rafaga[3];
-}
-
-double obtener_estimacion_proxima_rafaga(int rafaga_real, int estimacion) {
-	return alfa*rafaga_real + (1-alfa)*estimacion;
-}
-
-void liberar_split(char** split) {
-	int i = 0;
-
-	while(split[i] != NULL) {
-		free(split[i]);
-		i++;
-	}
-
-	free(split);
-}
-
 
 

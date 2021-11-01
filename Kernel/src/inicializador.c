@@ -21,6 +21,10 @@ int inicializar_kernel() {
 	inicializar_semaforos_planificacion();
 	iniciar_planificadores();
 	iniciar_hilos_cpu();
+	inicializar_io();
+
+	lista_semaforos = list_create();
+	pthread_mutex_init(&mutex_lista_semaforos, NULL);
 
 	id_proximo_carpincho = 0;
 
@@ -47,6 +51,7 @@ void crear_estructuras_planificacion() {
 	cola_running = queue_create();
 
 	lista_ready = list_create();
+	lista_blocked = list_create();
 
 }
 
@@ -54,6 +59,7 @@ void inicializar_semaforos_planificacion() {
 	pthread_mutex_init(&mutex_cola_new, NULL);
 	pthread_mutex_init(&mutex_lista_ready, NULL);
 	pthread_mutex_init(&mutex_lista_running, NULL);
+	pthread_mutex_init(&mutex_lista_blocked, NULL);
 	pthread_mutex_init(&mutex_cola_suspendidosReady, NULL);
 
 	sem_init(&carpinchos_new, 0, 0);
