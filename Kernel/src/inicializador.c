@@ -43,6 +43,8 @@ void leer_configuraciones() {
 	grado_multiprocesamiento 	= config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
 	alfa 						= config_get_double_value(config, "ALFA");
 	estimacion_inicial 			= config_get_int_value(config, "ESTIMACION_INICIAL");
+
+	tiempo_deadlock				= config_get_int_value(config, "TIEMPO_DEADLOCK");
 }
 
 void crear_estructuras_planificacion() {

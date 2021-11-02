@@ -6,6 +6,8 @@ int main() {
 
 	bool seguir = true;
 
+	iniciar_deteccion_deadlock(tiempo_deadlock);
+	
 	//proceso de recepcion de los mate_init
 	while(seguir) {
 		log_info(logger, "Kernel esperando algun carpincho");
