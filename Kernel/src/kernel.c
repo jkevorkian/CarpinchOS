@@ -9,7 +9,6 @@ int main() {
 	//proceso de recepcion de los mate_init
 	while(seguir) {
 		log_info(logger, "Kernel esperando algun carpincho");
-
 		int socket_auxiliar_carpincho = esperar_cliente(socket_kernel); // Espero a que llegue un nuevo carpincho
 
 		if(socket_auxiliar_carpincho < 0) {

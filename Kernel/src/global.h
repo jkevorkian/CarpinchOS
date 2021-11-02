@@ -38,11 +38,11 @@ char *algoritmo_planificacion;
 int grado_multiprogramacion, grado_multiprocesamiento, estimacion_inicial;
 double alfa;
 
+<<<<<<< HEAD
 int id_proximo_carpincho;
 
+>>>>>>> kernel-hito1
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
-t_list *lista_ready, *hilos_cpu;
-
 sem_t carpinchos_new, carpinchos_ready, carpinchos_running;
 sem_t multiprogramacion, multiprocesamiento;
 
