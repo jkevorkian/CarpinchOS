@@ -27,7 +27,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
-		t_mensaje* mensaje_out = crear_mensaje(SND_PO);
+		t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(info_carpincho->socket));
 		enviar_mensaje(fd_carpincho, mensaje_out);
 

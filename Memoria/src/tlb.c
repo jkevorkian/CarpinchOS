@@ -41,8 +41,13 @@ void liberar_control_tlb() {
 	}
 }
 
+<<<<<<< HEAD
 entrada_tlb *es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
 	entrada_tlb *entrada = tabla_tlb[nro_entrada];
+=======
+t_entrada_tlb *es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
+	t_entrada_tlb *entrada = tlb.mapa[nro_entrada];
+>>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 	if(entrada->id_car == id_car && entrada->pagina == nro_pagina)
 		return entrada;
 	else

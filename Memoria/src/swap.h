@@ -7,6 +7,8 @@
 #include <semaphore.h>
 #include <stdbool.h>
 
+#include "memoria.h"
+
 typedef struct {
 	uint8_t accion;
 	uint32_t id_carpincho;
@@ -20,5 +22,7 @@ pthread_mutex_t mutex_movimientos;
 
 void* manejar_swap(void* socket_swap);
 void crear_movimiento_swap(uint8_t, uint32_t, uint32_t, char *);
+
+t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho);
 
 #endif /* _SWAMP_H_ */
