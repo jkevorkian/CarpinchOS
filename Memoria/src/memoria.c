@@ -1,14 +1,9 @@
 #include "memoria.h"
 
 int main(void) {
-<<<<<<< HEAD
-	t_config* config = config_create("miramhq.config");
-	// t_log* logger = log_create("miramhq.log", "MEMORIA", 1, LOG_LEVEL_INFO);
-=======
 	logger = iniciar_logger();
 	config = iniciar_config();
 	lista_carpinchos = list_create();
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 
 	/* if(!iniciar_memoria(config)) {
 		log_info(logger, "FALLO EN EL ARCHIVO DE CONFIGURACIÓN");
@@ -25,8 +20,6 @@ int main(void) {
 	exit(1);
 }
 
-<<<<<<< HEAD
-=======
 uint32_t cant_frames_necesarios(uint32_t tamanio) {
 	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina); 
 	uint32_t nro_frames_q = nro_frames.quot;
@@ -151,7 +144,6 @@ void iniciar_marcos(uint32_t cant_marcos){
 	}
 }
 
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 void signal_handler_1(int sig) {
 
 }
@@ -163,8 +155,6 @@ void signal_handler_2(int sig) {
 void signal_handler_3(int sig) {
 
 }
-<<<<<<< HEAD
-=======
 
 t_log* iniciar_logger(void) {
 	t_log* nuevo_logger;
@@ -191,4 +181,3 @@ void terminar_programa(t_log* logger, t_config* config) {
 		config_destroy(config);
 
 }
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32

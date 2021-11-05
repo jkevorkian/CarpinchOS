@@ -9,6 +9,7 @@ void iniciar_servidor(char *ip, int puerto) {
 	// log_info(logger, "Servidor listo");
 	bool seguir = true;
 
+	int id = 1;
 	int fd_carpincho;
 	while(seguir) {
 		// Espero a que llegue un nuevo carpincho
@@ -17,6 +18,8 @@ void iniciar_servidor(char *ip, int puerto) {
 			seguir = false;
 			continue;
 		}
+		crear_carpincho(id);
+		id++;
 		// puede_iniciar() hay_memoria_suficiente()
 		// Creo un hilo para que el carpincho se comunique de forma particular
 		pthread_t nuevo_carpincho;

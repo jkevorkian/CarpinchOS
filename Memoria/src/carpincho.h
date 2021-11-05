@@ -6,6 +6,7 @@
 
 typedef struct {
 	int socket;
+	int id;
 } data_carpincho;
 
 void *rutina_carpincho(void* info_carpincho);

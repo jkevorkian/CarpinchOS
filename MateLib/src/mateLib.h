@@ -53,6 +53,7 @@ int mate_init(mate_instance *lib_ref, char *config);
 int mate_close(mate_instance *lib_ref);
 
 //-----------------Semaphore Functions---------------------/
+/*
 int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value);
 
 int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem);
@@ -64,6 +65,7 @@ int mate_sem_destroy(mate_instance *lib_ref, mate_sem_name sem);
 //--------------------IO Functions------------------------/
 
 int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg);
+*/
 
 //--------------Memory Module Functions-------------------/
 

@@ -4,25 +4,15 @@
 #include <utils/sockets.h>
 #include <semaphore.h>
 #include <signal.h>
-<<<<<<< HEAD
 #include "servidor.h"
 #include "tlb.h"
 
-void signal_handler_1(int);
-void signal_handler_2(int);
-void signal_handler_3(int);
-=======
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <math.h>
 
-//#include "servidor.h"
-//#include "tlb.h"
-//#include <utils/sockets.h>
-
 #define IP_RAM "127.0.0.1"
-#define CONSOLA_ACTIVA  1
 
 // ALGORITMOS REEMPLAZO 
 #define LRU 0
@@ -48,11 +38,14 @@ typedef struct __attribute__((packed)){
 } t_heap_metadata;
 
 typedef struct{
+	uint32_t duenio;		// 0 si está libre
+	uint32_t pagina_duenio;
 	uint32_t nro_real;
     bool libre;
     bool bit_uso;
     bool bit_modificado;
     char *temporal;
+    pthread_mutex_t mutex;	// TODO iniciar al inicializar memoria
 } t_marco;
 
 typedef struct {
@@ -60,7 +53,6 @@ typedef struct {
     t_marco** mapa_fisico;
     uint32_t puntero_clock;
 } t_memoria_ram;
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 
 
 // Agrego id_carpincho
@@ -85,8 +77,6 @@ typedef struct {
 t_list* lista_carpinchos;
 uint32_t cant_carpinchos;	// TODO crear función para obtener
 
-<<<<<<< HEAD
-=======
 bool iniciar_memoria(t_config*);
 void iniciar_marcos(uint32_t);
 void iniciar_heap(void);
@@ -112,5 +102,4 @@ t_log* logger;
 t_config* config;
 t_config_memoria config_memoria;
 
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 #endif /* _MEMORIA_H_ */
