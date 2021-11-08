@@ -28,6 +28,9 @@
 #define FIJA_LOCAL 0
 #define DINAMICA_GLOBAL 1
 
+#define TAMANIO_HEAP 9
+#define HEAP_NULL 0xFFFFFFFF
+
 typedef struct {
     uint32_t tamanio_memoria;
     uint32_t tamanio_pagina;
@@ -35,12 +38,6 @@ typedef struct {
     uint32_t tipo_asignacion;
     uint32_t cant_marcos;
 } t_config_memoria;
-
-typedef struct __attribute__((packed)){
-	uint32_t alloc_prev;
-    uint32_t alloc_sig;
-    bool libre;
-} t_heap_metadata;
 
 typedef struct{
 	uint32_t nro_real;
@@ -56,8 +53,6 @@ typedef struct {
     uint32_t puntero_clock;
 } t_memoria_ram;
 
-
-// Agrego id_carpincho
 typedef struct {
 	uint32_t id_carpincho;
     uint32_t nro_pagina;
@@ -68,35 +63,57 @@ typedef struct {
     uint32_t tiempo;
 } t_entrada_tp;
 
-// Cambio tabla de paginas
 typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
-	t_entrada_tp **tabla_paginas;
-    // t_list* tabla_paginas;
+	t_list* tabla_paginas;
 } t_carpincho;
 
-t_list* lista_carpinchos;
-uint32_t cant_carpinchos;	// TODO crear función para obtener
+t_list*             lista_carpinchos;
+uint32_t            cant_carpinchos;	// TODO crear función para obtener
 
-bool iniciar_memoria(t_config*);
-void iniciar_marcos(uint32_t);
-void iniciar_heap(void);
+bool                iniciar_memoria(t_config*);
+void                iniciar_marcos(uint32_t);
 
-void signal_handler_1(int);
-void signal_handler_2(int);
-void signal_handler_3(int);
+void                signal_handler_1(int);
+void                signal_handler_2(int);
+void                signal_handler_3(int);
 
-t_log* iniciar_logger(void);
-t_config* iniciar_config(void);
-void terminar_programa(t_log*, t_config*);
+t_log*              iniciar_logger(void);
+t_config*           iniciar_config(void);
+void                terminar_programa(t_log*, t_config*);
 
 //MEM_ALLOC
-uint32_t mem_alloc(t_carpincho*, uint32_t);
-t_marco* obtener_marco_libre();
-uint32_t cant_frames_necesarios(uint32_t);
-t_entrada_tp* crear_nueva_pagina(uint32_t);
-t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id);
+
+//MEM_FREE
+bool                mem_free(uint32_t id_carpincho, uint32_t dir_logica);
+
+// MARCOS
+bool                tengo_marcos_suficientes(uint32_t);
+// TODO: son lo mismo? elegir una
+t_marco*            obtener_marco_libre();
+t_marco*            obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina);
+
+uint32_t            cant_marcos_necesarios(uint32_t);
+
+// PAGINAS
+t_entrada_tp*       crear_nueva_pagina(uint32_t, t_carpincho*);
+uint32_t            pagina_segun_posicion(uint32_t posicion);
+uint32_t            offset_segun_posicion(uint32_t posicion);
+
+// TODO: mover a CARPINCHOS
+t_carpincho*        carpincho_de_lista(uint32_t id_carpincho);
+
+// HEAP METADATA
+bool                get_isFree(uint32_t nro_marco, uint32_t desplazamiento);
+void                set_isFree(uint32_t nro_marco, uint32_t desplazamiento);
+void                reset_isFree(uint32_t nro_marco, uint32_t desplazamiento);
+
+uint32_t            get_prevAlloc(uint32_t nro_marco, uint32_t desplazamiento);
+uint32_t            get_nextAlloc(uint32_t nro_marco, uint32_t desplazamiento);
+
+void                set_prevAlloc(uint32_t nro_marco, uint32_t desplazamiento, uint32_t nuevo_valor);
+void                set_nextAlloc(uint32_t nro_marco, uint32_t desplazamiento, uint32_t nuevo_valor);
 
 t_memoria_ram memoria_ram;
 
