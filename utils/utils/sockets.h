@@ -2,7 +2,7 @@
  *  sockets.h
  *
  *  Created on: 21 jun. 2021
- *  Author: cualquier-cosa
+ *  Author: AprobadOS
  */
 
 #ifndef _SOCKETS_H_
@@ -38,7 +38,7 @@
 #define S_SEM_POST		"%s"
 #define S_SEM_DESTROY	"%s"
 // Otros
-#define S_CALL_IO		""
+#define S_CALL_IO		"%s"
 #define S_DATA			"%s"
 #define S_SEND_PORT		"%d"
 
@@ -159,5 +159,12 @@ void liberar_mensaje_in(t_list* mensaje);
 * @OUTP: Devuelve true si el mensaje es válido
 */
 bool validar_mensaje(t_list* mensaje_in, void* logger);
+
+/**
+* @NAME: string_desde_mensaje
+* @DESC: Recibe el enum del mensaje recibido y lo transforma a un string para facilitar el logueo
+* @OUTP: Devuelve el string equivalente al mensaje
+*/
+char* string_desde_mensaje(int mensaje);
 
 #endif /* _SOCKETS_H_ */

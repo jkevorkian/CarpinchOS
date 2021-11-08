@@ -15,7 +15,6 @@ int main(void) {
 
 	iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
 	iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
-	// pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 	exit(1);
 }
 
