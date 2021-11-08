@@ -28,6 +28,9 @@ void *rutina_carpincho(void* info_carpincho) {
 		case MEM_WRITE:
 			// mem_write(id_carpincho, dir_logica, data);
 			break;
+		case SUSPEND:
+			// ...;
+			break;
 		}
 	}
 	return NULL; */

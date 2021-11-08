@@ -17,7 +17,7 @@ void iniciar_servidor(char *ip, int puerto) {
 			seguir = false;
 			continue;
 		}
-
+		// puede_iniciar() hay_memoria_suficiente()
 		// Creo un hilo para que el carpincho se comunique de forma particular
 		pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));

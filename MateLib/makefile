@@ -66,3 +66,4 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPENDENCIES)
 	$(CC) $(INCLUDES) $(CFLAGS) -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 
 .PHONY: all clean debug release memcheck helgrind
+

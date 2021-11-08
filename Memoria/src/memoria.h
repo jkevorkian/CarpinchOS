@@ -1,16 +1,15 @@
 #ifndef _MEMORIA_H_
 #define _MEMORIA_H_
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#include <utils/sockets.h>
 #include <semaphore.h>
 #include <signal.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <math.h>
+#include "servidor.h"
+#include "tlb.h"
 
 //#include "servidor.h"
 //#include "tlb.h"
