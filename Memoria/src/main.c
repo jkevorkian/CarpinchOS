@@ -1,5 +1,4 @@
-#include "memoria.h"
-#include "carpincho.h"
+#include "main.h"
 
 int main(void) {
 	logger = iniciar_logger();

@@ -74,14 +74,6 @@ uint32_t            cant_carpinchos;	// TODO crear función para obtener
 bool                iniciar_memoria(t_config*);
 void                iniciar_marcos(uint32_t);
 
-void                signal_handler_1(int);
-void                signal_handler_2(int);
-void                signal_handler_3(int);
-
-t_log*              iniciar_logger(void);
-t_config*           iniciar_config(void);
-void                terminar_programa(t_log*, t_config*);
-
 //MEM_ALLOC
 
 //MEM_FREE
@@ -104,15 +96,15 @@ uint32_t            offset_segun_posicion(uint32_t posicion);
 t_carpincho*        carpincho_de_lista(uint32_t id_carpincho);
 
 // HEAP METADATA
-bool                get_isFree(uint32_t nro_marco, uint32_t desplazamiento);
-void                set_isFree(uint32_t nro_marco, uint32_t desplazamiento);
-void                reset_isFree(uint32_t nro_marco, uint32_t desplazamiento);
+bool                get_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
+void                set_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
+void                reset_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
 
-uint32_t            get_prevAlloc(uint32_t nro_marco, uint32_t desplazamiento);
-uint32_t            get_nextAlloc(uint32_t nro_marco, uint32_t desplazamiento);
+uint32_t            get_prevAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap);
+uint32_t            get_nextAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap);
 
-void                set_prevAlloc(uint32_t nro_marco, uint32_t desplazamiento, uint32_t nuevo_valor);
-void                set_nextAlloc(uint32_t nro_marco, uint32_t desplazamiento, uint32_t nuevo_valor);
+void                set_prevAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap, uint32_t nuevo_valor);
+void                set_nextAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap, uint32_t nuevo_valor);
 
 t_memoria_ram memoria_ram;
 
