@@ -2,25 +2,29 @@
 #include "memoria.h"
 
 void *rutina_carpincho(void* info_carpincho) {
-	// COMENTO PORQUE SINO NO COMPILA
-/* 	bool seguir = true;
-	int socket_carpincho = ((data_carpincho *)info_carpincho)->socket;
-	int socket = esperar_cliente(socket_carpincho);
-	close(socket_carpincho);
 
-	// TODO: generar id en memoria, NO leerla del mensaje
-	t_list *mensaje_in = recibir_mensaje(socket);
-	int id = (int)list_get(mensaje_in, 2);
-	t_carpincho* carpincho = crear_carpincho(id);
+ 	bool seguir = true;
+	data_carpincho* carpincho = ((data_carpincho *)info_carpincho)->socket;
+	int socket = esperar_cliente(carpincho->socket);
+	close(carpincho->socket);
+
+	// Para mi hay que hacerlo en el servidor
+	/*
+		// TODO: generar id en memoria, NO leerla del mensaje
+		t_list *mensaje_in = recibir_mensaje(socket);
+		int id = (int)list_get(mensaje_in, 2);
+		t_carpincho* carpincho = crear_carpincho(id);
+	*/
+	t_list *mensaje_in;
 
 	while(seguir) {
-		mensaje_in = recibir_mensaje(socket_carpincho);
+		mensaje_in = recibir_mensaje(socket);
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
-			mem_alloc(carpincho, (int)list_get(mensaje_in, 1));
+			mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
 			break;
 		case MEM_FREE:
-			// mem_free(id_carpincho, dir_logica);
+			mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
 			break;
 		case MEM_READ:
 			// mem_read(id_carpincho, dir_logica);
@@ -33,8 +37,9 @@ void *rutina_carpincho(void* info_carpincho) {
 			break;
 		}
 	}
-	return NULL; */
+	return NULL;
 }
+
 
 t_carpincho* crear_carpincho(uint32_t id) {
 	t_carpincho* carpincho = malloc(sizeof(t_carpincho));
@@ -54,6 +59,7 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	return carpincho;
 }
 
+
 bool asignacion_fija(t_carpincho* carpincho) {
 	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
 
@@ -72,3 +78,4 @@ bool asignacion_fija(t_carpincho* carpincho) {
 bool asignacion_global(t_carpincho* carpincho) {
 	return false;
 }
+

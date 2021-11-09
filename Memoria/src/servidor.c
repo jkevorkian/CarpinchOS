@@ -18,8 +18,8 @@ void iniciar_servidor(char *ip, int puerto) {
 			seguir = false;
 			continue;
 		}
+
 		crear_carpincho(id);
-		id++;
 		// puede_iniciar() hay_memoria_suficiente()
 		// Creo un hilo para que el carpincho se comunique de forma particular
 		pthread_t nuevo_carpincho;
@@ -27,6 +27,7 @@ void iniciar_servidor(char *ip, int puerto) {
 
 		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
 		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
+		info_carpincho->id = id;
 		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
@@ -36,6 +37,7 @@ void iniciar_servidor(char *ip, int puerto) {
 
 		// Elimino la conexión auxiliar con el carpincho
 		close(fd_carpincho);
+		id++;
 	}
 
 }
@@ -51,4 +53,3 @@ bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 	// TODO
 	return true;
 }
-

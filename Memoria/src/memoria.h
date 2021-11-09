@@ -8,8 +8,12 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <math.h>
-#include "servidor.h"
-#include "tlb.h"
+
+#include <stdbool.h>
+// #include "read_write_op.h"
+// #include "swap.h"
+// #include "servidor.h"
+// #include "tlb.h"
 
 //#include "servidor.h"
 //#include "tlb.h"
@@ -38,12 +42,24 @@ typedef struct {
     uint32_t cant_marcos;
 } t_config_memoria;
 
+/*
 typedef struct{
 	uint32_t nro_real;
     bool libre;
     bool bit_uso;
     bool bit_modificado;
     char *temporal;
+} t_marco;*/
+
+typedef struct{
+	uint32_t duenio;		// 0 si está libre
+	uint32_t pagina_duenio;
+	uint32_t nro_real;
+    bool libre;				// to remove o cambiar lo de duenio
+    bool bit_uso;
+    bool bit_modificado;
+    char *temporal;
+    pthread_mutex_t mutex;	// TODO iniciar al inicializar memoria
 } t_marco;
 
 typedef struct {
@@ -62,40 +78,44 @@ typedef struct {
     uint32_t tiempo;
 } t_entrada_tp;
 
+
 typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
 	t_list* tabla_paginas;
 } t_carpincho;
 
-t_list*             lista_carpinchos;
-uint32_t            cant_carpinchos;	// TODO crear función para obtener
+t_memoria_ram memoria_ram;
+t_config* config;			// Creo que no tiene que ser global
+t_config_memoria config_memoria;
 
-bool                iniciar_memoria(t_config*);
-void                iniciar_marcos(uint32_t);
+t_log* logger;
 
-//MEM_ALLOC
+t_list* lista_carpinchos;
 
-//MEM_FREE
-bool                mem_free(uint32_t id_carpincho, uint32_t dir_logica);
+// TOREMOVE ya existe list_size
+uint32_t cant_carpinchos;	// TODO crear función para obtener
 
-// MARCOS
-bool                tengo_marcos_suficientes(uint32_t);
-// TODO: son lo mismo? elegir una
-t_marco*            obtener_marco_libre();
-t_marco*            obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina);
+void*			inicio_memoria(uint32_t nro_marco, uint32_t offset);
 
-uint32_t            cant_marcos_necesarios(uint32_t);
+bool			iniciar_memoria(t_config*);
+void			iniciar_marcos(uint32_t);
 
-// PAGINAS
-t_entrada_tp*       crear_nueva_pagina(uint32_t, t_carpincho*);
-uint32_t            pagina_segun_posicion(uint32_t posicion);
-uint32_t            offset_segun_posicion(uint32_t posicion);
+t_entrada_tp*	crear_nueva_pagina(uint32_t, t_carpincho*);		// REVISAR
+
+uint32_t		pagina_segun_posicion(uint32_t posicion);
+uint32_t		offset_segun_posicion(uint32_t posicion);
+t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
+
+#endif /* _MEMORIA_H_ */
 
 // TODO: mover a CARPINCHOS
+/*
 t_carpincho*        carpincho_de_lista(uint32_t id_carpincho);
+*/
 
 // HEAP METADATA
+/*
 bool                get_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
 void                set_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
 void                reset_isFree(uint32_t id_carpincho, uint32_t dir_logica_heap);
@@ -106,10 +126,23 @@ uint32_t            get_nextAlloc(uint32_t id_carpincho, uint32_t dir_logica_hea
 void                set_prevAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap, uint32_t nuevo_valor);
 void                set_nextAlloc(uint32_t id_carpincho, uint32_t dir_logica_heap, uint32_t nuevo_valor);
 
-t_memoria_ram memoria_ram;
+void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t tamanio);
+void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio);
 
-t_log* logger;
-t_config* config;
-t_config_memoria config_memoria;
+//MEM_ALLOC
 
-#endif /* _MEMORIA_H_ */
+//MEM_FREE
+bool                mem_free(uint32_t id_carpincho, uint32_t dir_logica);
+
+// MARCOS
+
+bool                tengo_marcos_suficientes(uint32_t);
+// TODO: son lo mismo? elegir una
+t_marco*            obtener_marco_libre();
+t_marco*            obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina);
+
+uint32_t            cant_marcos_necesarios(uint32_t);
+
+void			actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado);
+*/
+

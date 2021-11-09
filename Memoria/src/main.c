@@ -10,7 +10,7 @@ int main(void) {
 		exit(1);
 	}
 
-	t_carpincho* carpincho1 = crear_carpincho(1);
+	// t_carpincho* carpincho1 = crear_carpincho(1);
 
 	signal(SIGUSR1, &signal_handler_1);
 	signal(SIGUSR2, &signal_handler_2);

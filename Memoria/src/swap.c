@@ -7,6 +7,7 @@ t_marco *marco_viejo(t_marco *marco1, t_marco *marco2);
 uint32_t obtener_tiempo(char tipo, t_marco *marco);
 
 t_movimiento *obtener_movimiento();
+
 void hacer_swap_in(int socket, t_movimiento *mov);
 void hacer_swap_out(int socket, t_movimiento *mov);
 
@@ -217,16 +218,6 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 	}
 
 	return atoi(tiempo);
-}
-
-void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
-	if(modificado)
-		marco_auxiliar->bit_modificado = true;
-
-	if(config_memoria.algoritmo_reemplazo == LRU)
-		marco_auxiliar->temporal = temporal_get_string_time("%H:%M:%S");
-	else
-		marco_auxiliar->bit_uso = true;
 }
 
 void suspend(uint32_t id) {

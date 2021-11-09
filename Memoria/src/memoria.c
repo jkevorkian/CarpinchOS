@@ -68,6 +68,49 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 		return pagina;
 }
 
+uint32_t cant_frames_necesarios(uint32_t tamanio) {
+	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina);
+	uint32_t nro_frames_q = nro_frames.quot;
+	if(nro_frames.rem > 0) nro_frames_q++;
+	return nro_frames_q;
+}
+
+uint32_t pagina_segun_posicion(uint32_t posicion) {
+	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
+	return div_posicion.quot;
+}
+
+uint32_t offset_segun_posicion(uint32_t posicion) {
+	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
+	return div_posicion.rem;
+}
+
+t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
+	bool mi_carpincho(void *un_carpincho) {
+		if(((t_carpincho *)un_carpincho)->id == id_carpincho)
+			return true;
+		else
+			return false;
+	}
+
+	return list_find(lista_carpinchos, mi_carpincho);
+}
+
+void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
+	return memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
+}
+
+/*
+void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
+	if(modificado)
+		marco_auxiliar->bit_modificado = true;
+
+	if(config_memoria.algoritmo_reemplazo == LRU)
+		marco_auxiliar->temporal = temporal_get_string_time("%H:%M:%S");
+	else
+		marco_auxiliar->bit_uso = true;
+}
+
 t_marco* obtener_marco_libre() {
     for(int i = 0; i < config_memoria.cant_marcos; i++) {
         t_marco* marco = memoria_ram.mapa_fisico[i];
@@ -77,9 +120,9 @@ t_marco* obtener_marco_libre() {
 		}
     }
 
-    /* 
-    t_marco* marco = pedir_frame_swap(); 
-    */
+
+    // t_marco* marco = pedir_frame_swap();
+
 
 	return NULL;
 }
@@ -109,49 +152,187 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
     return false;
 }
 
-uint32_t cant_frames_necesarios(uint32_t tamanio) {
-	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina);
-	uint32_t nro_frames_q = nro_frames.quot;
-	if(nro_frames.rem > 0) nro_frames_q++;
-	return nro_frames_q;
+
+bool get_isFree(uint32_t id, uint32_t inicio_heap) {
+	uint8_t bit_esFree;
+	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
+
+	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
+	memcpy(&bit_esFree, inicio_memoria(marco->nro_real, posicion_compuesta.quot), 1);
+	soltar_marco(marco);
+
+	if(bit_esFree)	return true;
+	else			return false;
+}
+
+void set_isFree(uint32_t id, uint32_t inicio_heap) {
+	uint8_t bit_esFree = 1;
+	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
+
+	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
+	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.quot), &bit_esFree, 1);
+	soltar_marco(marco);
+}
+
+void reset_isFree(uint32_t id, uint32_t inicio_heap) {
+	uint8_t bit_esFree = 0;
+	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
+
+	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
+	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.quot), &bit_esFree, 1);
+	soltar_marco(marco);
+}
+
+uint32_t get_prevAlloc(uint32_t id, uint32_t inicio_heap) {
+	uint32_t pos_alloc;
+	void * bloque = obtener_bloque_paginacion(id, inicio_heap, 4);
+	memcpy(&pos_alloc, bloque, 4);
+	return pos_alloc;
+}
+
+uint32_t get_nextAlloc(uint32_t id, uint32_t inicio_heap) {
+	uint32_t pos_alloc;
+	void * bloque = obtener_bloque_paginacion(id, inicio_heap + 4, 4);
+	memcpy(&pos_alloc, bloque, 4);
+	return pos_alloc;
+}
+
+void set_prevAlloc(uint32_t id, uint32_t inicio_heap, uint32_t nuevo_valor) {
+	uint32_t data = nuevo_valor;
+	actualizar_bloque_paginacion(id, inicio_heap, &data, 4);
+}
+
+void set_nextAlloc(uint32_t id, uint32_t inicio_heap, uint32_t nuevo_valor) {
+	uint32_t data = nuevo_valor;
+	actualizar_bloque_paginacion(id, inicio_heap + 4, &data, 4);
+}
+
+void soltar_marco(t_marco *marco_auxiliar) {
+	pthread_mutex_unlock(&marco_auxiliar->mutex);
+}
+
+void reservar_marco(t_marco *marco_auxiliar) {
+	pthread_mutex_lock(&marco_auxiliar->mutex);
+}
+
+void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t tamanio) {
+	// t_carpincho* mi_carpincho = (t_carpincho *)list_get(lista_carpinchos, id - 1);
+
+	div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
+
+	uint32_t bytes_cargados = 0;
+	uint32_t bytes_disponibles = config_memoria.tamanio_pagina - posicion_compuesta.rem;
+	uint32_t pagina_actual = posicion_compuesta.quot;
+	uint32_t bytes_necesarios = tamanio;
+
+	void* data = malloc(tamanio);
+
+	uint32_t inicio_pagina = posicion_compuesta.rem;
+	while(bytes_cargados < bytes_necesarios) {
+		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
+			bytes_disponibles = bytes_necesarios - bytes_cargados;
+
+		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
+		memcpy(data, inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), bytes_disponibles);
+		actualizar_info_algoritmo(marco_auxiliar, true);
+		soltar_marco(marco_auxiliar);
+
+		// log_warning(logger, "Incorpore marco. Obtengo dato paginacion");
+		// log_info(logger, "Data: %d", obtener_entero_paginacion(id_patota, desplazamiento));
+
+		bytes_cargados += bytes_disponibles;
+		bytes_disponibles = config_memoria.tamanio_pagina;
+		inicio_pagina = 0;
+		pagina_actual++;
+	}
+    return data;
+}
+
+void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio) {
+	// t_carpincho* mi_carpincho = (t_carpincho *)list_get(lista_carpinchos, id - 1);
+
+    div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
+
+	uint32_t bytes_cargados = 0;
+	uint32_t bytes_disponibles = config_memoria.tamanio_pagina - posicion_compuesta.rem;
+	uint32_t pagina_actual = posicion_compuesta.quot;
+	uint32_t bytes_necesarios = tamanio;
+
+	uint32_t inicio_pagina = posicion_compuesta.rem;
+	while(bytes_cargados < bytes_necesarios) {
+		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
+			bytes_disponibles = bytes_necesarios - bytes_cargados;
+
+		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
+		memcpy(inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), &data, bytes_disponibles);
+		actualizar_info_algoritmo(marco_auxiliar);
+		soltar_marco(marco_auxiliar);
+
+		// log_warning(logger, "Incorpore marco. Obtengo dato paginacion");
+		// log_info(logger, "Data: %d", obtener_entero_paginacion(id_patota, desplazamiento));
+
+		bytes_cargados += bytes_disponibles;
+		bytes_disponibles = config_memoria.tamanio_pagina;
+		inicio_pagina = 0;
+		pagina_actual++;
+	}
+}
+
+void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco) {
+	// actualizar_tp();
+	// t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
+	// t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
+
+	pthread_mutex_lock(&marco->mutex);
+	if(id_carpincho) {
+		// enviar pagina a swamp
+		// swap_out(viejo_carpincho->id, nro_pagina);
+		// viejo_carpincho->tabla_paginas[marco->pagina_duenio] = NULL; // ??
+	}
+
+	// nuevo_carpincho->tabla_paginas[nro_pagina] debería ser NULL al no estar asignado
+	// nuevo_carpincho->tabla_paginas[nro_pagina] = marco;
+	marco->duenio = id_carpincho;
+	marco->pagina_duenio = nro_pagina;
+	marco->bit_modificado = false;
+	marco->bit_uso = true;
+
+	// pedir pagina a swap
+	// void * buffer = swap_in(id_carpincho, nro_pagina);
+	//memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
+	pthread_mutex_lock(&marco->mutex);
+
+	//actualizar_tlb();
+}
+
+
+t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
+	// el marco hay que reservarlo para que no lo saquen a memoria secundaria
+	// durante el proceso
+	// lo mismo con los marcos que se pidan para inificar el heapMetaData
+
+	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+	t_marco* marco;
+	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
+	// t_entrada_tp *entrada_tp = mi_carpincho->tabla_paginas[nro_pagina];
+	//if(entrada_tp->id_carpincho == id_carpincho && entrada_tp->nro_pagina == nro_pagina) {
+	//	marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
+	//	reservar_marco(marco);
+	//}
+
+	//else {
+		// Page fault
+		marco = realizar_algoritmo_reemplazo(id_carpincho);
+		reasignar_marco(id_carpincho, nro_pagina, marco);
+	// }
+	return marco;
 }
 
 uint32_t mem_alloc(t_carpincho* carpincho, uint32_t tamanio) {
-	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", carpincho->id, tamanio);
-	uint32_t nro_frames_asignados = 0;
-	uint32_t nro_frames_necesarios = cant_frames_necesarios(tamanio);
-	uint32_t dir_logica = 0;
-
-    while(nro_frames_necesarios > nro_frames_asignados) {
-		t_marco* marco = obtener_marco_libre();
-		/*
-		if(marco == NULL) {
-			nuevo_marco = pedir_frame_swap();
-			if(nuevo_marco == NULL) {
-				log_info(logger, "No se pudo asignar memoria");
-				return NULL;
-			}
-		};
-		*/
-
-		t_entrada_tp* nueva_pagina = crear_nueva_pagina(marco->nro_real);
-		// list_add(carpincho->tabla_paginas, nueva_pagina);
-
-		// log_info(logger, "Asigno frame. Cant frames del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
-		log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", nueva_pagina->nro_marco,nueva_pagina->presencia,nueva_pagina->modificado,nueva_pagina->uso);
-
-		nro_frames_asignados++;
-	}
-
-    t_heap_metadata* metadata = buscar_alloc_libre(carpincho->id);
-
-    dir_logica = metadata->alloc_prev + sizeof(t_heap_metadata);
-	log_info(logger, "Direccion logica asignada: %d", dir_logica);
-	return dir_logica;
+	return 0;
 }
 
 t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id){
-	/*
 	if(tam < heap_actual->alloc_sig - sizeof(t_heap_metadata)) {
 
 		t_heap_metadata* nuevo_heap = malloc(sizeof(t_heap_metadata));
@@ -163,7 +344,6 @@ t_heap_metadata* buscar_alloc_libre(uint32_t carpincho_id){
 		log_info(logger, "Heap metadata: |%d|%d|%d|%d|", heap_actual->alloc_prev, heap_actual->alloc_sig, nuevo_heap->alloc_prev, nuevo_heap->alloc_sig);
 	}
 	return heap_actual;
-	*/
 	return NULL;
 }
 
@@ -222,203 +402,5 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	}
 	return true;
 }
-
-uint32_t pagina_segun_posicion(uint32_t posicion) {
-	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
-	return div_posicion.quot;
-}
-
-uint32_t offset_segun_posicion(uint32_t posicion) {
-	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
-	return div_posicion.rem;
-}
-
-t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
-	// el marco hay que reservarlo para que no lo saquen a memoria secundaria
-	// durante el proceso
-	// lo mismo con los marcos que se pidan para inificar el heapMetaData
-
-	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
-	t_marco* marco;
-	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
-	t_entrada_tp *entrada_tp = mi_carpincho->tabla_paginas[nro_pagina];
-	if(entrada_tp->id_carpincho == id_carpincho && entrada_tp->nro_pagina == nro_pagina) {
-		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
-		reservar_marco(marco);
-	}
-
-	else {
-		// Page fault
-		marco = realizar_algoritmo_reemplazo(id_carpincho);
-		reasignar_marco(id_carpincho, nro_pagina, marco);
-	}
-	return marco;
-}
-
-t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
-	bool mi_carpincho(void *un_carpincho) {
-		if(((t_carpincho *)un_carpincho)->id == id_carpincho)
-			return true;
-		else
-			return false;
-	}
-
-	return list_find(lista_carpinchos, mi_carpincho);
-}
-
-bool get_isFree(uint32_t id, uint32_t inicio_heap) {
-	uint8_t bit_esFree;
-	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
-
-	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(&bit_esFree, inicio_memoria(marco->nro_real, posicion_compuesta.quot), 1);
-	soltar_marco(marco);
-
-	if(bit_esFree)	return true;
-	else			return false;
-}
-
-void set_isFree(uint32_t id, uint32_t inicio_heap) {
-	uint8_t bit_esFree = 1;
-	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
-
-	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(inicio_memoria(marco->nro_real, &bit_esFree, posicion_compuesta.quot), 1);
-	soltar_marco(marco);
-}
-
-void reset_isFree(uint32_t id, uint32_t inicio_heap) {
-	uint8_t bit_esFree = 0;
-	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
-
-	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(inicio_memoria(marco->nro_real, &bit_esFree, posicion_compuesta.quot), 1);
-	soltar_marco(marco);
-}
-
-uint32_t get_prevAlloc(uint32_t id, uint32_t inicio_heap) {
-	uint32_t pos_alloc;
-	void * bloque = obtener_bloque_paginacion(id, inicio_heap, 4);
-	memcpy(&pos_alloc, bloque, 4);
-	return pos_alloc;
-}
-
-uint32_t get_nextAlloc(uint32_t id, uint32_t inicio_heap) {
-	uint32_t pos_alloc;
-	void * bloque = obtener_bloque_paginacion(id, inicio_heap + 4, 4);
-	memcpy(&pos_alloc, bloque, 4);
-	return pos_alloc;
-}
-
-void set_prevAlloc(uint32_t id, uint32_t inicio_heap, uint32_t nuevo_valor) {
-	uint32_t data = nuevo_valor;
-	actualizar_bloque_paginacion(id, inicio_heap, &data, 4);
-}
-
-void set_nextAlloc(uint32_t id, uint32_t inicio_heap, uint32_t nuevo_valor) {
-	uint32_t data = nuevo_valor;
-	actualizar_bloque_paginacion(id, inicio_heap + 4, &data, 4);
-}
-
-void soltar_marco(t_marco *marco_auxiliar) {
-	pthread_mutex_unlock(&marco_auxiliar->mutex);
-}
-
-void reservar_marco(t_marco *marco_auxiliar) {
-	pthread_mutex_lock(&marco_auxiliar->mutex);
-}
-
-void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t tamanio) {
-	t_carpincho* mi_carpincho = (t_carpincho *)list_get(lista_carpinchos, id - 1);
-
-	div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
-
-	uint32_t bytes_cargados = 0;
-	uint32_t bytes_disponibles = config_memoria.tamanio_pagina - posicion_compuesta.rem;
-	uint32_t pagina_actual = posicion_compuesta.quot;
-	uint32_t bytes_necesarios = tamanio;
-
-	void* data = malloc(tamanio);
-
-	uint32_t inicio_pagina = posicion_compuesta.rem;
-	while(bytes_cargados < bytes_necesarios) {
-		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
-			bytes_disponibles = bytes_necesarios - bytes_cargados;
-
-		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
-		memcpy(data, inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), bytes_disponibles);
-		actualizar_info_algoritmo(marco_auxiliar, true);
-		soltar_marco(marco_auxiliar);
-
-		// log_warning(logger, "Incorpore marco. Obtengo dato paginacion");
-		// log_info(logger, "Data: %d", obtener_entero_paginacion(id_patota, desplazamiento));
-
-		bytes_cargados += bytes_disponibles;
-		bytes_disponibles = config_memoria.tamanio_pagina;
-		inicio_pagina = 0;
-		pagina_actual++;
-	}
-    return data;
-}
-
-void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio) {
-	t_carpincho* mi_carpincho = (t_carpincho *)list_get(lista_carpinchos, id - 1);
-
-    div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
-
-	uint32_t bytes_cargados = 0;
-	uint32_t bytes_disponibles = config_memoria.tamanio_pagina - posicion_compuesta.rem;
-	uint32_t pagina_actual = posicion_compuesta.quot;
-	uint32_t bytes_necesarios = tamanio;
-
-	uint32_t inicio_pagina = posicion_compuesta.rem;
-	while(bytes_cargados < bytes_necesarios) {
-		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
-			bytes_disponibles = bytes_necesarios - bytes_cargados;
-
-		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
-		memcpy(inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), &data, bytes_disponibles);
-		actualizar_info_algoritmo(marco_auxiliar);
-		soltar_marco(marco_auxiliar);
-
-		// log_warning(logger, "Incorpore marco. Obtengo dato paginacion");
-		// log_info(logger, "Data: %d", obtener_entero_paginacion(id_patota, desplazamiento));
-
-		bytes_cargados += bytes_disponibles;
-		bytes_disponibles = config_memoria.tamanio_pagina;
-		inicio_pagina = 0;
-		pagina_actual++;
-	}
-}
-
-void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco) {
-	// actualizar_tp();
-	t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
-	t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
-
-	pthread_mutex_lock(&marco->mutex);
-	if(id_carpincho) {
-		// enviar pagina a swamp
-		swap_out(viejo_carpincho->id, nro_pagina);
-		viejo_carpincho->tabla_paginas[marco->pagina_duenio] = NULL; // ??
-	}
-
-	// nuevo_carpincho->tabla_paginas[nro_pagina] debería ser NULL al no estar asignado
-	nuevo_carpincho->tabla_paginas[nro_pagina] = marco;
-	marco->duenio = id_carpincho;
-	marco->pagina_duenio = nro_pagina;
-	marco->bit_modificado = false;
-	marco->bit_uso = true;
-
-	// pedir pagina a swap
-	void * buffer = swap_in(id_carpincho, nro_pagina);
-	memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-	pthread_mutex_lock(&marco->mutex);
-
-	//actualizar_tlb();
-}
-
-void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
-	return memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
-}
+*/
 

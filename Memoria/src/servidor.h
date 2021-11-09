@@ -2,6 +2,7 @@
 #define _SERVIDOR_H_
 
 #include "carpincho.h"
+#include "memoria.h"
 #include "swap.h"
 #include <stdbool.h>
 
