@@ -41,6 +41,11 @@ detectar_deadlock(t_deadlock* deadlock){
 
 int algoritmo_deteccion(t_deadlock* deadlock){
     int deadlock_detectado;
+
+    foreach carpinchosAEvaluar {not.tieneEsperaCircular(carpincho) -> carpinchosAEvaluar.quitarCarpincho(carpincho)};
+    
+    
+
     //TODO
     return deadlock_detectado;
 }
