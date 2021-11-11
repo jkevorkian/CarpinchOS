@@ -1,14 +1,9 @@
 #include "memoria.h"
 
 int main(void) {
-<<<<<<< HEAD
-	t_config* config = config_create("miramhq.config");
-	// t_log* logger = log_create("miramhq.log", "MEMORIA", 1, LOG_LEVEL_INFO);
-=======
 	logger = iniciar_logger();
 	config = iniciar_config();
 	lista_carpinchos = list_create();
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
 
 	/* if(!iniciar_memoria(config)) {
 		log_info(logger, "FALLO EN EL ARCHIVO DE CONFIGURACIÓN");
@@ -24,8 +19,6 @@ int main(void) {
 	exit(1);
 }
 
-<<<<<<< HEAD
-=======
 uint32_t cant_frames_necesarios(uint32_t tamanio) {
 	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina); 
 	uint32_t nro_frames_q = nro_frames.quot;
@@ -94,31 +87,33 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco){
 		return pagina;
 }
 
-t_marco* obtener_marco_libre() {
-    for(int i = 0; i < config_memoria.cant_marcos; i++) {
-        t_marco* marco = memoria_ram.mapa_fisico[i];
-		if (marco->libre) {
-			marco->libre = false; //mutex
-			return marco; 
-		}
-    }
-	return NULL;
-}
-
 
 bool iniciar_memoria(t_config* config){
 	config_memoria.tamanio_memoria = config_get_int_value(config, "TAMANIO");
 	config_memoria.tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
 
-	config_memoria.cant_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+bool iniciar_memoria(t_config* config){
+	config_memoria.tamanio_memoria = config_get_int_value(config, "TAMANIO");
+	config_memoria.tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
+	
+	if(config_memoria.tamanio_memoria % config_memoria.tamanio_pagina > 0) {
+        log_error(logger, "Hubo un error al crear la memoria.");
+        return false;
+    }
 
-	if(config_memoria.tamanio_memoria % config_memoria.tamanio_pagina > 0)
-		return false;
+    memoria_ram.inicio = (void*) malloc(config_memoria.tamanio_memoria);   
+    if (memoria_ram.inicio == NULL) {
+        log_error(logger, "Hubo un error al crear la memoria.");
+        return false;
+    }
+
+	memset(memoria_ram.inicio, 0, config_memoria.tamanio_memoria);
+
+	config_memoria.cant_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+	memoria_ram.mapa_fisico = calloc(config_memoria.cant_marcos, config_memoria.tamanio_pagina);
 	
 	log_info(logger, "Estoy en paginación, con entrada valida. Nro marcos: %d. Tamaño marco: %d bytes", config_memoria.cant_marcos, config_memoria.tamanio_pagina);
 	
-	memoria_ram.mapa_fisico = calloc(config_memoria.cant_marcos, config_memoria.tamanio_pagina);
-
 	char * algoritmo_reemplazo_mmu = config_get_string_value(config, "ALGORITMO_REEMPLAZO_MMU");
 	if(!strcmp(algoritmo_reemplazo_mmu, "LRU"))
 		config_memoria.algoritmo_reemplazo = LRU;
@@ -150,44 +145,49 @@ void iniciar_marcos(uint32_t cant_marcos){
 	}
 }
 
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
-void signal_handler_1(int sig) {
+t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
+	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+	list_add(carpincho->tabla_paginas, pagina);
 
+	pagina->nro_marco = nro_marco;
+	pagina->presencia = true;
+	pagina->modificado = false;
+	pagina->uso = true;
+
+	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
+	log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
+
+	return pagina;
 }
 
-void signal_handler_2(int sig) {
-
+uint32_t cant_frames_necesarios(uint32_t tamanio) {
+	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina);
+	uint32_t nro_frames_q = nro_frames.quot;
+	if(nro_frames.rem > 0) nro_frames_q++;
+	return nro_frames_q;
 }
 
-void signal_handler_3(int sig) {
-
-}
-<<<<<<< HEAD
-=======
-
-t_log* iniciar_logger(void) {
-	t_log* nuevo_logger;
-
-	nuevo_logger = log_create("memoria.log", "memoria", 1, LOG_LEVEL_DEBUG);
-	if (nuevo_logger == NULL)
-		printf("Falla en la creación del Logger");
-
-	return nuevo_logger;
+uint32_t pagina_segun_posicion(uint32_t posicion) {
+	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
+	return div_posicion.quot;
 }
 
-t_config* iniciar_config(void) {
-	t_config* nuevo_config;
-
-	nuevo_config = config_create("memoria.config");
-
-	return nuevo_config;
+uint32_t offset_segun_posicion(uint32_t posicion) {
+	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
+	return div_posicion.rem;
 }
 
-void terminar_programa(t_log* logger, t_config* config) {
-	if (logger != NULL)
-		log_destroy(logger);
-	if (config != NULL)
-		config_destroy(config);
+t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
+	bool mi_carpincho(void *un_carpincho) {
+		if(((t_carpincho *)un_carpincho)->id == id_carpincho)
+			return true;
+		else
+			return false;
+	}
 
+	return list_find(lista_carpinchos, mi_carpincho);
 }
->>>>>>> 6c0d826f3802c0cb7bad2a60716508bb6a355d32
+
+void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
+	return memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
+}

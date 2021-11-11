@@ -7,6 +7,7 @@ t_marco *marco_viejo(t_marco *marco1, t_marco *marco2);
 uint32_t obtener_tiempo(char tipo, t_marco *marco);
 
 t_movimiento *obtener_movimiento();
+
 void hacer_swap_in(int socket, t_movimiento *mov);
 void hacer_swap_out(int socket, t_movimiento *mov);
 
@@ -151,7 +152,7 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho) {
 		marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
 	if(config_memoria.algoritmo_reemplazo == CLOCK)
 		marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
-
+	reservar_marco(marco_a_reemplazar);
 	return marco_a_reemplazar;
 }
 
@@ -166,12 +167,15 @@ t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
 	uint32_t nro_marcos = config_memoria.cant_marcos;
 	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
 	uint32_t nro_marcos_encontrados = 0;
-	for(int i = 0; nro_marcos > nro_marcos_encontrados; i++) {
+	uint32_t marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina - 1;
+	for(int i = 0; nro_marcos > nro_marcos_encontrados && nro_marcos > marcos_memoria; i++) {
 		if(memoria_ram.mapa_fisico[i]->nro_real == id_carpincho) {
 			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
 			nro_marcos_encontrados++;
 		}
 	}
+	if(nro_marcos_encontrados < nro_marcos)
+		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos_encontrados);
 	return marcos_proceso;
 }
 
@@ -214,4 +218,16 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 	}
 
 	return atoi(tiempo);
+}
+
+void suspend(uint32_t id) {
+	t_marco **lista_marcos = obtener_marcos_proceso(id);
+	t_marco *aux = lista_marcos[0];
+	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
+
+	for(int i = 0; i < cant_marcos; i++) {
+		void *buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
+	}
 }
