@@ -9,6 +9,7 @@ int main() {
 	//proceso de recepcion de los mate_init
 	while(seguir) {
 		log_info(logger, "Kernel esperando algun carpincho");
+
 		int socket_auxiliar_carpincho = esperar_cliente(socket_kernel); // Espero a que llegue un nuevo carpincho
 
 		if(socket_auxiliar_carpincho < 0) {
@@ -26,11 +27,11 @@ int main() {
 			nuevo_carpincho->rafaga_real_anterior = 0;
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 			nuevo_carpincho->id = id_proximo_carpincho;
+			nuevo_carpincho->esta_suspendido = false;
+			nuevo_carpincho->responder = false;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
-
-			//log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
 		}
 	}
 
