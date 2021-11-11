@@ -31,7 +31,7 @@ void iniciar_servidor(char *ip, int puerto) {
 
 		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
 		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
-		data_socket(socket, logger);
+		data_socket(info_carpincho->socket, logger);
 		info_carpincho->id = id;
 		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 

@@ -105,6 +105,17 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
     return false;
 }
 
+t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t id) {
+	pthread_mutex_lock(&memoria_ram.mutex_mapa);	// no se si hace falta
+	t_marco* marco_nuevo = memoria_ram.mapa_fisico[nro_marco];
+	pthread_mutex_unlock(&memoria_ram.mutex_mapa);
+	
+	// mutex ?
+	marco_nuevo->duenio = id;
+	marco_nuevo->pagina_duenio = nro_marco;
+    marco_nuevo->libre = false;				// to remove o cambiar lo de duenio
 
-
+	return marco_nuevo;
+}
+	
 

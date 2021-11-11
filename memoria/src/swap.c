@@ -222,7 +222,6 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 
 void suspend(uint32_t id) {
 	t_marco **lista_marcos = obtener_marcos_proceso(id);
-	t_marco *aux = lista_marcos[0];
 	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
 
 	for(int i = 0; i < cant_marcos; i++) {

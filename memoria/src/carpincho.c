@@ -91,7 +91,7 @@ bool asignacion_fija(t_carpincho* carpincho) {
 
 	if(tengo_marcos_suficientes(cant_marcos)){
 		for(int i = 0; i < cant_marcos; i++){
-			    t_marco* marco = obtener_marco_libre();
+			    t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
 			    crear_nueva_pagina(marco->nro_real, carpincho);
 		}
 
