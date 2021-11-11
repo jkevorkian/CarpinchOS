@@ -34,6 +34,12 @@
 #define TAMANIO_HEAP 9
 #define HEAP_NULL 0xFFFFFFFF
 
+///////// temporal
+// t_log* logger;
+
+
+//////////////////
+
 typedef struct {
     uint32_t tamanio_memoria;
     uint32_t tamanio_pagina;

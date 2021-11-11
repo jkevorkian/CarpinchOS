@@ -54,18 +54,18 @@ void iniciar_marcos(uint32_t cant_marcos){
 }
 
 t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
-		t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-		list_add(carpincho->tabla_paginas, pagina);
-		
-		pagina->nro_marco = nro_marco;
-		pagina->presencia = true; 
-		pagina->modificado = false;
-        pagina->uso = true;
+	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+	list_add(carpincho->tabla_paginas, pagina);
 
-		log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
-		log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
+	pagina->nro_marco = nro_marco;
+	pagina->presencia = true;
+	pagina->modificado = false;
+	pagina->uso = true;
 
-		return pagina;
+	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
+	log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
+
+	return pagina;
 }
 
 uint32_t cant_frames_necesarios(uint32_t tamanio) {

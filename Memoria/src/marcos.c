@@ -1,24 +1,21 @@
 #include "marcos.h"
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
-	// el marco hay que reservarlo para que no lo saquen a memoria secundaria
-	// durante el proceso
 	// lo mismo con los marcos que se pidan para inificar el heapMetaData
 
 	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 	t_marco* marco;
 	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
-	// t_entrada_tp *entrada_tp = mi_carpincho->tabla_paginas[nro_pagina];
-	//if(entrada_tp->id_carpincho == id_carpincho && entrada_tp->nro_pagina == nro_pagina) {
-	//	marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
-	//	reservar_marco(marco);
-	//}
-
-	//else {
+	t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+	if(entrada_tp->id_carpincho == id_carpincho && entrada_tp->nro_pagina == nro_pagina) {
+		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
+		reservar_marco(marco);
+	}
+	else {
 		// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho);
 		reasignar_marco(id_carpincho, nro_pagina, marco);
-	// }
+	 }
 	return marco;
 }
 
@@ -34,8 +31,8 @@ void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
 
 void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco) {
 	// actualizar_tp();
-	// t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
-	// t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
+	t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
+	t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
 
 	pthread_mutex_lock(&marco->mutex);
 	if(id_carpincho) {

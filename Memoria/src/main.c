@@ -16,8 +16,10 @@ int main(void) {
 	signal(SIGUSR2, &signal_handler_2);
 	signal(SIGINT,  &signal_handler_3);
 
-	//iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
-	//iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
+	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
+	iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
+
+	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_int_value(config, "PUERTO_SWAP"));
 
 	terminar_programa(logger, config);
 	exit(1);
