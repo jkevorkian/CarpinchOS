@@ -51,7 +51,7 @@ imprimir_tabla(tabla_paginas);
 	leer_archivo(particiones[1],11);
 
 	printf("El tamanio disponible en 1 es %d \n",espacio_disponible[0]);
-	printf("El tamanio disponible en 2 es %d \n",espacio_disponible[1]);
+	printf("El tamanio disponible en 2 es %d  \n",espacio_disponible[1]);
 
 	guardar_pagina_en_memoria("Hola Juan Carlos, soy el espiritu, como estas chupa pija 12345678",0,particiones[0]);
 	leer_pagina(particiones[0],0);
