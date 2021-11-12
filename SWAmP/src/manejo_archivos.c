@@ -1,4 +1,4 @@
-#include "swamp.h"
+#include "manejo_archivos.h"
 
 void* crear_archivo(char* DIR_archivo){
 

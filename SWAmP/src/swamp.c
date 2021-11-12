@@ -16,22 +16,46 @@ int main(){
 
 	remove("/home/utnso/SWAmP_files/swap2.bin");
 	remove("/home/utnso/SWAmP_files/swap1.bin");
+
 	int file_amount = cantidad_archivos;
-	t_particion particiones[cantidad_archivos];
+	void** particiones = malloc(cantidad_archivos * sizeof(void*));
+	int* espacio_disponible = malloc(cantidad_archivos * sizeof(int));
 	int aux = 0;
+
+	char tabla_paginas[3][cantidad_total_paginas];
+	crear_tabla(tabla_paginas);
+
 	while(file_amount > 0){
 		log_info(logger, "Generando Particiones");
 		printf("El Path del archivo es %s \n",file_locations[file_amount-1]);
-		//particiones[aux] = crear_particion((file_locations[file_amount-1]),aux);
-			char*temp = crear_archivo(file_locations[file_amount-1]);
-			//escribir_archivo(temp,16,"Hola Juan Carlos");
+			void* temp = crear_archivo(file_locations[file_amount-1]);
+			escribir_archivo(temp,16,"Hola Juan Carlos");
 			//leer_archivo(temp,15);
 			//vaciar_archivo(temp,7);
 			//leer_archivo(temp,20);
+			particiones[aux] = temp;
+			espacio_disponible[aux] = particion_size;
+			cargar_particion_en_tabla(tabla_paginas, aux);
 		file_amount--;
 		aux++;
 	}
-	log_info(logger, "Particiones creadas correctamente");
+	cargar_pagina_en_tabla(tabla_paginas,1,0,5);
+	cargar_pagina_en_tabla(tabla_paginas,0,1,9);
+	cargar_pagina_en_tabla(tabla_paginas,1,0,7);
+	cargar_pagina_en_tabla(tabla_paginas,0,1,6);
+	cargar_pagina_en_tabla(tabla_paginas,0,1,1);
+
+imprimir_tabla(tabla_paginas);
+
+	leer_archivo(particiones[0],15);
+	leer_archivo(particiones[1],11);
+
+	printf("El tamanio disponible en 1 es %d \n",espacio_disponible[0]);
+	printf("El tamanio disponible en 2 es %d \n",espacio_disponible[1]);
+
+	guardar_pagina_en_memoria("Hola Juan Carlos, soy el espiritu, como estas chupa pija 12345678",0,particiones[0]);
+	leer_pagina(particiones[0],0);
+
 
 //-------------------------------------Conexiones-------------------------------------
 /*	int server_fd = crear_conexion_servidor(ip_swamp, config_get_int_value(config, "PUERTO"), 1);
@@ -77,36 +101,17 @@ int main(){
 	log_info(logger, "Finalizando SWAmP");
 }
 
-t_particion crear_particion(char* DIR_archivo, int numero_particion){
-	log_info(logger, "Creando Particion %d...",numero_particion);
-	char* particion_new = crear_archivo(DIR_archivo);
-	char tabla_new[paginas_por_particion];
-	t_particion new;
-	crear_tabla_particion(tabla_new);
-	new.id = numero_particion,
-	new.particion = particion_new,
-	new.tabla_paginas = tabla_new;
-	log_info(logger, "Particion creada");
-	return new;
+
+
+char itoc(int numero){
+	return numero + '0';
 }
 
 
-void crear_tabla_marcos(char* tabla_global){ //va a guardar el estado (ocupados o desocupados) de los marcos a nivel global
-	//char tabla_global[cantidad_total_paginas];
-	for(int i = 0; i < cantidad_total_paginas; i++){
-		tabla_global[i] = '0'; //inician todas los marcos desocupados (en 0)
-	}
-}
-void crear_tabla_particion(char* tabla_particion){ //guarda los numeros de pagina guardadas en cada marco de cada archivo, se crea 1 por archivo
-	for(int i = 0; i < cantidad_total_paginas; i++){
-			tabla_particion[i] = '\0'; //inician todas los marcos desocupados
-			//printf("%d\n",i);
-		}
-}
-void ocupar_marco(char* tabla_global, char* tabla_particion,int numero_marco, int numero_pagina){
-	tabla_particion[numero_marco] = numero_pagina;
-	tabla_global[numero_marco] = '1';
-}
+
+
+
+
 /*
 void crear_archivo(char* DIR_archivo){
 
