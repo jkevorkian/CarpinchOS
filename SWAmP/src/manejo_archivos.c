@@ -58,4 +58,12 @@ void vaciar_archivo(void* particion,int cantidad_caracteres){
 	}
 
 }
-
+int obtener_n_particion(void** partiones, void* particion){
+	int i;
+	for(i = 0; i < cantidad_archivos; i++){
+		if(partiones[i] == particion){
+			return i;
+		}
+	}
+	return -1;
+}

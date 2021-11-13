@@ -8,5 +8,6 @@ void rellenar_archivo(void* particion);
 void escribir_archivo(void* particion, int largo, char* mensaje);
 void leer_archivo(void* particion,int cantidad_caracteres);
 void vaciar_archivo(void* particion,int cantidad_caracteres);
+int obtener_n_particion(void** partiones, void* particion);
 
 #endif /* SRC_MANEJO_ARCHIVOS_H_ */

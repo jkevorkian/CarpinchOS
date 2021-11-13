@@ -5,37 +5,29 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <math.h>
 
 #include "global.h"
 #include "utilidades.h"
 #include "manejo_archivos.h"
 #include "manejo_paginas.h"
+#include "manejo_carpinchos.h"
 
 char** file_locations;
 int swamp_size;
 int particion_size;
 int pagina_size;
 int cantidad_archivos;
-
-
+int marcos_maximos;
 char* ip_swamp;
-
+int* espacio_disponible;
 
 t_log* logger;
 t_config* config;
-typedef struct{
-	int id;
-	void* particion;
-	char* tabla_paginas;
-	//carpinchos?
-}t_particion;
-
-t_particion crear_particion(char* DIR_archivo, int numero_particion);
-
 
 
 char itoc(int numero);
-
+void* algoritmo_de_particiones(void** particiones, int* espacio_disponible);
 
 #define ERROR_CONEXION -1
 
