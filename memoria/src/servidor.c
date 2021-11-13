@@ -14,7 +14,6 @@ void iniciar_servidor(char *ip, int puerto) {
 	int fd_carpincho;
 	while(seguir) {
 		log_info(logger, "Espero a que llegue un nuevo carpincho");
-		// Espero a que llegue un nuevo carpincho
 		fd_carpincho = esperar_cliente(server_fd);
 		if(fd_carpincho < 0) {
 			log_info(logger, "Muero esperando cliente");
@@ -24,16 +23,16 @@ void iniciar_servidor(char *ip, int puerto) {
 
 		log_info(logger, "Creo un nuevo carpincho");
 		crear_carpincho(id);
-		// puede_iniciar() hay_memoria_suficiente()
+
 		// Creo un hilo para que el carpincho se comunique de forma particular
-		// pthread_t nuevo_carpincho;
+		pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));
 
 		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
 		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
 		data_socket(info_carpincho->socket, logger);
 		info_carpincho->id = id;
-		// pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
+		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 
 		log_info(logger, "Comunico al caprincho %d el nuevo puerto con el cual se debe comunicar.", id);
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
@@ -45,8 +44,9 @@ void iniciar_servidor(char *ip, int puerto) {
 		close(fd_carpincho);
 		id++;
 
-		rutina_test_carpincho(info_carpincho);
-		exit(1);
+		// para testear o debuggear en un hilo
+		// rutina_test_carpincho(info_carpincho);
+		// exit(1);
 	}
 
 }
