@@ -24,6 +24,6 @@ void soltar_marco(t_marco *marco_auxiliar);
 void reservar_marco(t_marco *marco_auxiliar);
 
 t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t);
-t_entrada_tp2* crear_nueva_pagina(uint32_t, t_carpincho*);		// REVISAR
+t_entrada_tp* crear_nueva_pagina(uint32_t, t_carpincho*);		// REVISAR
 
 #endif /* _MARCOS_H_ */

@@ -53,19 +53,9 @@ typedef struct {
 } t_memoria_ram;
 
 typedef struct {
-	uint32_t id_carpincho;
-    uint32_t nro_pagina;
-    uint32_t nro_marco;
-    bool presencia;
-    bool uso;
-    bool modificado;
-    uint32_t tiempo;
-} t_entrada_tp;
-
-typedef struct {
 	bool presencia;		// demuestra que está actualizada la entrada
 	uint32_t nro_marco;
-} t_entrada_tp2;
+} t_entrada_tp;
 
 typedef struct {
     uint32_t id;

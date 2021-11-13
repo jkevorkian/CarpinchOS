@@ -26,7 +26,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		crear_carpincho(id);
 		// puede_iniciar() hay_memoria_suficiente()
 		// Creo un hilo para que el carpincho se comunique de forma particular
-		pthread_t nuevo_carpincho;
+		// pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));
 
 		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO

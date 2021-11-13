@@ -177,5 +177,4 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			break;
 		}
 	}
-
 }

@@ -7,7 +7,7 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_marco* marco;
 	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
 	// t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
-	t_entrada_tp2 *entrada_tp = (t_entrada_tp2 *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+	t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
@@ -55,6 +55,9 @@ void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco)
 	// pthread_mutex_lock(&marco->mutex);
 
 	//actualizar_tlb();
+
+
+	// Actualizar tabla de paginas del que perdio el marco
 }
 
 void soltar_marco(t_marco *marco_auxiliar) {
@@ -118,23 +121,14 @@ t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t id) {
 
 	return marco_nuevo;
 }
-	
-t_entrada_tp2* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
-	/*
+
+t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
 	list_add(carpincho->tabla_paginas, pagina);
+	pagina->nro_marco = nro_marco;
+	pagina->presencia = true;
 
-	pagina->id_carpincho = carpincho->id;
-	pagina->nro_marco = nro_marco;
-	pagina->presencia = true;
-	pagina->modificado = false;
-	pagina->uso = true;
-	*/
-	t_entrada_tp2* pagina = malloc(sizeof(t_entrada_tp2));
-	list_add(carpincho->tabla_paginas, pagina);
-	pagina->nro_marco = nro_marco;
-	pagina->presencia = true;
-	// -> Esto agregaría yo
+	// -> Esto agregaría yo, si el marco está en memoria
 	t_marco* marco_nuevo = asignar_marco_libre(nro_marco, carpincho->id);
 	marco_nuevo->pagina_duenio = list_size(carpincho->tabla_paginas) - 1;
 	// <- */
