@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct{
 	uint32_t duenio;		// 0 si está libre
-	uint32_t pagina_duenio;
+	uint32_t pagina_duenio;	// sirve para poder modificar la tabla de paginas del proceso, marcando presencia en false
 	uint32_t nro_real;
     bool libre;				// to remove o cambiar lo de duenio
     bool bit_uso;
@@ -55,13 +55,17 @@ typedef struct {
 typedef struct {
 	uint32_t id_carpincho;
     uint32_t nro_pagina;
-    uint32_t nro_marco;    
+    uint32_t nro_marco;
     bool presencia;
     bool uso;
     bool modificado;
     uint32_t tiempo;
 } t_entrada_tp;
 
+typedef struct {
+	bool presencia;		// demuestra que está actualizada la entrada
+	uint32_t nro_marco;
+} t_entrada_tp2;
 
 typedef struct {
     uint32_t id;
@@ -84,8 +88,6 @@ void*			inicio_memoria(uint32_t nro_marco, uint32_t offset);
 
 bool			iniciar_memoria(t_config*);
 void		    iniciar_marcos(uint32_t);
-
-t_entrada_tp*	crear_nueva_pagina(uint32_t, t_carpincho*);		// REVISAR
 
 uint32_t		pagina_segun_posicion(uint32_t posicion);
 uint32_t		offset_segun_posicion(uint32_t posicion);

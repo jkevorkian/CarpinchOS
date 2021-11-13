@@ -33,7 +33,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
 		data_socket(info_carpincho->socket, logger);
 		info_carpincho->id = id;
-		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
+		// pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 
 		log_info(logger, "Comunico al caprincho %d el nuevo puerto con el cual se debe comunicar.", id);
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
@@ -44,6 +44,9 @@ void iniciar_servidor(char *ip, int puerto) {
 		// Elimino la conexión auxiliar con el carpincho
 		close(fd_carpincho);
 		id++;
+
+		rutina_test_carpincho(info_carpincho);
+		exit(1);
 	}
 
 }

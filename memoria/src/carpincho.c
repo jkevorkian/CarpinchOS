@@ -105,3 +105,77 @@ bool asignacion_global(t_carpincho* carpincho) {
 	return false;
 }
 
+void rutina_test_carpincho(data_carpincho *info_carpincho) {
+	log_info(logger, "Nace un nuevo carpincho");
+	bool seguir = true;
+	data_carpincho* carpincho = (data_carpincho *)info_carpincho;
+	int socket = esperar_cliente(carpincho->socket);
+	close(carpincho->socket);
+	data_socket(socket, logger);
+
+	t_list *mensaje_in;
+	t_mensaje* mensaje_out;
+	uint32_t desplazamiento_d;
+	char* marioneta;
+	uint32_t tamanio_mensaje;
+
+	while(seguir) {
+		mensaje_in = recibir_mensaje(socket);
+
+		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
+		case MEM_ALLOC:
+
+			mensaje_out = crear_mensaje(MEM_ALLOC);
+			agregar_a_mensaje(mensaje_out, "%d", 0);
+			enviar_mensaje(socket, mensaje_out);
+			break;
+		case MEM_FREE:
+			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
+			// mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
+
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
+			break;
+		case MEM_READ:
+			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
+
+			mensaje_out = crear_mensaje(DATA);
+			log_info(logger, "Creo mensaje");
+			agregar_a_mensaje(mensaje_out, "%s", "Luke, yo soy tu padre");
+			enviar_mensaje(socket, mensaje_out);
+			log_info(logger, "Envío mensaje");
+			break;
+		case MEM_WRITE:
+			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
+			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
+			marioneta = (char *)list_get(mensaje_in, 2);
+			tamanio_mensaje = strlen(marioneta);
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
+
+			actualizar_bloque_paginacion(carpincho->id, desplazamiento_d, marioneta, strlen(marioneta));
+			marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, strlen(marioneta));
+
+			// Hago esto para que se pase como string porque si lo paso como stream (sin /0) me puede inventar fruta.
+			// Esto solo hace falta en el mem_read
+			char final = '\0';
+			memcpy(marioneta + tamanio_mensaje, &final, 1);
+
+			log_info(logger, "Escribí: %s", marioneta);
+			free(marioneta);
+
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
+			// mem_write(id_carpincho, dir_logica, data);
+			break;
+		case SUSPEND:
+			// ...;
+			break;
+		case MATE_CLOSE:
+		default:
+			seguir = false;
+			log_info(logger, "Murio el carpincho, nos vemos.");
+			break;
+		}
+	}
+
+}

@@ -12,13 +12,20 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 
 	void* data = malloc(tamanio);
 
+	/////////////////////// Para testear
+	void* inicio;
+	///////////////////////
+
 	uint32_t inicio_pagina = posicion_compuesta.rem;
 	while(bytes_cargados < bytes_necesarios) {
 		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
 			bytes_disponibles = bytes_necesarios - bytes_cargados;
 
 		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
-		memcpy(data, inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), bytes_disponibles);
+		inicio = inicio_memoria(marco_auxiliar->nro_real, inicio_pagina);
+
+		memcpy(data + bytes_cargados, inicio, bytes_disponibles);
+
 		actualizar_info_algoritmo(marco_auxiliar, false);
 		soltar_marco(marco_auxiliar);
 
@@ -30,6 +37,7 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 		inicio_pagina = 0;
 		pagina_actual++;
 	}
+	log_info(logger, "Inscribo %s", data);
     return data;
 }
 
@@ -43,13 +51,19 @@ void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* da
 	uint32_t pagina_actual = posicion_compuesta.quot;
 	uint32_t bytes_necesarios = tamanio;
 
+	/////////////////////// Para testear
+	void* inicio;
+	///////////////////////
+
 	uint32_t inicio_pagina = posicion_compuesta.rem;
 	while(bytes_cargados < bytes_necesarios) {
 		if(bytes_disponibles > bytes_necesarios - bytes_cargados)
 			bytes_disponibles = bytes_necesarios - bytes_cargados;
 
 		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
-		memcpy(inicio_memoria(marco_auxiliar->nro_real, inicio_pagina), &data, bytes_disponibles);
+		inicio = inicio_memoria(marco_auxiliar->nro_real, inicio_pagina);
+		memcpy(inicio, data + bytes_cargados, bytes_disponibles);
+
 		actualizar_info_algoritmo(marco_auxiliar, true);
 		soltar_marco(marco_auxiliar);
 

@@ -24,6 +24,7 @@ t_carpincho* 	crear_carpincho(uint32_t);
 bool 			asignacion_fija(t_carpincho*);
 bool 			asignacion_global(t_carpincho*);
 
+void rutina_test_carpincho(data_carpincho *info_carpincho);
 
 #endif /* _CARPINCHO_H_ */
 

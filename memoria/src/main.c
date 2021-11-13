@@ -17,9 +17,10 @@ int main(void) {
 	signal(SIGINT,  &signal_handler_3);
 
 	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
-	iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
-
-	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_int_value(config, "PUERTO_SWAP"));
+	// iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
+	char* ip = config_get_string_value(config, "IP");
+	int puerto = config_get_int_value(config, "PUERTO");
+	iniciar_servidor(ip, puerto);
 
 	terminar_programa(logger, config);
 	exit(1);

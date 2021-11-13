@@ -53,26 +53,6 @@ void iniciar_marcos(uint32_t cant_marcos){
 	}
 }
 
-t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
-	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-	list_add(carpincho->tabla_paginas, pagina);
-
-	pagina->nro_marco = nro_marco;
-	pagina->presencia = true;
-	pagina->modificado = false;
-	pagina->uso = true;
-
-	/* -> Esto agregaría yo
-	t_marco* marco_nuevo = asignar_marco_libre(uint32_t nro_marco, uint32_t id);
-	marco_nuevo->pagina_duenio;
-	<- */
-	
-	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
-	log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
-
-	return pagina;
-}
-
 uint32_t cant_frames_necesarios(uint32_t tamanio) {
 	div_t nro_frames = div(tamanio, config_memoria.tamanio_pagina);
 	uint32_t nro_frames_q = nro_frames.quot;
@@ -102,6 +82,5 @@ t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
 }
 
 void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
-	void *inicio = memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
-	return inicio;
+	return memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
 }

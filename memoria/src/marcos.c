@@ -6,8 +6,9 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 	t_marco* marco;
 	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
-	t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
-	if(entrada_tp->id_carpincho == id_carpincho && entrada_tp->nro_pagina == nro_pagina) {
+	// t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+	t_entrada_tp2 *entrada_tp = (t_entrada_tp2 *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
 	}
@@ -31,8 +32,8 @@ void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
 
 void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco) {
 	// actualizar_tp();
-	t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
-	t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
+	// t_carpincho * nuevo_carpincho = list_get(lista_carpinchos, id_carpincho - 1);
+	// t_carpincho * viejo_carpincho = list_get(lista_carpinchos, marco->duenio - 1);
 
 	pthread_mutex_lock(&marco->mutex);
 	if(id_carpincho) {
@@ -51,17 +52,17 @@ void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco)
 	// pedir pagina a swap
 	// void * buffer = swap_in(id_carpincho, nro_pagina);
 	//memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-	pthread_mutex_lock(&marco->mutex);
+	// pthread_mutex_lock(&marco->mutex);
 
 	//actualizar_tlb();
 }
 
 void soltar_marco(t_marco *marco_auxiliar) {
-	pthread_mutex_unlock(&marco_auxiliar->mutex);
+	// pthread_mutex_unlock(&marco_auxiliar->mutex);
 }
 
 void reservar_marco(t_marco *marco_auxiliar) {
-	pthread_mutex_lock(&marco_auxiliar->mutex);
+	// pthread_mutex_lock(&marco_auxiliar->mutex);
 }
 
 t_marco* obtener_marco_libre() {
@@ -118,4 +119,28 @@ t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t id) {
 	return marco_nuevo;
 }
 	
+t_entrada_tp2* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
+	/*
+	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+	list_add(carpincho->tabla_paginas, pagina);
 
+	pagina->id_carpincho = carpincho->id;
+	pagina->nro_marco = nro_marco;
+	pagina->presencia = true;
+	pagina->modificado = false;
+	pagina->uso = true;
+	*/
+	t_entrada_tp2* pagina = malloc(sizeof(t_entrada_tp2));
+	list_add(carpincho->tabla_paginas, pagina);
+	pagina->nro_marco = nro_marco;
+	pagina->presencia = true;
+	// -> Esto agregaría yo
+	t_marco* marco_nuevo = asignar_marco_libre(nro_marco, carpincho->id);
+	marco_nuevo->pagina_duenio = list_size(carpincho->tabla_paginas) - 1;
+	// <- */
+
+	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
+	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
+
+	return pagina;
+}
