@@ -84,3 +84,9 @@ t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
 void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
 	return memoria_ram.inicio + nro_marco * config_memoria.tamanio_pagina + offset;
 }
+
+void* dir_fisica_proceso(t_list* tabla_paginas) {
+    t_entrada_tp* pagina = (t_entrada_tp*) list_get(tabla_paginas, 0);
+	// TODO: obtener marco
+    return memoria_ram.inicio + pagina->nro_marco * config_memoria.tamanio_pagina;;
+}

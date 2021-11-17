@@ -41,41 +41,154 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	return true;
 }
 
-uint32_t mem_alloc(uint32_t carpincho, uint32_t tamanio) {
-	return 0;
+uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento);
+uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig);
+
+// TODO: cambiar bit modificado de pagina cuando escribo un heap metadata
+uint32_t get_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento);
+uint32_t get_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento);
+uint32_t get_is_free(t_carpincho* carpincho, uint32_t desplazamiento);
+void set_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor);
+void set_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor);
+void set_is_free(t_carpincho* carpincho, uint32_t desplazamiento, uint8_t valor);
+
+uint32_t get_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento){
+	uint32_t prev_alloc;
+	memcpy(&prev_alloc, carpincho->heap_metadata + desplazamiento, sizeof(uint32_t));
+	return prev_alloc;
 }
 
-/*
-uint32_t mem_alloc(t_carpincho* carpincho, uint32_t tamanio) {
-	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", carpincho->id, tamanio);
-	uint32_t nro_frames_asignados = 0;
-	uint32_t nro_frames_necesarios = cant_frames_necesarios(tamanio);
+uint32_t get_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento){
+	uint32_t next_alloc;
+	memcpy(&next_alloc, carpincho->heap_metadata + desplazamiento + 4, sizeof(uint32_t));
+	return next_alloc;
+}
+
+uint32_t get_is_free(t_carpincho* carpincho, uint32_t desplazamiento){
+	uint8_t is_free;
+	memcpy(&is_free, carpincho->heap_metadata + desplazamiento + 8, sizeof(uint8_t));
+	return is_free;
+}
+
+void set_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor){
+	uint32_t prev_alloc = valor;
+	memcpy(carpincho->heap_metadata + desplazamiento, &prev_alloc, sizeof(uint32_t));
+}
+
+void set_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor){
+	uint32_t next_alloc = valor;
+	memcpy(carpincho->heap_metadata + desplazamiento + 4, &next_alloc, sizeof(uint32_t));
+}
+
+void set_is_free(t_carpincho* carpincho, uint32_t desplazamiento, uint8_t valor){
+	uint8_t is_free = valor;
+	memcpy(carpincho->heap_metadata + desplazamiento + 8, &is_free, sizeof(uint8_t));
+}
+
+
+uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
+	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
+
+	uint32_t nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP);
 	uint32_t dir_logica = 0;
-
-    while(nro_frames_necesarios > nro_frames_asignados) {
-		t_marco* marco = obtener_marco_libre();
-
-		if(marco == NULL) { 
-			nuevo_marco = pedir_frame_swap(); 
-			if(nuevo_marco == NULL) { 
-				log_info(logger, "No se pudo asignar memoria");
-				return NULL;
-			}
-		};
-
-		t_entrada_tp* nueva_pagina = crear_nueva_pagina(marco->nro_real);
-		// list_add(carpincho->tabla_paginas, nueva_pagina);
-
-		// log_info(logger, "Asigno frame. Cant frames del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
-		log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", nueva_pagina->nro_marco,nueva_pagina->presencia,nueva_pagina->modificado,nueva_pagina->uso);
-		
-		nro_frames_asignados++;
+	
+	// esto esta mal porque podria tener un monton de marcos en swap
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
+		if(nro_frames_necesarios > config_get_int_value(config, "MARCOS_POR_CARPINCHO")) {
+			return 0;
+		}
 	}
 
-    t_heap_metadata* metadata = buscar_alloc_libre(carpincho->id);
+	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
 
-    dir_logica = metadata->alloc_prev + sizeof(t_heap_metadata); 
-	log_info(logger, "Direccion logica asignada: %d", dir_logica);
-	return dir_logica;
+	if(carpincho->heap_metadata == NULL) {
+		carpincho->heap_metadata = dir_fisica_proceso(carpincho->tabla_paginas);
+		dir_logica = heap_header(carpincho, tamanio, 0);
+		heap_footer(carpincho, tamanio, dir_logica + tamanio, HEAP_NULL);
+	}
+	else {
+		uint32_t desplazamiento = 0;
+		uint32_t alloc_sig;
+		uint8_t is_free;		
+
+		while(true){
+			alloc_sig = get_next_alloc(carpincho, desplazamiento);
+			is_free = get_is_free(carpincho, desplazamiento);
+			printf("desp %d free %d", desplazamiento, is_free);
+
+			if(alloc_sig == HEAP_NULL){
+				if(is_free) {
+					if (desplazamiento + 2*TAMANIO_HEAP > config_get_int_value(config, "MARCOS_POR_CARPINCHO") * config_memoria.tamanio_pagina) {
+						//no entra al final
+						//con asig global asigno pagina de cualquier marco
+						//con asig fija reemplazo de mis paginas. lo que hago seria:
+						//*el marco victima mio pasa a swap
+						//*escribo en una nueva pagina los nuevos datos usando el marco victima
+					}
+					dir_logica = heap_header(carpincho, tamanio, desplazamiento);
+					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
+					break;
+				};
+				// siempre voy a tener un metadata free al final de todo o no?
+			}
+			else {
+				if(is_free) {
+					dir_logica = heap_header(carpincho, tamanio, desplazamiento);
+
+					//no entra en ese espacio alocado, buscar otro
+					if(dir_logica == 0) {
+						desplazamiento = alloc_sig;
+						continue;
+					};
+
+					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
+					break;
+				};
+
+			desplazamiento = alloc_sig;
+
+			}
+		}
+	}	
+
+	log_info(logger, "Direccion logica asignada al carpincho #%d: %d", id_carpincho, dir_logica);
+	return dir_logica; 
 }
-*/
+
+uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento){
+	bool tiene_footer = get_next_alloc(carpincho, desplazamiento) != 0 || get_next_alloc(carpincho, desplazamiento) != HEAP_NULL;
+	uint32_t bytes_allocados = get_next_alloc(carpincho, desplazamiento) - desplazamiento - TAMANIO_HEAP;
+
+	// tiene que entrar justo en el tamaño de aloc libre o tiene que sobrar espacio para un nuevo heap footer
+	if(tiene_footer){
+		if(bytes_allocados == tam){
+			//printf("Entra entero pero sin footer intermedio");
+		}
+		else if(bytes_allocados >= tam + TAMANIO_HEAP){
+			//printf("Entra con footer intermedio");
+		}
+		else {
+			//printf("No entra, buscar otro libre.");
+			return 0;
+		}
+	}
+
+	set_is_free(carpincho, desplazamiento, 0);
+	set_next_alloc(carpincho, desplazamiento, TAMANIO_HEAP + tam + desplazamiento);
+
+	log_info(logger, "Heap header creado en direccion logica: %d.", desplazamiento);
+	log_info(logger, "%d %d %d", get_prev_alloc(carpincho, desplazamiento), get_next_alloc(carpincho, desplazamiento), get_is_free(carpincho, desplazamiento));
+
+	return desplazamiento + TAMANIO_HEAP;
+}
+
+uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig){
+	set_is_free(carpincho, desplazamiento, 1);
+	set_next_alloc(carpincho, desplazamiento, alloc_sig);
+	set_prev_alloc(carpincho, desplazamiento, desplazamiento - tam - TAMANIO_HEAP);
+
+	log_info(logger, "Heap footer creado en direccion logica: %d.", desplazamiento);
+	log_info(logger, "%d %d %d", get_prev_alloc(carpincho, desplazamiento), get_next_alloc(carpincho, desplazamiento), get_is_free(carpincho, desplazamiento));
+
+	return desplazamiento + TAMANIO_HEAP;
+}

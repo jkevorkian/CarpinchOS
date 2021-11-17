@@ -23,7 +23,7 @@ void *rutina_carpincho(void* info_carpincho) {
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
-			// mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
+			mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
 
 			mensaje_out = crear_mensaje(MEM_ALLOC);
 			agregar_a_mensaje(mensaje_out, "%d", 0);
@@ -31,7 +31,7 @@ void *rutina_carpincho(void* info_carpincho) {
 			break;
 		case MEM_FREE:
 			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
-			// mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
+			mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
 			
 			mensaje_out = crear_mensaje(TODOOK);
 			enviar_mensaje(socket, mensaje_out);
@@ -94,7 +94,7 @@ bool asignacion_fija(t_carpincho* carpincho) {
 			    t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
 			    crear_nueva_pagina(marco->nro_real, carpincho);
 		}
-
+		carpincho->heap_metadata = NULL;
 		return true;
 	}
 

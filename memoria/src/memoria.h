@@ -61,6 +61,7 @@ typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
 	t_list* tabla_paginas;
+    void* heap_metadata;
 } t_carpincho;
 
 t_memoria_ram memoria_ram;
@@ -82,5 +83,7 @@ void		    iniciar_marcos(uint32_t);
 uint32_t		pagina_segun_posicion(uint32_t posicion);
 uint32_t		offset_segun_posicion(uint32_t posicion);
 t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
+
+void*           dir_fisica_proceso(t_list* tabla_paginas);
 
 #endif /* _MEMORIA_H_ */
