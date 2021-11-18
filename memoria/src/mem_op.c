@@ -26,7 +26,6 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 		}
 	}
 
-
 	// BUSCO EL ALLOC ANTERIOR y, si corresponde, le actualizo el nextAlloc
 	uint32_t pos_alloc_anterior = get_prevAlloc(id_carpincho, dir_logica_heap);
 	if(HEAP_NULL != pos_alloc_anterior) {

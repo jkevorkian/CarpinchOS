@@ -105,6 +105,22 @@ bool asignacion_global(t_carpincho* carpincho) {
 	return false;
 }
 
+void setear_condicion_inicial(uint32_t id) {
+	uint32_t tamanio_alloc_1 = 20;
+	uint32_t tamanio_alloc_2 = 13;
+	uint32_t tamanio_alloc_3 = 32;
+	
+	uint32_t posicion_heap = 0;
+	set_prevAlloc(id, posicion_heap, HEAP_NULL);
+	set_nextAlloc(id, posicion_heap, tamanio_alloc_1 + TAMANIO_HEAP);	// El alloc de prueba ocupa 20 bytes
+	reset_isFree(id, posicion_heap);
+
+	posicion_heap = posicion_heap + tamanio_alloc_1 + TAMANIO_HEAP;
+	set_prevAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, 0);
+	set_nextAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, HEAP_NULL);	// El alloc de prueba ocupa 21 bytes
+	reset_isFree(id, tamanio_alloc_1 + TAMANIO_HEAP);
+}
+
 void rutina_test_carpincho(data_carpincho *info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
 	bool seguir = true;
@@ -119,14 +135,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
-	uint32_t tamanio_alloc_prueba = 20;
-	set_prevAlloc(carpincho->id, 0, HEAP_NULL);
-	set_nextAlloc(carpincho->id, 0, tamanio_alloc_prueba + TAMANIO_HEAP);	// El alloc de prueba ocupa 20 bytes
-	reset_isFree(carpincho->id, 0);
-
-	set_prevAlloc(carpincho->id, tamanio_alloc_prueba + TAMANIO_HEAP, 0);
-	set_nextAlloc(carpincho->id, tamanio_alloc_prueba + TAMANIO_HEAP, HEAP_NULL);	// El alloc de prueba ocupa 21 bytes
-	set_isFree(carpincho->id, tamanio_alloc_prueba + TAMANIO_HEAP);
+	setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
