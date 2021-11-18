@@ -1,4 +1,5 @@
 #include "memoria.h"
+#include "tlb.h"
 
 bool iniciar_memoria(t_config* config) {
 	config_memoria.tamanio_memoria = config_get_int_value(config, "TAMANIO");
@@ -38,7 +39,7 @@ bool iniciar_memoria(t_config* config) {
 	}
 
 	iniciar_marcos(config_memoria.cant_marcos);
-	//iniciar_tlb(config);  
+	iniciar_tlb();  
 
 	return true;
 }

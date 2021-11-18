@@ -11,26 +11,53 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <utils/sockets.h>
 #include "memoria.h"
+#include "carpincho.h"
 
 typedef struct {
 	uint32_t id_car;
-	uint32_t cant_paginas;
-	uint32_t *paginas;
-} tabla_paginas;
-
-typedef struct {
-	uint32_t id_car;	// si id_car == 0, entonces está vacía la entrada
 	uint32_t pagina;
 	uint32_t marco;
-} entrada_tlb;
+} t_entrada_tlb;
 
-entrada_tlb **tabla_tlb;
-uint32_t cant_entradas_tlb;
+typedef struct {
+    uint32_t id_proceso;
+    uint32_t cant_hit;
+    uint32_t cant_miss;
+} t_tlb_por_proceso;
 
-entrada_tlb *solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
-void asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
-void borrar_entrada_tlb(uint32_t nro_entrada);
+typedef struct {
+	uint32_t cant_hit;
+    uint32_t cant_miss;
+	uint32_t cant_entradas;   
+    uint32_t algoritmo_reemplazo;
+    uint32_t retardo_acierto;
+    uint32_t retardo_fallo;
+    t_entrada_tlb** mapa;
+    t_list* hit_miss_proceso; 
+} t_tlb;
+
+t_tlb 				tlb;
+
+void 				iniciar_tlb();
+
+uint32_t			leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+t_entrada_tlb*		solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+void 				asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+void 				borrar_entrada_tlb(uint32_t nro_entrada);
+void 				obtener_control_tlb();
+void 				liberar_control_tlb();
+t_entrada_tlb*		es_entrada(uint32_t, uint32_t, uint32_t);
+t_tlb_por_proceso* 	get_hit_miss_proceso(uint32_t id_carpincho);
+
+// SEÑALES
+void 				print_tlb(void);
+void 				resetear_tlb(void);
+void 				print_hit_miss(void);
+void 				cant_hit_carpincho(void* item);
+void 				cant_miss_carpincho(void* item);
+
 
 #endif /* _TLB_H_ */
