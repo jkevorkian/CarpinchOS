@@ -35,6 +35,7 @@ typedef struct {
     uint32_t algoritmo_reemplazo;
     uint32_t retardo_acierto;
     uint32_t retardo_fallo;
+    uint32_t puntero_fifo;
     t_entrada_tlb** mapa;
     t_list* hit_miss_proceso; 
 } t_tlb;
@@ -45,12 +46,13 @@ void 				iniciar_tlb();
 
 uint32_t			leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 t_entrada_tlb*		solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
-void 				asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void 				borrar_entrada_tlb(uint32_t nro_entrada);
 void 				obtener_control_tlb();
 void 				liberar_control_tlb();
 t_entrada_tlb*		es_entrada(uint32_t, uint32_t, uint32_t);
 t_tlb_por_proceso* 	get_hit_miss_proceso(uint32_t id_carpincho);
+void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
 
 // SEÑALES
 void 				print_tlb(void);
