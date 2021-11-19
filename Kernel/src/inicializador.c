@@ -27,6 +27,7 @@ int inicializar_kernel() {
 	pthread_mutex_init(&mutex_lista_semaforos, NULL);
 
 	id_proximo_carpincho = 0;
+	id_proximo_semaforo = 0;
 
 	log_info(logger, "Kernel listo");
 

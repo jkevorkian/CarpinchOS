@@ -29,12 +29,15 @@ typedef struct {
 	bool esta_suspendido;
 	bool responder_wait;
 	bool responder_IO;
+	t_list *semaforos_asignados;
 }carpincho;
 
 //semaforo
 typedef struct {
 	char *nombre;
-	int instancias_iniciadas;
+	int id;	//agrego el id para mas facil de manejo inequivoco de semaforos en el deadlock
+	int instancias_disponibles;
+	int instancias_maximas;
 	t_queue *cola_espera;
 	pthread_mutex_t mutex_espera;
 }semaforo;
@@ -60,6 +63,8 @@ int grado_multiprogramacion, grado_multiprocesamiento, estimacion_inicial;
 double alfa;
 
 int id_proximo_carpincho;
+
+int id_proximo_semaforo;
 
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
 t_list *lista_ready, *hilos_cpu, *lista_blocked, *lista_suspendidosBlocked, *lista_semaforos, *lista_IO;

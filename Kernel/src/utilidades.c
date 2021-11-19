@@ -44,18 +44,20 @@ int buscar(t_list *lista, char* nombre) {
 	return index;
 }
 
-void iniciar_semaforo(char* nombre, int valor) {
+int iniciar_semaforo(char* nombre, int valor) {
 	if(buscar(lista_semaforos, nombre) == -1) {
 		semaforo *sem = malloc(sizeof(semaforo*));
 		sem->cola_espera = queue_create();
-		sem->instancias_iniciadas = valor;
+		sem->instancias_disponibles = valor;
 		sem->nombre = string_duplicate(nombre);
+		sem->id = id_proximo_semaforo;
+		id_proximo_semaforo++;
 		pthread_mutex_init(&sem->mutex_espera, NULL);
 
 		pthread_mutex_lock(&mutex_lista_semaforos);
 		list_add(lista_semaforos, sem);
 		pthread_mutex_unlock(&mutex_lista_semaforos);
-
+		return sem->id;
 	}
 }
 
