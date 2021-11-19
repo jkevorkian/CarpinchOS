@@ -1,4 +1,5 @@
 #include "main.h"
+#include "tlb.h"
 
 int main(void) {
 	logger = iniciar_logger();
@@ -27,15 +28,15 @@ int main(void) {
 }
 
 void signal_handler_1(int sig) {
-
+	print_tlb();
 }
 
 void signal_handler_2(int sig) {
-
+	resetear_tlb();
 }
 
 void signal_handler_3(int sig) {
-
+	print_hit_miss();
 }
 
 t_log* iniciar_logger(void) {

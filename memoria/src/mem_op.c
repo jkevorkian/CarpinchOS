@@ -85,7 +85,6 @@ void set_is_free(t_carpincho* carpincho, uint32_t desplazamiento, uint8_t valor)
 	memcpy(carpincho->heap_metadata + desplazamiento + 8, &is_free, sizeof(uint8_t));
 }
 
-
 uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
 
@@ -114,7 +113,6 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		while(true){
 			alloc_sig = get_next_alloc(carpincho, desplazamiento);
 			is_free = get_is_free(carpincho, desplazamiento);
-			printf("desp %d free %d", desplazamiento, is_free);
 
 			if(alloc_sig == HEAP_NULL){
 				if(is_free) {

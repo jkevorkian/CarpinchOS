@@ -1,4 +1,5 @@
 #include "tlb.h"
+// TODO: agregar path al nombre de dump
 
 void iniciar_tlb(){
 	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
@@ -17,43 +18,32 @@ void iniciar_tlb(){
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		t_entrada_tlb* entrada = malloc(sizeof(t_entrada_tlb));
 		entrada->id_car = 0;
-		entrada->pagina = 0;
-		entrada->marco = 0;
+		entrada->pagina = -1;
+		entrada->marco = -1;
 		tlb.mapa[i] = entrada;
 	} 
 
 	log_info(logger,"TLB inicializada. Nro de entradas: %d", tlb.cant_entradas);
-	
-	// TEST
- 	/* crear_carpincho(1);
-	// TODO: seg fault al crear otro carpincho
- 	// crear_carpincho(2);
-	leer_tlb(1, 1);
-	leer_tlb(1, 2);
-	leer_tlb(1, 1);
-	leer_tlb(1, 3);
-	leer_tlb(1, 0);
-
-	print_hit_miss();
-	print_tlb();  */
 
 } 
 
-// TODO: retardo fallo y retado acierto
 uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 	t_entrada_tlb* entrada = solicitar_entrada_tlb(id_carpincho, nro_pagina);
 	t_tlb_por_proceso* hit_miss = get_hit_miss_proceso(id_carpincho);
 
  	if(entrada == NULL){
-		hit_miss->cant_miss = hit_miss->cant_miss + 1;
-		tlb.cant_miss = tlb.cant_miss + 1;
-		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
+		usleep(tlb.retardo_fallo * 1000);
+		hit_miss->cant_miss += 1;
+		tlb.cant_miss += 1;
 		entrada = asignar_entrada_tlb(id_carpincho, nro_pagina);
+		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
 	}
 	else {
-		hit_miss->cant_hit = hit_miss->cant_hit + 1;
-		tlb.cant_hit = tlb.cant_hit + 1;
-		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);
+		usleep(tlb.retardo_acierto * 1000);
+		hit_miss->cant_hit += 1;
+		tlb.cant_hit += 1;
+		entrada->tiempo_lru = time(0);
+		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
 	}
 
 	return entrada->marco;
@@ -74,11 +64,8 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		entrada = tlb.mapa[i];
-
 		if(entrada->id_car == 0){
 			entrada_nueva(id_carpincho, nro_pagina, entrada);
-			log_info(logger, "Entrada %d asignada a carpincho #%d", i, id_carpincho);
-
 			liberar_control_tlb();
 			return entrada;
 		};
@@ -86,20 +73,29 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 
 	if(tlb.algoritmo_reemplazo == FIFO){
 		entrada = tlb.mapa[tlb.puntero_fifo]; 
-
 		entrada_nueva(id_carpincho, nro_pagina, entrada);
-		log_info(logger, "Entrada %d asignada a carpincho #%d", tlb.puntero_fifo, id_carpincho);
 
 		if(tlb.puntero_fifo + 1 == tlb.cant_entradas) tlb.puntero_fifo = 0;
 		else tlb.puntero_fifo = tlb.puntero_fifo + 1;
 	}
 	else if(tlb.algoritmo_reemplazo == LRU){
-		// TODO: reemplazo LRU
+		// DUDA: tipo double puede traer problemas? si lo casteo a uint32_t no funciona result < 0
+		double result;
+		t_entrada_tlb* entrada_menor = tlb.mapa[0];
+
+		for(int i = 0; i < tlb.cant_entradas; i++) {
+			entrada = tlb.mapa[i];
+			if(entrada->tiempo_lru){
+				result = difftime(entrada->tiempo_lru, entrada_menor->tiempo_lru);
+				if(result < 0) entrada_menor = entrada;
+			};
+		} 
+
+		entrada_nueva(id_carpincho, nro_pagina, entrada_menor);
 	}
 
 	liberar_control_tlb();
 	return entrada;
-
 }
 
 void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada){
@@ -109,6 +105,7 @@ void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* en
 	entrada->id_car = id_carpincho;
 	entrada->pagina = nro_pagina;
 	entrada->marco = pagina->nro_marco;
+	entrada->tiempo_lru = time(0);
 }
 
 void borrar_entrada_tlb(uint32_t nro_entrada) {
@@ -144,7 +141,7 @@ t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pa
 }
 
 void print_tlb() {
-	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
+	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S:%MS");
     char* filename = string_from_format("Dump_<%s>.dmp", temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
     FILE* dump_file = fopen(filename, "w");
 
@@ -166,6 +163,22 @@ void print_tlb() {
 	fclose(dump_file);
 	free(timestamp);
 	free(filename);
+}
+
+void resetear_entradas_proceso(uint32_t id_carpincho) {
+	bool encontrar_carpincho(void* item){
+		t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
+		return entrada->id_proceso == id_carpincho;
+	}
+
+	for(int i = 0; i < tlb.cant_entradas; i++) {
+		t_entrada_tlb* entrada = tlb.mapa[i];
+		if(entrada->id_car == id_carpincho){
+			borrar_entrada_tlb(i);
+		}
+	}
+
+	list_remove_by_condition(tlb.hit_miss_proceso, encontrar_carpincho);
 }
 
 void resetear_tlb() {
@@ -208,4 +221,12 @@ void liberar_control_tlb() {
 		aux = list_get(lista_carpinchos, i);
 		sem_post(aux->sem_tlb);
 	}
+}
+
+void print_tiempo(t_entrada_tlb* entrada){
+	struct tm *ts;
+	char buf[80];
+	ts = localtime(&entrada->tiempo_lru);
+	strftime(buf, sizeof(buf), "%H:%M:%S", ts);
+	printf("Pagina: %d Tiempo: %s\n", entrada->pagina, buf);
 }
