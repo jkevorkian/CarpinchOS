@@ -40,50 +40,6 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	return true;
 }
 
-uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento);
-uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig);
-
-// TODO: cambiar bit modificado de pagina cuando escribo un heap metadata
-uint32_t get_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento);
-uint32_t get_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento);
-uint32_t get_is_free(t_carpincho* carpincho, uint32_t desplazamiento);
-void set_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor);
-void set_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor);
-void set_is_free(t_carpincho* carpincho, uint32_t desplazamiento, uint8_t valor);
-
-uint32_t get_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento){
-	uint32_t prev_alloc;
-	memcpy(&prev_alloc, carpincho->heap_metadata + desplazamiento, sizeof(uint32_t));
-	return prev_alloc;
-}
-
-uint32_t get_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento){
-	uint32_t next_alloc;
-	memcpy(&next_alloc, carpincho->heap_metadata + desplazamiento + 4, sizeof(uint32_t));
-	return next_alloc;
-}
-
-uint32_t get_is_free(t_carpincho* carpincho, uint32_t desplazamiento){
-	uint8_t is_free;
-	memcpy(&is_free, carpincho->heap_metadata + desplazamiento + 8, sizeof(uint8_t));
-	return is_free;
-}
-
-void set_prev_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor){
-	uint32_t prev_alloc = valor;
-	memcpy(carpincho->heap_metadata + desplazamiento, &prev_alloc, sizeof(uint32_t));
-}
-
-void set_next_alloc(t_carpincho* carpincho, uint32_t desplazamiento, uint32_t valor){
-	uint32_t next_alloc = valor;
-	memcpy(carpincho->heap_metadata + desplazamiento + 4, &next_alloc, sizeof(uint32_t));
-}
-
-void set_is_free(t_carpincho* carpincho, uint32_t desplazamiento, uint8_t valor){
-	uint8_t is_free = valor;
-	memcpy(carpincho->heap_metadata + desplazamiento + 8, &is_free, sizeof(uint8_t));
-}
-
 uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
 
@@ -110,8 +66,8 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		uint8_t is_free;		
 
 		while(true){
-			alloc_sig = get_next_alloc(carpincho, desplazamiento);
-			is_free = get_is_free(carpincho, desplazamiento);
+			alloc_sig = get_nextAlloc(carpincho->id, desplazamiento);
+			is_free = get_isFree(carpincho->id, desplazamiento);
 
 			if(alloc_sig == HEAP_NULL){
 				if(is_free) {
@@ -153,8 +109,8 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 }
 
 uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento){
-	bool tiene_footer = get_next_alloc(carpincho, desplazamiento) != 0 || get_next_alloc(carpincho, desplazamiento) != HEAP_NULL;
-	uint32_t bytes_allocados = get_next_alloc(carpincho, desplazamiento) - desplazamiento - TAMANIO_HEAP;
+	bool tiene_footer = get_nextAlloc(carpincho->id, desplazamiento) != 0 || get_nextAlloc(carpincho->id, desplazamiento) != HEAP_NULL;
+	uint32_t bytes_allocados = get_nextAlloc(carpincho->id, desplazamiento) - desplazamiento - TAMANIO_HEAP;
 
 	// tiene que entrar justo en el tamaño de aloc libre o tiene que sobrar espacio para un nuevo heap footer
 	if(tiene_footer){
@@ -170,22 +126,22 @@ uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamien
 		}
 	}
 
-	set_is_free(carpincho, desplazamiento, 0);
-	set_next_alloc(carpincho, desplazamiento, TAMANIO_HEAP + tam + desplazamiento);
+	reset_isFree(carpincho->id, desplazamiento);
+	set_nextAlloc(carpincho->id, desplazamiento, TAMANIO_HEAP + tam + desplazamiento);
 
 	log_info(logger, "Heap header creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prev_alloc(carpincho, desplazamiento), get_next_alloc(carpincho, desplazamiento), get_is_free(carpincho, desplazamiento));
+	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
 
 	return desplazamiento + TAMANIO_HEAP;
 }
 
 uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig){
-	set_is_free(carpincho, desplazamiento, 1);
-	set_next_alloc(carpincho, desplazamiento, alloc_sig);
-	set_prev_alloc(carpincho, desplazamiento, desplazamiento - tam - TAMANIO_HEAP);
+	set_isFree(carpincho->id, desplazamiento);
+	set_nextAlloc(carpincho->id, desplazamiento, alloc_sig);
+	set_prevAlloc(carpincho->id, desplazamiento, desplazamiento - tam - TAMANIO_HEAP);
 
 	log_info(logger, "Heap footer creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prev_alloc(carpincho, desplazamiento), get_next_alloc(carpincho, desplazamiento), get_is_free(carpincho, desplazamiento));
+	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
 
 	return desplazamiento + TAMANIO_HEAP;
 }

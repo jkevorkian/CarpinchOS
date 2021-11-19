@@ -8,19 +8,16 @@ void *rutina_carpincho(void* info_carpincho) {
 	int socket = esperar_cliente(carpincho->socket);
 	close(carpincho->socket);
 	data_socket(socket, logger);
-	// Para mi hay que hacerlo en el servidor
-	/*
-		// TODO: generar id en memoria, NO leerla del mensaje
-		t_list *mensaje_in = recibir_mensaje(socket);
-		int id = (int)list_get(mensaje_in, 2);
-		t_carpincho* carpincho = crear_carpincho(id);
-	*/
+
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
+	uint32_t desplazamiento_d;
+	char* marioneta;
+	uint32_t tamanio_mensaje;
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
-		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
+		switch((int)list_get(mensaje_in, 0)) { 
 		case MEM_ALLOC:
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
 			mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
@@ -38,20 +35,39 @@ void *rutina_carpincho(void* info_carpincho) {
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
 			
+			marioneta = mem_read(carpincho->id, desplazamiento_d);
+			log_info(logger, "El contenido del alloc es: %s", marioneta);
+
 			mensaje_out = crear_mensaje(DATA);
 			log_info(logger, "Creo mensaje");
-			agregar_a_mensaje(mensaje_out, "%s", "Luke, yo soy tu padre");
+
+			agregar_a_mensaje(mensaje_out, "%s", marioneta);
 			enviar_mensaje(socket, mensaje_out);
 			log_info(logger, "Envío mensaje");
 			break;
 		case MEM_WRITE:
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
 			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
-			
-			mensaje_out = crear_mensaje(TODOOK);
-			enviar_mensaje(socket, mensaje_out);
-			// mem_write(id_carpincho, dir_logica, data);
+
+			marioneta = (char *)list_get(mensaje_in, 2);
+			tamanio_mensaje = strlen(marioneta);
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
+
+			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
+				free(marioneta);
+				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, strlen(marioneta));
+				
+				log_info(logger, "Escribí: %s", marioneta);
+				free(marioneta);
+
+				mensaje_out = crear_mensaje(TODOOK);
+			}
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
+
+			enviar_mensaje(socket, mensaje_out);	
 			break;
 		case SUSPEND:
 			// ...;

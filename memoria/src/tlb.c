@@ -1,5 +1,6 @@
 #include "tlb.h"
 // TODO: agregar path al nombre de dump
+// DUDA: hay que considerar milisegundos para lru?
 
 void iniciar_tlb(){
 	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
@@ -141,7 +142,7 @@ t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pa
 }
 
 void print_tlb() {
-	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S:%MS");
+	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
     char* filename = string_from_format("Dump_<%s>.dmp", temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
     FILE* dump_file = fopen(filename, "w");
 
