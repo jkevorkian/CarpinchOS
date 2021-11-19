@@ -26,7 +26,6 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 		}
 	}
 
-
 	// BUSCO EL ALLOC ANTERIOR y, si corresponde, le actualizo el nextAlloc
 	uint32_t pos_alloc_anterior = get_prevAlloc(id_carpincho, dir_logica_heap);
 	if(HEAP_NULL != pos_alloc_anterior) {
@@ -189,4 +188,44 @@ uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamien
 	log_info(logger, "%d %d %d", get_prev_alloc(carpincho, desplazamiento), get_next_alloc(carpincho, desplazamiento), get_is_free(carpincho, desplazamiento));
 
 	return desplazamiento + TAMANIO_HEAP;
+}
+
+void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
+	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
+
+	// Verifico que el free es válido
+	if(get_isFree(id_carpincho, dir_logica_heap))
+		return false;
+	
+	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
+	
+	return obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
+}
+
+bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
+	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
+
+	// Verifico que el free es válido
+	if(get_isFree(id_carpincho, dir_logica_heap))
+		return false;
+	
+	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
+	uint32_t tamanio_data = strlen(contenido);
+	int32_t diferencia_tamanios = tamanio_alocado - strlen(contenido);
+
+	if(diferencia_tamanios < 0)
+		return false;
+
+	void *data = malloc(tamanio_alocado);
+	memcpy(data, contenido, tamanio_data);
+	char relleno = '\0';
+	
+	if(diferencia_tamanios > 0) {
+		while(diferencia_tamanios > 0) {
+			memcpy(data + tamanio_alocado - diferencia_tamanios, &relleno, 1);
+			diferencia_tamanios--;
+		}
+	}
+	actualizar_bloque_paginacion(id_carpincho, dir_logica, data, tamanio_alocado);
+	return true;
 }
