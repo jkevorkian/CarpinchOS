@@ -1,0 +1,12 @@
+[INFO] 15:10:15:994 memoria/(8477:8477): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 15:10:15:994 memoria/(8477:8477): Creo socket de escucha para recibir los carpinchos
+[INFO] 15:10:15:994 memoria/(8477:8477): Servidor listo
+[INFO] 15:10:15:994 memoria/(8477:8477): Espero a que llegue un nuevo carpincho
+[INFO] 12:36:55:063 memoria/(12243:12243): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:36:55:063 memoria/(12243:12243): Creo socket de escucha para recibir los carpinchos
+[INFO] 12:36:55:063 memoria/(12243:12243): Servidor listo
+[INFO] 12:36:55:064 memoria/(12243:12243): Espero a que llegue un nuevo carpincho
+[INFO] 14:00:58:026 memoria/(16119:16119): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 14:00:58:026 memoria/(16119:16119): Creo socket de escucha para recibir los carpinchos
+[INFO] 14:00:58:026 memoria/(16119:16119): Servidor listo
+[INFO] 14:00:58:027 memoria/(16119:16119): Espero a que llegue un nuevo carpincho

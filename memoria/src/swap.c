@@ -1,6 +1,13 @@
 #include "swap.h"
 
+t_marco** paginas_reemplazo(uint32_t id_carpincho);
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho);
+uint32_t nro_paginas_reemplazo();
+t_marco *marco_viejo(t_marco *marco1, t_marco *marco2);
+uint32_t obtener_tiempo(char tipo, t_marco *marco);
+
 t_movimiento *obtener_movimiento();
+
 void hacer_swap_in(int socket, t_movimiento *mov);
 void hacer_swap_out(int socket, t_movimiento *mov);
 
@@ -18,20 +25,20 @@ void* manejar_swap(void* socket_swap) {
         case EXIT_C:
         	break;
         case SET_PAGE:
-        	hacer_swap_out(movimiento_pendiente);
+        	hacer_swap_out((int)socket_swap, movimiento_pendiente);
         	break;
         case GET_PAGE:
-        	hacer_swap_in(movimiento_pendiente);
+        	hacer_swap_in((int)socket_swap, movimiento_pendiente);
         	break;
         case SUSPEND:
-        	suspender_proceso(movimiento_pendiente->id_carpincho);
+        	// suspender_proceso(movimiento_pendiente->id_carpincho);
         	break;
         // case MORIR:
         // 	morir();
         default:
         	break;
         }
-        if(movimiento_pendiente->buffer)	free(movimiento_pendiente->buffer);
+        if(movimiento_pendiente->buffer) free(movimiento_pendiente->buffer);
         	free(movimiento_pendiente);
     }
     // free(continuar_consola);
@@ -69,13 +76,13 @@ void hacer_swap_in(int socket, t_movimiento *mov) {
 
 	t_list *mensaje_in = recibir_mensaje(socket);
 
-	if((int)list_get(0, mensaje_in) != DATA_PAGE) {
+	if((int)list_get(mensaje_in, 0) != DATA) {
 		// ERROR
 	}
 	// else
 	// TODO Ver si se puede simplificar la copia del buffer
-	char *buffer = malloc(TAMANIO_PAGINA);
-	memcpy(buffer, (char *)list_get(mensaje_in, 1), TAMANIO_PAGINA);
+	char *buffer = malloc(config_memoria.tamanio_pagina);
+	memcpy(buffer, (char *)list_get(mensaje_in, 1), config_memoria.tamanio_pagina);
 
 	//pagina = asignar_pagina_memoria();
 	//escribir_pagina(pagina, buffer);
@@ -91,8 +98,135 @@ void crear_movimiento_swap(uint8_t accion, uint32_t id_carpincho, uint32_t nro_p
 		nuevo_mov->buffer = strdup(buffer);
 
 	pthread_mutex_lock(&mutex_movimientos);
-	queue_push(&movimientos_pendientes, nuevo_mov);
+	queue_push(movimientos_pendientes, nuevo_mov);
 	pthread_mutex_unlock(&mutex_movimientos);
 
 	sem_post(&sem_movimiento);
+}
+
+t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
+
+	bool encontre_marco = false;
+	t_marco* marco_referencia;
+	uint32_t puntero_clock = 0;
+	uint32_t ciclo = 0;
+	while(!encontre_marco) {
+		marco_referencia = lista_paginas[puntero_clock];
+
+		switch(ciclo) {
+		case 0:
+			if(!marco_referencia->bit_uso && !marco_referencia->bit_modificado)
+				encontre_marco = true;
+			break;
+		case 1:
+			if(!marco_referencia->bit_uso && !marco_referencia->bit_modificado)
+				encontre_marco = true;
+			else
+				// TODO reset_bit_uso(marco_referencia);	// Importante por concurrencia ?
+			break;
+		}
+		puntero_clock++;
+		if(puntero_clock == nro_paginas) {
+			puntero_clock = 0;
+			ciclo = ciclo ? false : true;
+		}
+	}
+	return marco_referencia;
+}
+
+t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas) {
+	t_marco *marco_referencia = lista_paginas[0];
+
+	for(int i = 1; i < nro_paginas; i++) {
+		marco_referencia = marco_viejo(marco_referencia, lista_paginas[i]);
+	}
+	return marco_referencia;
+}
+
+t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho) {
+	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
+	uint32_t nro_paginas = nro_paginas_reemplazo();
+
+	t_marco *marco_a_reemplazar;
+	if(config_memoria.algoritmo_reemplazo == LRU)
+		marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
+	if(config_memoria.algoritmo_reemplazo == CLOCK)
+		marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
+	reservar_marco(marco_a_reemplazar);
+	return marco_a_reemplazar;
+}
+
+t_marco** paginas_reemplazo(uint32_t id_carpincho) {
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		return obtener_marcos_proceso(id_carpincho);
+	else
+		return memoria_ram.mapa_fisico;
+}
+
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
+	uint32_t nro_marcos = config_memoria.cant_marcos;
+	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
+	uint32_t nro_marcos_encontrados = 0;
+	uint32_t marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina - 1;
+	for(int i = 0; nro_marcos > nro_marcos_encontrados && nro_marcos > marcos_memoria; i++) {
+		if(memoria_ram.mapa_fisico[i]->nro_real == id_carpincho) {
+			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
+			nro_marcos_encontrados++;
+		}
+	}
+	if(nro_marcos_encontrados < nro_marcos)
+		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos_encontrados);
+	return marcos_proceso;
+}
+
+uint32_t nro_paginas_reemplazo() {
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		return config_memoria.cant_marcos;
+	else
+		return config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+}
+
+t_marco *marco_viejo(t_marco *marco1, t_marco *marco2) {
+	// Formato temporal para LRU de marcos: HH:MM:SS
+	if(obtener_tiempo('H', marco1) > obtener_tiempo('H', marco2))
+		return marco1;
+	if(obtener_tiempo('H', marco1) < obtener_tiempo('H', marco2))
+		return marco2;
+	if(obtener_tiempo('M', marco1) > obtener_tiempo('M', marco2))
+		return marco1;
+	if(obtener_tiempo('M', marco1) < obtener_tiempo('M', marco2))
+		return marco2;
+	if(obtener_tiempo('S', marco1) > obtener_tiempo('S', marco2))
+		return marco1;
+	//if(obtener_tiempo('S', marco1) < obtener_hora('S', marco2))
+	else
+		return marco2;
+}
+
+uint32_t obtener_tiempo(char tipo, t_marco *marco) {
+	char tiempo[2];
+	switch(tipo) {
+	case 'H':
+		memcpy(tiempo, marco->temporal, 2);
+		break;
+	case 'M':
+		memcpy(tiempo, marco->temporal + 3, 2);
+		break;
+	case 'S':
+		memcpy(tiempo, marco->temporal + 6, 2);
+		break;
+	}
+
+	return atoi(tiempo);
+}
+
+void suspend(uint32_t id) {
+	t_marco **lista_marcos = obtener_marcos_proceso(id);
+	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
+
+	for(int i = 0; i < cant_marcos; i++) {
+		void *buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
+	}
 }

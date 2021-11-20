@@ -9,4 +9,5 @@ int carpincho_tiene_marcos_disponibles(char tabla_paginas[][cantidad_total_pagin
 void recibir_carpincho(int id_carpincho, int n_pagina, char* mensaje_pagina, char tabla_paginas[][cantidad_total_paginas], void** particiones);
 void eliminar_carpincho(int id_carpincho, char tabla_paginas[][cantidad_total_paginas], void** particiones);
 
+
 #endif /* SRC_MANEJO_CARPINCHOS_H_ */

@@ -21,12 +21,14 @@ int cantidad_archivos;
 int marcos_maximos;
 char* ip_swamp;
 int* espacio_disponible;
+int tipo_asignacion;
+
 
 t_log* logger;
 t_config* config;
 
-
 char itoc(int numero);
+int ctoi(char caracter);
 void* algoritmo_de_particiones(void** particiones, int* espacio_disponible);
 
 #define ERROR_CONEXION -1

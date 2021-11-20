@@ -319,7 +319,7 @@ bool validar_mensaje(t_list* mensaje_in, void* logger) {
 	}
 	return true;
 }
-
+/*
 char* string_desde_mensaje(int mensaje) {
 	char* listaDeStrings[] = {
 			// Validaciones
@@ -336,4 +336,4 @@ char* string_desde_mensaje(int mensaje) {
 			"CALL_IO", "DATA", "SEND_PORT"};
 
 	return listaDeStrings[mensaje];
-}
+}*/
