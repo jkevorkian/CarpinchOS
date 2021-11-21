@@ -84,7 +84,7 @@ void* cpu() {
 						}
 						break;
 					case SEM_INIT:
-						int sem_id = iniciar_semaforo((char *)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2));  //busca el semaforo, si no existe lo crea y lo agrega a la lista
+						iniciar_semaforo((char *)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2));  //busca el semaforo, si no existe lo crea y lo agrega a la lista
 
 						mensaje_out = crear_mensaje(TODOOK);
 						enviar_mensaje(carp->socket_mateLib, mensaje_out);
@@ -167,8 +167,7 @@ void* cpu() {
 							} else {
 								free(sem->nombre);
 								free(sem->id);
-								free(sem->instancias_disponibles);
-								free(sem->instancias_maximas);
+								free(sem->instancias_iniciadas);
 								queue_destroy(sem->cola_espera);
 								pthread_mutex_destroy(&sem->mutex_espera);
 								free(sem);

@@ -60,11 +60,11 @@ semaforo* buscar_sem_por_id(t_list *lista, int id) {
 	return NULL;  //retorna NULL si falla al encontrar un semaforo con el id dado
 }
 
-int iniciar_semaforo(char* nombre, int valor) {
+void iniciar_semaforo(char* nombre, int valor) {
 	if(buscar(lista_semaforos, nombre) == -1) {
 		semaforo *sem = malloc(sizeof(semaforo*));
 		sem->cola_espera = queue_create();
-		sem->instancias_disponibles = valor;
+		sem->instancias_iniciadas = valor;
 		sem->nombre = string_duplicate(nombre);
 		sem->id = id_proximo_semaforo;
 		id_proximo_semaforo++;
@@ -73,7 +73,7 @@ int iniciar_semaforo(char* nombre, int valor) {
 		pthread_mutex_lock(&mutex_lista_semaforos);
 		list_add(lista_semaforos, sem);
 		pthread_mutex_unlock(&mutex_lista_semaforos);
-		return sem->id;
+		//return sem->id;
 	}
 }
 

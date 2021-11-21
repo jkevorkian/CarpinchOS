@@ -18,6 +18,9 @@
 
 #define MEMORIA_ACTIVADA 0
 
+#define LOGUEAR_MENSAJES_INICIALIZADOR 0
+
+
 //carpincho
 typedef struct {
 	int id;
@@ -27,8 +30,7 @@ typedef struct {
 	double estimacion_proxima_rafaga;
 	char *tiempo_llegada;
 	bool esta_suspendido;
-	bool responder_wait;
-	bool responder_IO;
+	bool responder;
 	t_list *semaforos_asignados;
 	int id_semaforo_bloqueante; //es -1 cuando no esta siendo bloqueado por espera de un semaforo
 }carpincho;
@@ -37,8 +39,7 @@ typedef struct {
 typedef struct {
 	char *nombre;
 	int id;	//agrego el id para mas facil de manejo inequivoco de semaforos en el deadlock
-	int instancias_disponibles;
-	int instancias_maximas;
+	int instancias_iniciadas;
 	t_queue *cola_espera;
 	pthread_mutex_t mutex_espera;
 }semaforo;
@@ -66,6 +67,7 @@ double alfa;
 int id_proximo_carpincho;
 
 int id_proximo_semaforo;
+int tiempo_deadlock;
 
 t_queue *cola_new, *cola_suspendidosReady, *cola_running;
 t_list *lista_ready, *hilos_cpu, *lista_blocked, *lista_suspendidosBlocked, *lista_semaforos, *lista_IO;
