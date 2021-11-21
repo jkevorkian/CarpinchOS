@@ -96,7 +96,7 @@ carpincho* quitar_suspendidosReady() {
 
 carpincho* quitar_blocked(carpincho* carp_quitar) {
 	int index = encontrar_carpincho(lista_blocked, carp_quitar);
-
+	carp_quitar->id_semaforo_bloqueante = -1;
 	pthread_mutex_lock(&mutex_lista_blocked);
 	carpincho *carp = list_remove(lista_blocked, index);
 	pthread_mutex_unlock(&mutex_lista_blocked);

@@ -32,6 +32,7 @@ int main() {
 			nuevo_carpincho->esta_suspendido = false;
 			nuevo_carpincho->responder_wait = false;
 			nuevo_carpincho->responder_IO = false;
+			nuevo_carpincho->id_semaforo_bloqueante = -1;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;

@@ -44,6 +44,22 @@ int buscar(t_list *lista, char* nombre) {
 	return index;
 }
 
+semaforo* buscar_sem_por_id(t_list *lista, int id) {
+	int index = list_size(lista) - 1;
+
+	while(index >= 0) {
+		semaforo *sem = (semaforo*)list_get(lista, index);
+
+		if(id == sem->id){
+			return sem;
+		}
+
+		index--;
+	}
+
+	return NULL;  //retorna NULL si falla al encontrar un semaforo con el id dado
+}
+
 int iniciar_semaforo(char* nombre, int valor) {
 	if(buscar(lista_semaforos, nombre) == -1) {
 		semaforo *sem = malloc(sizeof(semaforo*));

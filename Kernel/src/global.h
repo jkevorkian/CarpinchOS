@@ -30,6 +30,7 @@ typedef struct {
 	bool responder_wait;
 	bool responder_IO;
 	t_list *semaforos_asignados;
+	int id_semaforo_bloqueante; //es -1 cuando no esta siendo bloqueado por espera de un semaforo
 }carpincho;
 
 //semaforo
