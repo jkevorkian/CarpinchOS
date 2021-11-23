@@ -8,7 +8,7 @@ void *rutina_carpincho(void* info_carpincho) {
 	int socket = esperar_cliente(carpincho->socket);
 	close(carpincho->socket);
 	data_socket(socket, logger);
-
+	
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
 	uint32_t desplazamiento_d;
@@ -39,8 +39,7 @@ void *rutina_carpincho(void* info_carpincho) {
 			
 			marioneta = mem_read(carpincho->id, desplazamiento_d);
 			log_info(logger, "El contenido del alloc es: %s", marioneta);
-
-			mensaje_out = crear_mensaje(DATA);
+			mensaje_out = crear_mensaje(DATA_CHAR);
 			log_info(logger, "Creo mensaje");
 
 			agregar_a_mensaje(mensaje_out, "%s", marioneta);
@@ -70,12 +69,16 @@ void *rutina_carpincho(void* info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);	
 			break;
 		case SUSPEND:
-			// ...;
+			suspend(carpincho->id);
+			break;
+		case UNSUSPEND:
+			unsuspend(carpincho->id);
 			break;
 		case MATE_CLOSE:
 		default:
 			seguir = false;
 			log_info(logger, "Murio el carpincho, nos vemos.");
+			crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 			break;
 		}
 	}
@@ -107,8 +110,8 @@ bool asignacion_fija(t_carpincho* carpincho) {
 
 	if(tengo_marcos_suficientes(cant_marcos)){
 		for(int i = 0; i < cant_marcos; i++){
-			    t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
-			    crear_nueva_pagina(marco->nro_real, carpincho);
+			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			crear_nueva_pagina(marco->nro_real, carpincho);
 		}
 		carpincho->heap_metadata = NULL;
 		return true;
@@ -118,13 +121,13 @@ bool asignacion_fija(t_carpincho* carpincho) {
 }
 
 bool asignacion_global(t_carpincho* carpincho) {
-	return false;
+	return true;
 }
 
 void setear_condicion_inicial(uint32_t id) {
 	uint32_t tamanio_alloc_1 = 20;
-	uint32_t tamanio_alloc_2 = 13;
-	uint32_t tamanio_alloc_3 = 32;
+	// uint32_t tamanio_alloc_2 = 13;
+	// uint32_t tamanio_alloc_3 = 32;
 	
 	uint32_t posicion_heap = 0;
 	set_prevAlloc(id, posicion_heap, HEAP_NULL);
@@ -177,7 +180,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			marioneta = mem_read(carpincho->id, desplazamiento_d);
 			log_info(logger, "El contenido del alloc es: %s", marioneta);
 			
-			mensaje_out = crear_mensaje(DATA);
+			mensaje_out = crear_mensaje(DATA_CHAR);
 			log_info(logger, "Creo mensaje");
 			agregar_a_mensaje(mensaje_out, "%s", marioneta);
 			enviar_mensaje(socket, mensaje_out);
@@ -192,7 +195,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 
 			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
 				free(marioneta);
-				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, strlen(marioneta));
+				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, tamanio_mensaje);
 				
 				log_info(logger, "Escribí: %s", marioneta);
 				free(marioneta);
@@ -205,7 +208,10 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case SUSPEND:
-			// ...;
+			suspend(carpincho->id);
+			break;
+		case UNSUSPEND:
+			unsuspend(carpincho->id);
 			break;
 		case MATE_CLOSE:
 		default:

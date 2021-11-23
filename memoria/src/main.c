@@ -11,20 +11,27 @@ int main(void) {
 		exit(1);
 	}
 
-	// t_carpincho* carpincho1 = crear_carpincho(1);
-
 	signal(SIGUSR1, &signal_handler_1);
 	signal(SIGUSR2, &signal_handler_2);
 	signal(SIGINT,  &signal_handler_3);
 
-	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
-	// iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
-	char* ip = config_get_string_value(config, "IP");
-	int puerto = config_get_int_value(config, "PUERTO");
-	iniciar_servidor(ip, puerto);
+	// char* ip;
 
-	terminar_programa(logger, config);
-	exit(1);
+	iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
+	
+	// ip = config_get_string_value(config, "IP");
+	// int puerto_serv = config_get_int_value(config, "PUERTO");
+	// iniciar_servidor(ip, puerto_serv);
+	iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
+	// ip = config_get_string_value(config, "IP_SWAP");
+	// char* puerto = config_get_string_value(config, "PUERTO_SWAP");
+	// iniciar_swap(ip, puerto);
+	
+	// log_info(logger, "Voy a cancelar hilo");
+	// pthread_cancel(nuevo_carpincho);
+	// terminar_programa(logger, config);
+	// exit(1);
+	return 0;
 }
 
 void signal_handler_1(int sig) {

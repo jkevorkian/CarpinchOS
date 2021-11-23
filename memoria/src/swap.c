@@ -1,111 +1,167 @@
 #include "swap.h"
 
 t_marco** paginas_reemplazo(uint32_t id_carpincho);
-t_marco** obtener_marcos_proceso(uint32_t id_carpincho);
 uint32_t nro_paginas_reemplazo();
 t_marco *marco_viejo(t_marco *marco1, t_marco *marco2);
 uint32_t obtener_tiempo(char tipo, t_marco *marco);
 
 t_movimiento *obtener_movimiento();
 
-void hacer_swap_in(int socket, t_movimiento *mov);
-void hacer_swap_out(int socket, t_movimiento *mov);
-
 void* manejar_swap(void* socket_swap) {
     sem_init(&sem_movimiento, 0, 0);
-    movimientos_pendientes = queue_create();
+	sem_init(&sem_respuesta, 0, 0);
+    
+	movimientos_pendientes = queue_create();
     pthread_mutex_init(&mutex_movimientos, NULL);
 
-    t_movimiento* movimiento_pendiente;
-    while (true) {
-    	movimiento_pendiente = obtener_movimiento();
-        switch(movimiento_pendiente->accion) {
-        case NEW_C:
-        	break;
+	int socket = (int)socket_swap;
+
+    t_movimiento* mov;
+	t_mensaje *mensaje_out;
+	t_list *mensaje_in;
+	data_socket(socket, logger);
+	bool seguir = true;
+
+    while(seguir) {
+		log_info(logger, "Espero nuevo movimiento");
+    	mov = obtener_movimiento();
+
+		log_info(logger, "Accion: %d", mov->accion);
+		log_info(logger, "ID: %d", mov->id_carpincho);
+		log_info(logger, "NRO_PAGINA: %d", mov->nro_pagina);
+        switch(mov->accion) {
         case EXIT_C:
-        	break;
+			log_info(logger, "Recibo un exit_c");
+
+			mensaje_out = crear_mensaje(mov->accion);
+			agregar_a_mensaje(mensaje_out, "%d", mov->id_carpincho);
+			enviar_mensaje(socket, mensaje_out);
+
+			mensaje_in = recibir_mensaje(socket);
+			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
+			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
+				mov->respuesta = true;
+			
+			// PARA TESTEAR
+			// liberar_mensaje_out(mensaje_out);
+			// liberar_mensaje_in(mensaje_in);
+			// seguir = false;
+        	// continue;
+			break;
+		case NEW_PAGE:
+			log_info(logger, "Recibo un new_page");
+			
+			mensaje_out = crear_mensaje(mov->accion);
+			agregar_a_mensaje(mensaje_out, "%d%d", mov->id_carpincho, mov->nro_pagina);
+			enviar_mensaje(socket, mensaje_out);
+
+			mensaje_in = recibir_mensaje(socket);
+			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
+			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
+				mov->respuesta = true;
+			break;
         case SET_PAGE:
-        	hacer_swap_out((int)socket_swap, movimiento_pendiente);
+        	log_info(logger, "Recibo un set_page");
+
+			mensaje_out = crear_mensaje(mov->accion);
+			agregar_a_mensaje(mensaje_out, "%d%d%s", mov->id_carpincho, mov->nro_pagina, mov->buffer);
+			enviar_mensaje(socket, mensaje_out);
+
+			mensaje_in = recibir_mensaje(socket);
+			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
+			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
+				mov->respuesta = true;
         	break;
         case GET_PAGE:
-        	hacer_swap_in((int)socket_swap, movimiento_pendiente);
+			log_info(logger, "Recibo un get_page");
+			mensaje_out = crear_mensaje(GET_PAGE);
+			agregar_a_mensaje(mensaje_out, "%d%d", mov->id_carpincho, mov->nro_pagina);
+			enviar_mensaje(socket, mensaje_out);
+
+			mensaje_in = recibir_mensaje(socket);
+			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
+			log_info(logger, "Contenido: %s", (char *)list_get(mensaje_in, 1));
+			if((uint32_t)list_get(mensaje_in, 0) == DATA_CHAR) {
+				log_info(logger, "Cargo la pagina");
+				mov->respuesta = true;
+				mov->buffer = (void *)list_get(mensaje_in, 1);
+			}
         	break;
-        case SUSPEND:
-        	// suspender_proceso(movimiento_pendiente->id_carpincho);
-        	break;
-        // case MORIR:
-        // 	morir();
+		case RM_PAGE:
+			log_info(logger, "Recibo un rm_page");
+
+			mensaje_out = crear_mensaje(mov->accion);
+			agregar_a_mensaje(mensaje_out, "%d", mov->id_carpincho);
+			enviar_mensaje(socket, mensaje_out);
+			
+			mensaje_in = recibir_mensaje(socket);
+			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
+				mov->respuesta = true;
+			break;
         default:
+			log_info(logger, "Recibo un default");			
+			mov->respuesta = false;
         	break;
         }
-        if(movimiento_pendiente->buffer) free(movimiento_pendiente->buffer);
-        	free(movimiento_pendiente);
+		sem_post(&sem_respuesta);
+		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(mensaje_in);
     }
-    // free(continuar_consola);
+	log_info(logger, "Salgo del while");
     return NULL;
 }
 
 t_movimiento *obtener_movimiento() {
 	sem_wait(&sem_movimiento);
 	pthread_mutex_lock(&mutex_movimientos);
-	t_movimiento *movimiento_pendiente = queue_pop(movimientos_pendientes);
+	t_movimiento *mov = queue_pop(movimientos_pendientes);
 	pthread_mutex_unlock(&mutex_movimientos);
-	return movimiento_pendiente;
+	return mov;
 }
 
-void hacer_swap_out(int socket, t_movimiento *mov) {
-	t_mensaje *mensaje_out = crear_mensaje(mov->accion);
-	agregar_a_mensaje(mensaje_out, "%d%d%s", mov->id_carpincho, mov->nro_pagina, mov->buffer);
-	enviar_mensaje(socket, mensaje_out);
-	free(mov->buffer);
-	liberar_mensaje_out(mensaje_out);
-
-	t_list *mensaje_in = recibir_mensaje(socket);
-	// if((int)list_get(0, mensaje_in) == TODOOK)
-	// 	return EXITO;
-	// else
-	// 	return ;
-	liberar_mensaje_in(mensaje_in);
-}
-
-void hacer_swap_in(int socket, t_movimiento *mov) {
-	t_mensaje *mensaje_out = crear_mensaje(GET_PAGE);
-	agregar_a_mensaje(mensaje_out, "%d%d", mov->id_carpincho, mov->nro_pagina);
-	enviar_mensaje(socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
-
-	t_list *mensaje_in = recibir_mensaje(socket);
-
-	if((int)list_get(mensaje_in, 0) != DATA) {
-		// ERROR
-	}
-	// else
-	// TODO Ver si se puede simplificar la copia del buffer
-	char *buffer = malloc(config_memoria.tamanio_pagina);
-	memcpy(buffer, (char *)list_get(mensaje_in, 1), config_memoria.tamanio_pagina);
-
-	//pagina = asignar_pagina_memoria();
-	//escribir_pagina(pagina, buffer);
-	liberar_mensaje_in(mensaje_in);
-}
-
-void crear_movimiento_swap(uint8_t accion, uint32_t id_carpincho, uint32_t nro_pagina, char *buffer) {
-	t_movimiento *nuevo_mov = malloc(sizeof(t_movimiento *));
+bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_pagina, char *buffer) {
+	t_movimiento *nuevo_mov = malloc(sizeof(t_movimiento));
 	nuevo_mov->accion = accion;
 	nuevo_mov->id_carpincho = id_carpincho;
 	nuevo_mov->nro_pagina = nro_pagina;
+	nuevo_mov->respuesta = false;
 	if(accion == SET_PAGE)
-		nuevo_mov->buffer = strdup(buffer);
+		nuevo_mov->buffer = buffer;
+	
+	log_info(logger, "Accion: %d/%d", nuevo_mov->accion, accion);
+	log_info(logger, "ID: %d/%d", nuevo_mov->id_carpincho, id_carpincho);
+	log_info(logger, "NRO_PAGINA: %d/%d", nuevo_mov->nro_pagina, nro_pagina);
 
 	pthread_mutex_lock(&mutex_movimientos);
 	queue_push(movimientos_pendientes, nuevo_mov);
 	pthread_mutex_unlock(&mutex_movimientos);
 
+	log_info(logger, "Posteo movimiento y espero respuesta");
 	sem_post(&sem_movimiento);
+	sem_wait(&sem_respuesta);
+
+	log_info(logger, "Recibo respuesta");
+	bool respuesta = nuevo_mov->respuesta;
+
+	log_info(logger, "0");
+	if(nuevo_mov->buffer) {
+		log_info(logger, "0");
+		if(accion == SET_PAGE) {
+			free(nuevo_mov->buffer);
+		}
+		if(accion == GET_PAGE) {
+			memcpy(buffer, nuevo_mov->buffer, config_memoria.tamanio_pagina);
+			free(nuevo_mov->buffer);
+		}
+	}
+	free(nuevo_mov);
+
+	log_info(logger, "Finalizo movimiento. Respuesta = %d", respuesta);
+
+	return respuesta;
 }
 
 t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
-
 	bool encontre_marco = false;
 	t_marco* marco_referencia;
 	uint32_t puntero_clock = 0;
@@ -147,12 +203,17 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho) {
 	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
 	uint32_t nro_paginas = nro_paginas_reemplazo();
 
-	t_marco *marco_a_reemplazar;
-	if(config_memoria.algoritmo_reemplazo == LRU)
-		marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
-	if(config_memoria.algoritmo_reemplazo == CLOCK)
-		marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
-	reservar_marco(marco_a_reemplazar);
+	t_marco* marco_a_reemplazar;
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
+		marco_a_reemplazar = obtener_marco_libre();
+	}
+	if(!marco_a_reemplazar) {
+		if(config_memoria.algoritmo_reemplazo == LRU)
+			marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
+		if(config_memoria.algoritmo_reemplazo == CLOCK)
+			marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
+	}
+	reservar_marco(marco_a_reemplazar); // ?????
 	return marco_a_reemplazar;
 }
 
@@ -218,15 +279,4 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 	}
 
 	return atoi(tiempo);
-}
-
-void suspend(uint32_t id) {
-	t_marco **lista_marcos = obtener_marcos_proceso(id);
-	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
-
-	for(int i = 0; i < cant_marcos; i++) {
-		void *buffer = malloc(config_memoria.tamanio_pagina);
-		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
-		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
-	}
 }

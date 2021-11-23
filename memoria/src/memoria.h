@@ -63,6 +63,8 @@ typedef struct {
     void* heap_metadata;
 } t_carpincho;
 
+// pthread_t nuevo_carpincho;
+
 t_memoria_ram memoria_ram;
 t_config* config;			// Creo que no tiene que ser global
 t_config_memoria config_memoria;

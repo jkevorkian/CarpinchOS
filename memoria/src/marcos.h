@@ -2,15 +2,13 @@
 #define _MARCOS_H_
 
 #include <commons/temporal.h>
-#include <pthread.h>
+#include <pthread.h>            // Para mutex
 
 #include "memoria.h"
-#include "carpincho.h"
 #include "swap.h"
 
 bool tengo_marcos_suficientes(uint32_t);
 
-// TODO: son lo mismo? elegir una
 // SON DISTINTOS, OBTENER MARCO DEVUELVE UN MARCO PREVIAMENTE ASIGNADO
 t_marco* obtener_marco_libre();
 t_marco* obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina);
@@ -25,5 +23,8 @@ void reservar_marco(t_marco *marco_auxiliar);
 
 t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t);
 t_entrada_tp* crear_nueva_pagina(uint32_t, t_carpincho*);		// REVISAR
+
+void suspend(uint32_t id);
+void unsuspend(uint32_t id);
 
 #endif /* _MARCOS_H_ */
