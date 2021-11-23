@@ -25,9 +25,12 @@ int main(void) {
 	ip = config_get_string_value(config, "IP_SWAP");
 	char* puerto = config_get_string_value(config, "PUERTO_SWAP");
 	iniciar_swap(ip, puerto);
+	log_info(logger, "Voy a cancelar hilo");
+	// pthread_cancel(nuevo_carpincho);
 
 	// terminar_programa(logger, config);
-	exit(1);
+	// exit(1);
+	return 0;
 }
 
 void signal_handler_1(int sig) {

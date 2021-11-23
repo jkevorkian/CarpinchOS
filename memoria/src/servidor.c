@@ -26,7 +26,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		crear_carpincho(id);
 		// puede_iniciar() hay_memoria_suficiente()
 		// Creo un hilo para que el carpincho se comunique de forma particular
-		pthread_t nuevo_carpincho;
+		// pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));
 
 		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
@@ -44,6 +44,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(info_carpincho->socket));
 		enviar_mensaje(fd_carpincho, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
 		// Elimino la conexión auxiliar con el carpincho
 		close(fd_carpincho);
@@ -64,8 +65,6 @@ void *rutina_creador_movimientos(void *pepe) {
 
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
-
-	char pagina_generica[32] = "Esta es la pagina de salida";
 
 	bool respuesta;
 	char *buffer;
@@ -99,12 +98,10 @@ void *rutina_creador_movimientos(void *pepe) {
 			else
 				mensaje_out = crear_mensaje(NO_MEMORY);
 			enviar_mensaje(socket, mensaje_out);
+			free(buffer);
 			break;
 		case SET_PAGE:
 			log_info(logger, "Me llego un set_page");
-			
-			buffer = malloc(config_memoria.tamanio_pagina);
-			memcpy(buffer, pagina_generica, config_memoria.tamanio_pagina);
 
 			respuesta = crear_movimiento_swap(SET_PAGE, (int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), (char *)list_get(mensaje_in, 3));
 			log_info(logger, "Respuesta: %d", respuesta);
@@ -134,8 +131,10 @@ void *rutina_creador_movimientos(void *pepe) {
 			
 			respuesta = crear_movimiento_swap(EXIT_C, (int)list_get(mensaje_in, 1), 0, NULL);
 			log_info(logger, "Respuesta: %d", respuesta);
-			break;
+			continue;
 		}
+		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(mensaje_in);
 	}
 	return NULL;
 }
@@ -149,6 +148,7 @@ bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 	// pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
 
 	manejar_test_swap((void *)socket_swap);
+	log_info(logger, "Salgo de iniciar_swap");
 	return true;
 }
 

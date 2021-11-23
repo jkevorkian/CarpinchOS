@@ -21,8 +21,10 @@ typedef struct {
 	bool respuesta;
 }t_movimiento;
 
-sem_t *sem_movimiento;
-sem_t *sem_respuesta;
+// sem_t *sem_movimiento;
+// sem_t *sem_respuesta;
+sem_t sem_movimiento;
+sem_t sem_respuesta;
 
 t_queue *movimientos_pendientes;
 pthread_mutex_t mutex_movimientos;
