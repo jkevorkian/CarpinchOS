@@ -33,6 +33,7 @@ int main() {
 			nuevo_carpincho->responder_wait = false;
 			nuevo_carpincho->responder_IO = false;
 			nuevo_carpincho->id_semaforo_bloqueante = -1;
+			nuevo_carpincho->debe_morir = false;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
