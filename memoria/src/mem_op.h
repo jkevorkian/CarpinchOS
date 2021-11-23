@@ -8,7 +8,6 @@
 #ifndef MEM_OP_H_
 #define MEM_OP_H_
 
-#include "memoria.h"
 #include "read_write_op.h"
 
 uint32_t mem_alloc(uint32_t carpincho, uint32_t tamanio);

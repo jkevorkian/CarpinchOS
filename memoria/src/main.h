@@ -1,7 +1,6 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include "memoria.h"
 #include "servidor.h"
 #include <signal.h>
 

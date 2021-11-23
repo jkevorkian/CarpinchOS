@@ -8,7 +8,6 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <math.h>
-
 #include <stdbool.h>
 
 #define IP_RAM "127.0.0.1"

@@ -1,8 +1,6 @@
 #include "marcos.h"
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
-	// lo mismo con los marcos que se pidan para inificar el heapMetaData
-
 	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 	t_marco* marco;
 	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
@@ -16,7 +14,7 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 		// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho);
 		reasignar_marco(id_carpincho, nro_pagina, marco);
-	 }
+	}
 	return marco;
 }
 
@@ -47,12 +45,10 @@ void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco)
 	marco->duenio = id_carpincho;
 	marco->pagina_duenio = nro_pagina;
 	marco->bit_modificado = false;
-	marco->bit_uso = true;
+	marco->bit_uso = false;
 
 	// pedir pagina a swap
-	// void * buffer = swap_in(id_carpincho, nro_pagina);
-	//memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-	// pthread_mutex_lock(&marco->mutex);
+	crear_movimiento_swap(GET_PAGE, id_carpincho, nro_pagina, NULL);
 
 	//actualizar_tlb();
 
@@ -77,7 +73,7 @@ t_marco* obtener_marco_libre() {
 		}
     }
 
-    /*
+    /* Esto no va
     t_marco* marco = pedir_frame_swap();
     */
 
@@ -104,9 +100,10 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
         if(contador_necesarios == 0) return true;
     }
 
-    //seguir buscando en swap
-
-    return false;
+	if(crear_movimiento_swap(NEW_PAGE, /*id_carpincho*/1, contador_necesarios, NULL))
+		return true;
+	else
+		return false;
 }
 
 t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t id) {
@@ -137,4 +134,32 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
 
 	return pagina;
+}
+
+void suspend(uint32_t id) {
+	t_marco **lista_marcos = obtener_marcos_proceso(id);
+	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
+
+	for(int i = 0; i < cant_marcos; i++) {
+		void *buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
+
+		lista_marcos[i]->libre = true;
+		// actualizar tlb y tabla de paginas
+	}
+}
+
+void unsuspend(uint32_t id) {
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL)
+		return;
+	// t_marco **lista_marcos = obtener_marcos_proceso(id);
+	// uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
+
+	// continuar
+	/*for(int i = 0; i < cant_marcos; i++) {
+		void *buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+		crear_movimiento_swap(GET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
+	}*/
 }

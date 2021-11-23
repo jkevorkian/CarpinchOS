@@ -1,0 +1,555 @@
+==25278== Memcheck, a memory error detector
+==25278== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==25278== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==25278== Command: bin/memoria
+==25278== Parent PID: 25277
+==25278== 
+==25278== Thread 2:
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B0: crear_movimiento_swap (swap.c:103)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x424332c is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B9: crear_movimiento_swap (swap.c:104)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4243330 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B4F7: crear_movimiento_swap (swap.c:108)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x424332c is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B514: crear_movimiento_swap (swap.c:109)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4243330 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 1:
+==25278== Invalid read of size 4
+==25278==    at 0x804BB67: manejar_test_swap (swap.c:293)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x424332c is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BB84: manejar_test_swap (swap.c:294)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4243330 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BC02: manejar_test_swap (swap.c:304)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4243330 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BC08: manejar_test_swap (swap.c:304)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x424332c is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 1
+==25278==    at 0x804BCAC: manejar_test_swap (swap.c:312)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4243338 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 2:
+==25278== Invalid read of size 1
+==25278==    at 0x804B5C9: crear_movimiento_swap (swap.c:129)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4243338 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B5D3: crear_movimiento_swap (swap.c:130)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4243334 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AD1B: rutina_creador_movimientos (servidor.c:79)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B0: crear_movimiento_swap (swap.c:103)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x42508fc is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B9: crear_movimiento_swap (swap.c:104)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250900 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B4F7: crear_movimiento_swap (swap.c:108)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x42508fc is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B514: crear_movimiento_swap (swap.c:109)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250900 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 1:
+==25278== Invalid read of size 4
+==25278==    at 0x804BE1A: manejar_test_swap (swap.c:338)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4250900 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BE20: manejar_test_swap (swap.c:338)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x42508fc is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 1
+==25278==    at 0x804BED7: manejar_test_swap (swap.c:347)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4250908 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804BEF1: manejar_test_swap (swap.c:348)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4250904 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BF0F: manejar_test_swap (swap.c:349)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4250904 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 2:
+==25278== Invalid read of size 1
+==25278==    at 0x804B5C9: crear_movimiento_swap (swap.c:129)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250908 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B5D3: crear_movimiento_swap (swap.c:130)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250904 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B5FF: crear_movimiento_swap (swap.c:133)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250904 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B62B: crear_movimiento_swap (swap.c:135)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4250904 is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804ADE8: rutina_creador_movimientos (servidor.c:92)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B0: crear_movimiento_swap (swap.c:103)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dc4 is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4B9: crear_movimiento_swap (swap.c:104)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dc8 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 4
+==25278==    at 0x804B4D5: crear_movimiento_swap (swap.c:105)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dcc is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B4F7: crear_movimiento_swap (swap.c:108)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dc4 is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B514: crear_movimiento_swap (swap.c:109)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dc8 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 1:
+==25278== Invalid read of size 4
+==25278==    at 0x804BD02: manejar_test_swap (swap.c:320)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4289dcc is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BD08: manejar_test_swap (swap.c:320)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4289dc8 is 4 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BD0E: manejar_test_swap (swap.c:320)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4289dc4 is 0 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804BD3B: manejar_test_swap (swap.c:322)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4289dcc is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid write of size 1
+==25278==    at 0x804BDBE: manejar_test_swap (swap.c:329)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278==  Address 0x4289dd0 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Thread 2:
+==25278== Invalid read of size 1
+==25278==    at 0x804B5C9: crear_movimiento_swap (swap.c:129)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dd0 is 12 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x804B5D3: crear_movimiento_swap (swap.c:130)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4289dcc is 8 bytes after a block of size 4 alloc'd
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804B49B: crear_movimiento_swap (swap.c:101)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== Invalid read of size 4
+==25278==    at 0x40566EE: list_find_element (list.c:425)
+==25278==    by 0x40555C2: list_get (list.c:59)
+==25278==    by 0x804B04A: rutina_creador_movimientos (servidor.c:135)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  Address 0x4 is not stack'd, malloc'd or (recently) free'd
+==25278== 
+==25278== 
+==25278== Process terminating with default action of signal 11 (SIGSEGV)
+==25278==  Access not within mapped region at address 0x4
+==25278==    at 0x40566EE: list_find_element (list.c:425)
+==25278==    by 0x40555C2: list_get (list.c:59)
+==25278==    by 0x804B04A: rutina_creador_movimientos (servidor.c:135)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278==  If you believe this happened as a result of a stack
+==25278==  overflow in your program's main thread (unlikely but
+==25278==  possible), you can try to increase the size of the
+==25278==  main thread stack using the --main-stacksize= flag.
+==25278==  The main thread stack size used in this run was 8388608.
+==25278== 
+==25278== HEAP SUMMARY:
+==25278==     in use at exit: 17,352 bytes in 362 blocks
+==25278==   total heap usage: 4,719 allocs, 4,357 frees, 142,964 bytes allocated
+==25278== 
+==25278== Thread 1:
+==25278== 20 (8 direct, 12 indirect) bytes in 1 blocks are definitely lost in loss record 29 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804C67C: crear_mensaje (sockets.c:144)
+==25278==    by 0x804AB5F: iniciar_servidor (servidor.c:44)
+==25278==    by 0x8049A0A: main (main.c:23)
+==25278== 
+==25278== 32 bytes in 1 blocks are definitely lost in loss record 35 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x40EE2C5: strdup (strdup.c:42)
+==25278==    by 0x804B4CC: crear_movimiento_swap (swap.c:105)
+==25278==    by 0x804AEF6: rutina_creador_movimientos (servidor.c:109)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== 32 (16 direct, 16 indirect) bytes in 2 blocks are definitely lost in loss record 36 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x40553FE: list_create (list.c:32)
+==25278==    by 0x804CA38: recibir_mensaje (sockets.c:239)
+==25278==    by 0x804BC64: manejar_test_swap (swap.c:309)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278== 
+==25278== 32 (16 direct, 16 indirect) bytes in 2 blocks are definitely lost in loss record 37 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804C67C: crear_mensaje (sockets.c:144)
+==25278==    by 0x804AD4C: rutina_creador_movimientos (servidor.c:82)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== 48 (16 direct, 32 indirect) bytes in 2 blocks are definitely lost in loss record 39 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804C67C: crear_mensaje (sockets.c:144)
+==25278==    by 0x804BBE2: manejar_test_swap (swap.c:302)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278== 
+==25278== 136 bytes in 1 blocks are possibly lost in loss record 49 of 63
+==25278==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==25278==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==25278==    by 0x4062CC3: allocate_stack (allocatestack.c:588)
+==25278==    by 0x4062CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==25278==    by 0x804AB39: iniciar_servidor (servidor.c:40)
+==25278==    by 0x8049A0A: main (main.c:23)
+==25278== 
+==25278== 192 (64 direct, 128 indirect) bytes in 8 blocks are definitely lost in loss record 50 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804C67C: crear_mensaje (sockets.c:144)
+==25278==    by 0x804BE10: manejar_test_swap (swap.c:337)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278== 
+==25278== 256 bytes in 8 blocks are definitely lost in loss record 54 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804ADB4: rutina_creador_movimientos (servidor.c:90)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== 256 bytes in 8 blocks are definitely lost in loss record 55 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804BEE8: manejar_test_swap (swap.c:348)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278== 
+==25278== 392 (88 direct, 304 indirect) bytes in 11 blocks are definitely lost in loss record 58 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x40553FE: list_create (list.c:32)
+==25278==    by 0x804CA38: recibir_mensaje (sockets.c:239)
+==25278==    by 0x804AC93: rutina_creador_movimientos (servidor.c:74)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== 416 (64 direct, 352 indirect) bytes in 8 blocks are definitely lost in loss record 59 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x804C67C: crear_mensaje (sockets.c:144)
+==25278==    by 0x804AE32: rutina_creador_movimientos (servidor.c:96)
+==25278==    by 0x4062294: start_thread (pthread_create.c:333)
+==25278==    by 0x41600AD: clone (clone.S:114)
+==25278== 
+==25278== 448 (64 direct, 384 indirect) bytes in 8 blocks are definitely lost in loss record 60 of 63
+==25278==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==25278==    by 0x40553FE: list_create (list.c:32)
+==25278==    by 0x804CA38: recibir_mensaje (sockets.c:239)
+==25278==    by 0x804BE50: manejar_test_swap (swap.c:342)
+==25278==    by 0x804B128: iniciar_swap (servidor.c:157)
+==25278==    by 0x8049A4D: main (main.c:27)
+==25278== 
+==25278== LEAK SUMMARY:
+==25278==    definitely lost: 880 bytes in 59 blocks
+==25278==    indirectly lost: 1,244 bytes in 101 blocks
+==25278==      possibly lost: 136 bytes in 1 blocks
+==25278==    still reachable: 15,092 bytes in 201 blocks
+==25278==         suppressed: 0 bytes in 0 blocks
+==25278== Reachable blocks (those to which a pointer was found) are not shown.
+==25278== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==25278== 
+==25278== For counts of detected and suppressed errors, rerun with: -v
+==25278== ERROR SUMMARY: 169 errors from 49 contexts (suppressed: 0 from 0)
