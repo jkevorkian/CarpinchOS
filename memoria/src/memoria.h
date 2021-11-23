@@ -65,6 +65,8 @@ typedef struct {
 
 // pthread_t nuevo_carpincho;
 
+pthread_mutex_t mutex_asignacion_marcos;
+
 t_memoria_ram memoria_ram;
 t_config* config;			// Creo que no tiene que ser global
 t_config_memoria config_memoria;

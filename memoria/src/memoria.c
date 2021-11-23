@@ -38,6 +38,8 @@ bool iniciar_memoria(t_config* config) {
 		config_memoria.tipo_asignacion = DINAMICA_GLOBAL;
 	}
 
+	pthread_mutex_init(&mutex_asignacion_marcos, NULL);
+
 	iniciar_marcos(config_memoria.cant_marcos);
 	iniciar_tlb();  
 
