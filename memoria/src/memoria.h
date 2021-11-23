@@ -62,7 +62,7 @@ typedef struct {
 	t_list* tabla_paginas;
 } t_carpincho;
 
-pthread_t nuevo_carpincho;
+// pthread_t nuevo_carpincho;
 
 t_memoria_ram memoria_ram;
 t_config* config;			// Creo que no tiene que ser global

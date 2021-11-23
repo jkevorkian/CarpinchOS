@@ -14,20 +14,20 @@ int main(void) {
 	signal(SIGUSR2, &signal_handler_2);
 	signal(SIGINT,  &signal_handler_3);
 
-	char* ip;
+	// char* ip;
 
-	// iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_int_value(config, "PUERTO_SWAP"));
+	iniciar_swap(config_get_string_value(config, "IP_SWAP"), config_get_string_value(config, "PUERTO_SWAP"));
 	
-	ip = config_get_string_value(config, "IP");
-	int puerto_serv = config_get_int_value(config, "PUERTO");
-	iniciar_servidor(ip, puerto_serv);
-	// iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
-	ip = config_get_string_value(config, "IP_SWAP");
-	char* puerto = config_get_string_value(config, "PUERTO_SWAP");
-	iniciar_swap(ip, puerto);
-	log_info(logger, "Voy a cancelar hilo");
+	// ip = config_get_string_value(config, "IP");
+	// int puerto_serv = config_get_int_value(config, "PUERTO");
+	// iniciar_servidor(ip, puerto_serv);
+	iniciar_servidor(config_get_string_value(config, "IP"), config_get_int_value(config, "PUERTO"));
+	// ip = config_get_string_value(config, "IP_SWAP");
+	// char* puerto = config_get_string_value(config, "PUERTO_SWAP");
+	// iniciar_swap(ip, puerto);
+	
+	// log_info(logger, "Voy a cancelar hilo");
 	// pthread_cancel(nuevo_carpincho);
-
 	// terminar_programa(logger, config);
 	// exit(1);
 	return 0;
