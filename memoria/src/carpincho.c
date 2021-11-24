@@ -125,19 +125,25 @@ bool asignacion_global(t_carpincho* carpincho) {
 }
 
 void setear_condicion_inicial(uint32_t id) {
-	uint32_t tamanio_alloc_1 = 20;
-	// uint32_t tamanio_alloc_2 = 13;
-	// uint32_t tamanio_alloc_3 = 32;
+	uint32_t tamanio_alloc[3] = { 20, 13, 32 };
 	
 	uint32_t posicion_heap = 0;
-	set_prevAlloc(id, posicion_heap, HEAP_NULL);
-	set_nextAlloc(id, posicion_heap, tamanio_alloc_1 + TAMANIO_HEAP);	// El alloc de prueba ocupa 20 bytes
-	reset_isFree(id, posicion_heap);
-
-	posicion_heap = posicion_heap + tamanio_alloc_1 + TAMANIO_HEAP;
-	set_prevAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, 0);
-	set_nextAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, HEAP_NULL);	// El alloc de prueba ocupa 21 bytes
-	reset_isFree(id, tamanio_alloc_1 + TAMANIO_HEAP);
+	uint32_t next_alloc = tamanio_alloc[0] + TAMANIO_HEAP;
+	uint32_t prev_alloc = HEAP_NULL;
+	for(int i = 1; i < 4; i++) {
+		log_info(logger, "Prev: %d; main: %d; next: %d", prev_alloc, posicion_heap, next_alloc);
+		set_prevAlloc(id, posicion_heap, prev_alloc);
+		set_nextAlloc(id, posicion_heap, next_alloc);
+		reset_isFree(id, posicion_heap);
+		prev_alloc = posicion_heap;
+		posicion_heap = next_alloc;
+		if(i < 3)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
+		else		next_alloc = HEAP_NULL;
+	}
+	log_info(logger, "Prev: %d; main: %d; next: %d", prev_alloc, posicion_heap, next_alloc);
+	set_prevAlloc(id, posicion_heap, prev_alloc);
+	set_nextAlloc(id, posicion_heap, next_alloc);	// El alloc de prueba ocupa 21 bytes
+	set_isFree(id, posicion_heap);
 }
 
 void rutina_test_carpincho(data_carpincho *info_carpincho) {
@@ -161,16 +167,23 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
-
-			mensaje_out = crear_mensaje(MEM_ALLOC);
-			agregar_a_mensaje(mensaje_out, "%d", 0);
+			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			
+			if(mem_free(carpincho->id, desplazamiento_d))
+				mensaje_out = crear_mensaje(TODOOK);
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_FREE:
 			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
-			// mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
-
-			mensaje_out = crear_mensaje(TODOOK);
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			
+			if(mem_free(carpincho->id, desplazamiento_d))
+				mensaje_out = crear_mensaje(TODOOK);
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_READ:

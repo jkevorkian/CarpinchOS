@@ -36,7 +36,8 @@ void iniciar_servidor(char *ip, int puerto) {
 		// pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
 
 		// Test
-		pthread_create(&nuevo_carpincho, NULL, rutina_creador_movimientos, (void *)info_carpincho);
+		// pthread_create(&nuevo_carpincho, NULL, rutina_creador_movimientos, (void *)info_carpincho);
+		// pthread_create(&nuevo_carpincho, NULL, rutina_test_carpincho, (void *)info_carpincho);
 
 		log_info(logger, "Comunico al caprincho %d el nuevo puerto con el cual se debe comunicar.", id);
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
@@ -49,8 +50,8 @@ void iniciar_servidor(char *ip, int puerto) {
 		close(fd_carpincho);
 		id++;
 
-		// rutina_test_carpincho(info_carpincho);
-		// exit(1);
+		rutina_test_carpincho(info_carpincho);
+		exit(1);
 	}
 }
 

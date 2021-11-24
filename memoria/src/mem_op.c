@@ -18,11 +18,12 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	bool uni_con_anterior = false;
 	// BUSCO EL ALLOC SIGUIENTE y, si corresponde, actualizo el nextAlloc del primero
 	uint32_t pos_alloc_siguiente = get_nextAlloc(id_carpincho, dir_logica_heap);
-	if(HEAP_NULL != pos_alloc_siguiente) {
-		if(get_isFree(id_carpincho, pos_alloc_siguiente)) {
-			pos_final_free = get_nextAlloc(id_carpincho, pos_alloc_siguiente);
-			set_nextAlloc(id_carpincho, dir_logica_heap, pos_final_free);
-		}
+	if(HEAP_NULL == pos_alloc_siguiente)
+		return false;
+	
+	if(get_isFree(id_carpincho, pos_alloc_siguiente)) {
+		pos_final_free = get_nextAlloc(id_carpincho, pos_alloc_siguiente);
+		set_nextAlloc(id_carpincho, dir_logica_heap, pos_final_free);
 	}
 
 	// BUSCO EL ALLOC ANTERIOR y, si corresponde, le actualizo el nextAlloc
@@ -36,7 +37,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 
 	// SI SE MEMORIA AL FINAL, LIBERO LAS PAGINAS QUE HAGAN FALTA
 	t_list *tabla_de_paginas = ((t_carpincho *)carpincho_de_lista(id_carpincho))->tabla_paginas;
-	t_entrada_tp *entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
+	t_entrada_tp *entrada;
 	
 	uint32_t desplazamiento = dir_logica_heap;
 	if(uni_con_anterior) desplazamiento = pos_alloc_anterior;
@@ -47,6 +48,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 			desplazamiento += TAMANIO_HEAP;
 		
 		while(desplazamiento < list_size(tabla_de_paginas) * config_memoria.tamanio_pagina) {
+			entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
 			remover_pagina(id_carpincho, entrada);
 			// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
 		}

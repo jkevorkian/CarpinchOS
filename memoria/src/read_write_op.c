@@ -37,7 +37,7 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 		inicio_pagina = 0;
 		pagina_actual++;
 	}
-	log_info(logger, "Inscribo %s", data);
+	// log_info(logger, "Inscribo %s", data);
     return data;
 }
 
@@ -82,7 +82,7 @@ bool get_isFree(uint32_t id, uint32_t inicio_heap) {
 	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
 
 	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(&bit_esFree, inicio_memoria(marco->nro_real, posicion_compuesta.quot), 1);
+	memcpy(&bit_esFree, inicio_memoria(marco->nro_real, posicion_compuesta.rem), 1);
 	soltar_marco(marco);
 
 	if(bit_esFree)	return true;
@@ -94,7 +94,7 @@ void set_isFree(uint32_t id, uint32_t inicio_heap) {
 	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
 
 	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.quot), &bit_esFree, 1);
+	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.rem), &bit_esFree, 1);
 	soltar_marco(marco);
 }
 
@@ -103,7 +103,7 @@ void reset_isFree(uint32_t id, uint32_t inicio_heap) {
 	div_t posicion_compuesta = div(inicio_heap + 8, config_memoria.tamanio_pagina);
 
 	t_marco *marco = obtener_marco(id, posicion_compuesta.quot);
-	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.quot), &bit_esFree, 1);
+	memcpy(inicio_memoria(marco->nro_real, posicion_compuesta.rem), &bit_esFree, 1);
 	soltar_marco(marco);
 }
 
