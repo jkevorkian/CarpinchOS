@@ -18,4 +18,6 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido);
 uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento);
 uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig);
 
+void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento);
+
 #endif /* MEM_OP_H_ */

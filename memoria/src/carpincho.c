@@ -146,6 +146,24 @@ void setear_condicion_inicial(uint32_t id) {
 	set_isFree(id, posicion_heap);
 }
 
+void obtener_condicion_final(uint32_t id) {
+	uint32_t tamanio_alloc[3] = { 20, 13, 32 };
+	
+	uint32_t posicion_heap = 0;
+	uint32_t next_alloc = tamanio_alloc[0] + TAMANIO_HEAP;
+	for(int i = 1; i < 4; i++) {
+		log_info(logger, "Valor heap %d: %d", i - 1, get_prevAlloc(id, posicion_heap));
+		log_info(logger, "Valor heap %d: %d", i - 1, get_nextAlloc(id, posicion_heap));
+		log_info(logger, "Valor heap %d: %d", i - 1, get_isFree(id, posicion_heap));
+		posicion_heap = next_alloc;
+		if(i < 3)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
+		else		next_alloc = HEAP_NULL;
+	}
+	log_info(logger, "Valor heap 3: %d", get_prevAlloc(id, posicion_heap));
+	log_info(logger, "Valor heap 3: %d", get_nextAlloc(id, posicion_heap));	// El alloc de prueba ocupa 21 bytes
+	log_info(logger, "Valor heap 3: %d", get_isFree(id, posicion_heap));
+}
+
 void rutina_test_carpincho(data_carpincho *info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
 	bool seguir = true;
@@ -185,6 +203,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
+			obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));

@@ -13,46 +13,44 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	set_isFree(id_carpincho, dir_logica_heap);
 
 	// UNIFICO EL NUEVO FREE CON LOS ADYACENTES
-	uint32_t pos_final_free = dir_logica_heap;	// posicion final del alloc libre que genero
-
-	bool uni_con_anterior = false;
-	// BUSCO EL ALLOC SIGUIENTE y, si corresponde, actualizo el nextAlloc del primero
-	uint32_t pos_alloc_siguiente = get_nextAlloc(id_carpincho, dir_logica_heap);
-	if(HEAP_NULL == pos_alloc_siguiente)
-		return false;
+	uint32_t prev_heap;
+	uint32_t main_heap = dir_logica - TAMANIO_HEAP;
+	uint32_t foot_heap;
 	
-	if(get_isFree(id_carpincho, pos_alloc_siguiente)) {
-		pos_final_free = get_nextAlloc(id_carpincho, pos_alloc_siguiente);
-		set_nextAlloc(id_carpincho, dir_logica_heap, pos_final_free);
+	uint32_t first_heap, last_heap;
+
+	// BUSCO EL ALLOC ANTERIOR y, si corresponde, los integro
+	prev_heap = get_prevAlloc(id_carpincho, main_heap);
+	if(HEAP_NULL == prev_heap || !get_isFree(id_carpincho, prev_heap)) {
+		first_heap = main_heap;
+	}
+	else {	// Se elimina el main_heap
+		first_heap = prev_heap;
 	}
 
-	// BUSCO EL ALLOC ANTERIOR y, si corresponde, le actualizo el nextAlloc
-	uint32_t pos_alloc_anterior = get_prevAlloc(id_carpincho, dir_logica_heap);
-	if(HEAP_NULL != pos_alloc_anterior) {
-		if(get_isFree(id_carpincho, pos_alloc_anterior)) {
-			set_nextAlloc(id_carpincho, pos_alloc_anterior, pos_final_free);
-			uni_con_anterior = true;
+	// BUSCO EL ALLOC SIGUIENTE y, si corresponde, los integro
+	foot_heap = get_nextAlloc(id_carpincho, main_heap);
+	if(!get_isFree(id_carpincho, foot_heap)) {
+		last_heap = foot_heap;
+	}
+	else {	// Se elimina el foot_heap
+		last_heap = get_nextAlloc(id_carpincho, foot_heap);
+	}
+	
+	if(main_heap != first_heap || foot_heap != last_heap) {
+		uint32_t bytes_ocupados = 1;
+		if(last_heap == HEAP_NULL) {
+			bytes_ocupados = first_heap > 0 ? first_heap + TAMANIO_HEAP : 0;
+			liberar_paginas_carpincho(id_carpincho, bytes_ocupados);
+		}
+		else {
+			set_prevAlloc(id_carpincho, last_heap, first_heap);
+		}
+		if(bytes_ocupados != 0) {
+			set_nextAlloc(id_carpincho, first_heap, last_heap);
 		}
 	}
 
-	// SI SE MEMORIA AL FINAL, LIBERO LAS PAGINAS QUE HAGAN FALTA
-	t_list *tabla_de_paginas = ((t_carpincho *)carpincho_de_lista(id_carpincho))->tabla_paginas;
-	t_entrada_tp *entrada;
-	
-	uint32_t desplazamiento = dir_logica_heap;
-	if(uni_con_anterior) desplazamiento = pos_alloc_anterior;
-	if(HEAP_NULL == get_nextAlloc(id_carpincho, desplazamiento)) {
-		if(HEAP_NULL == get_prevAlloc(id_carpincho, desplazamiento))
-			desplazamiento = 0;
-		else
-			desplazamiento += TAMANIO_HEAP;
-		
-		while(desplazamiento < list_size(tabla_de_paginas) * config_memoria.tamanio_pagina) {
-			entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
-			remover_pagina(id_carpincho, entrada);
-			// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
-		}
-	}
 	return true;
 }
 
@@ -202,16 +200,31 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	return true;
 }
 
-bool remover_pagina(uint32_t id_carpincho, t_entrada_tp * entrada) {
-	t_marco *marco;
+void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		return;
 	
-	if(entrada->presencia) {
-		pthread_mutex_lock(&mutex_asignacion_marcos);
-		marco = memoria_ram.mapa_fisico[entrada->nro_marco];
-		marco->libre = false;
-		marco->duenio = 0;
-		pthread_mutex_unlock(&mutex_asignacion_marcos);
+	t_list *tabla_de_paginas = ((t_carpincho *)carpincho_de_lista(id_carpincho))->tabla_paginas;
+	t_entrada_tp *entrada;
+	t_marco *marco;
+
+	div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
+	
+	uint32_t paginas_minimas = posicion_compuesta.quot;
+	if(posicion_compuesta.rem)
+		paginas_minimas++;
+	
+	while(paginas_minimas < list_size(tabla_de_paginas)) {
+		entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
+		// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
+		if(entrada->presencia) {
+			pthread_mutex_lock(&mutex_asignacion_marcos);
+			marco = memoria_ram.mapa_fisico[entrada->nro_marco];
+			marco->libre = false;
+			marco->duenio = 0;
+			pthread_mutex_unlock(&mutex_asignacion_marcos);
+		}
+		free(entrada);
+		crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
 	}
-	free(entrada);
-	return crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
 }
