@@ -92,12 +92,16 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	carpincho->tabla_paginas = list_create();
 
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(!asignacion_fija(carpincho)) return NULL;
+		if(!asignacion_fija(carpincho)) {
+			list_destroy(carpincho->tabla_paginas);
+			free(carpincho);
+			return NULL;
+		}
 	}
 
-	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-		if(!asignacion_global(carpincho)) return NULL;
-	}
+	// if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
+	//	if(!asignacion_global(carpincho)) return NULL;
+	// }
 
 	list_add(lista_carpinchos, carpincho);
 	log_info(logger, "Se admitio correctamente el carpincho #%d", carpincho->id);
@@ -118,6 +122,28 @@ bool asignacion_fija(t_carpincho* carpincho) {
 	}
 
 	return false;
+}
+
+bool asignacion_fija2(t_carpincho* carpincho) {
+	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
+	bool resultado = false;
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	if(tengo_marcos_suficientes(cant_marcos)){
+		if(crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
+			for(int i = 0; i < cant_marcos; i++){
+				t_marco* marco = obtener_marco_libre_mp();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+				t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+				list_add(carpincho->tabla_paginas, pagina);
+				pagina->nro_marco = marco->nro_real;
+				pagina->presencia = true;
+			}
+			carpincho->heap_metadata = NULL;
+			resultado = true;
+		}		
+	}
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
+
+	return resultado;
 }
 
 bool asignacion_global(t_carpincho* carpincho) {

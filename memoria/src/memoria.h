@@ -40,8 +40,11 @@ typedef struct{
     bool libre;				// to remove o cambiar lo de duenio
     bool bit_uso;
     bool bit_modificado;
-    char *temporal;
-    pthread_mutex_t mutex;	// TODO instanciar al inicializar memoria
+    char *temporal;         // "%H:%M:%S:%MS" => "12:51:59:331"
+    pthread_mutex_t mutex_espera_uso;	// TODO instanciar al inicializar memoria
+    pthread_mutex_t mutex_info_algoritmo;
+    // bool en_uso;
+    // pthread_mutex_t sem_espera_uso;
 } t_marco;
 
 typedef struct {
@@ -53,7 +56,9 @@ typedef struct {
 
 typedef struct {
 	bool presencia;		// demuestra que está actualizada la entrada
-	uint32_t nro_marco;
+	bool esta_vacia;
+    uint32_t nro_marco;
+    pthread_mutex_t mutex;
 } t_entrada_tp;
 
 typedef struct {

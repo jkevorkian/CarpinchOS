@@ -2,7 +2,7 @@
 
 t_marco** paginas_reemplazo(uint32_t id_carpincho);
 uint32_t nro_paginas_reemplazo();
-t_marco *marco_viejo(t_marco *marco1, t_marco *marco2);
+bool marco_mas_viejo(t_marco *marco1, t_marco *marco2);
 uint32_t obtener_tiempo(char tipo, t_marco *marco);
 
 t_movimiento *obtener_movimiento();
@@ -165,65 +165,89 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 	bool encontre_marco = false;
 	t_marco* marco_referencia;
 	uint32_t puntero_clock = 0;
-	uint32_t ciclo = 0;
+	uint8_t ciclo = 0;
 	while(!encontre_marco) {
 		marco_referencia = lista_paginas[puntero_clock];
 
+		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
 		switch(ciclo) {
 		case 0:
 			if(!marco_referencia->bit_uso && !marco_referencia->bit_modificado)
 				encontre_marco = true;
 			break;
 		case 1:
-			if(!marco_referencia->bit_uso && !marco_referencia->bit_modificado)
+			if(!marco_referencia->bit_uso && marco_referencia->bit_modificado)
 				encontre_marco = true;
 			else
-				// TODO reset_bit_uso(marco_referencia);	// Importante por concurrencia ?
+				marco_referencia->bit_uso = 0;
 			break;
 		}
+		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
+
 		puntero_clock++;
 		if(puntero_clock == nro_paginas) {
 			puntero_clock = 0;
-			ciclo = ciclo ? false : true;
+			ciclo = ciclo ? 0 : 1;
 		}
 	}
+	
+	pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
+	marco_referencia->bit_uso = false;
+	pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
+
 	return marco_referencia;
 }
 
 t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas) {
 	t_marco *marco_referencia = lista_paginas[0];
+	t_marco *marco_siguiente;
+	bool segundo_mas_viejo;
 
 	for(int i = 1; i < nro_paginas; i++) {
-		marco_referencia = marco_viejo(marco_referencia, lista_paginas[i]);
+		marco_siguiente = lista_paginas[i];
+		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
+		pthread_mutex_lock(&marco_siguiente->mutex_info_algoritmo);
+		segundo_mas_viejo = marco_mas_viejo(marco_referencia, marco_siguiente);
+		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
+		pthread_mutex_unlock(&marco_siguiente->mutex_info_algoritmo);
+
+		if(segundo_mas_viejo)	marco_referencia = marco_siguiente;
 	}
+
+	pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
+	marco_referencia->bit_uso = false;
+	pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
+
 	return marco_referencia;
 }
 
-t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho) {
+t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
 	uint32_t nro_paginas = nro_paginas_reemplazo();
 
 	t_marco* marco_a_reemplazar;
-	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-		marco_a_reemplazar = obtener_marco_libre();
-	}
-	if(!marco_a_reemplazar) {
-		if(config_memoria.algoritmo_reemplazo == LRU)
-			marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
-		if(config_memoria.algoritmo_reemplazo == CLOCK)
-			marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
-	}
-	reservar_marco(marco_a_reemplazar); // ?????
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	if(config_memoria.algoritmo_reemplazo == LRU)
+		marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
+	if(config_memoria.algoritmo_reemplazo == CLOCK)
+		marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
+
+	reasignar_marco(marco_a_reemplazar, id_carpincho, nro_pagina);
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
+	
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(lista_paginas);
+	pthread_mutex_lock(&marco_a_reemplazar->mutex_espera_uso);
 	return marco_a_reemplazar;
 }
 
 t_marco** paginas_reemplazo(uint32_t id_carpincho) {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return obtener_marcos_proceso(id_carpincho);
+		return obtener_marcos_proceso_af(id_carpincho);
 	else
 		return memoria_ram.mapa_fisico;
 }
 
+///////////////////////////////////////////////////////
 t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
 	uint32_t nro_marcos = config_memoria.cant_marcos;
 	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
@@ -240,6 +264,19 @@ t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
 	return marcos_proceso;
 }
 
+t_marco** obtener_marcos_proceso_af(uint32_t id_carpincho) {
+	uint32_t nro_marcos = config_memoria.cant_marcos;
+	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
+	uint32_t nro_marcos_encontrados = 0;
+	for(int i = 0; nro_marcos > nro_marcos_encontrados; i++) {
+		if(memoria_ram.mapa_fisico[i]->nro_real == id_carpincho) {
+			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
+			nro_marcos_encontrados++;
+		}
+	}
+	return marcos_proceso;
+}
+///////////////////////////////////////////////////////
 uint32_t nro_paginas_reemplazo() {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
 		return config_memoria.cant_marcos;
@@ -247,25 +284,23 @@ uint32_t nro_paginas_reemplazo() {
 		return config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 }
 
-t_marco *marco_viejo(t_marco *marco1, t_marco *marco2) {
-	// Formato temporal para LRU de marcos: HH:MM:SS
-	if(obtener_tiempo('H', marco1) > obtener_tiempo('H', marco2))
-		return marco1;
-	if(obtener_tiempo('H', marco1) < obtener_tiempo('H', marco2))
-		return marco2;
-	if(obtener_tiempo('M', marco1) > obtener_tiempo('M', marco2))
-		return marco1;
-	if(obtener_tiempo('M', marco1) < obtener_tiempo('M', marco2))
-		return marco2;
-	if(obtener_tiempo('S', marco1) > obtener_tiempo('S', marco2))
-		return marco1;
-	//if(obtener_tiempo('S', marco1) < obtener_hora('S', marco2))
-	else
-		return marco2;
+bool marco_mas_viejo(t_marco *marco1, t_marco *marco2) {
+	// Formato temporal para LRU de marcos: HH:MM:SS:mmm
+	if(obtener_tiempo('H', marco1) > obtener_tiempo('H', marco2))	return 0;
+	if(obtener_tiempo('H', marco1) < obtener_tiempo('H', marco2))	return 1;
+	if(obtener_tiempo('M', marco1) > obtener_tiempo('M', marco2))	return 0;
+	if(obtener_tiempo('M', marco1) < obtener_tiempo('M', marco2))	return 1;
+	if(obtener_tiempo('S', marco1) > obtener_tiempo('S', marco2))	return 0;
+	if(obtener_tiempo('S', marco1) < obtener_tiempo('S', marco2))	return 1;
+	if(obtener_tiempo('m', marco1) > obtener_tiempo('m', marco2))	return 0;
+	if(obtener_tiempo('m', marco1) < obtener_tiempo('m', marco2))	return 1;
+	else	return 0;	// Para evitar warnings
 }
+
 
 uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 	char tiempo[2];
+	char tiempo_ms[3];
 	switch(tipo) {
 	case 'H':
 		memcpy(tiempo, marco->temporal, 2);
@@ -276,6 +311,9 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco) {
 	case 'S':
 		memcpy(tiempo, marco->temporal + 6, 2);
 		break;
+	case 'm':
+		memcpy(tiempo_ms, marco->temporal + 9, 3);
+		return atoi(tiempo_ms);
 	}
 
 	return atoi(tiempo);
