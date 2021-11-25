@@ -227,16 +227,24 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina
 
 	t_marco* marco_a_reemplazar;
 	pthread_mutex_lock(&mutex_asignacion_marcos);
-	if(config_memoria.algoritmo_reemplazo == LRU)
-		marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
-	if(config_memoria.algoritmo_reemplazo == CLOCK)
-		marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
-
-	reasignar_marco(marco_a_reemplazar, id_carpincho, nro_pagina);
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
+		marco_a_reemplazar = obtener_marco_libre();
+		asignar_marco_libre(marco_a_reemplazar, id_carpincho, nro_pagina);
+	}
+		
+	if(!marco_a_reemplazar) {
+		if(config_memoria.algoritmo_reemplazo == LRU)
+			marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
+		if(config_memoria.algoritmo_reemplazo == CLOCK)
+			marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
+		reasignar_marco(marco_a_reemplazar, id_carpincho, nro_pagina);
+	}
+	
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
 	
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(lista_paginas);
-	pthread_mutex_lock(&marco_a_reemplazar->mutex_espera_uso);
+	// pthread_mutex_lock(&marco_a_reemplazar->mutex_espera_uso);
+	reservar_marco(marco_a_reemplazar);
 	return marco_a_reemplazar;
 }
 

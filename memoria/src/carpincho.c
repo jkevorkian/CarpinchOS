@@ -20,53 +20,48 @@ void *rutina_carpincho(void* info_carpincho) {
 		switch((int)list_get(mensaje_in, 0)) { 
 		case MEM_ALLOC:
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
-			mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
-
-			mensaje_out = crear_mensaje(MEM_ALLOC);
-			agregar_a_mensaje(mensaje_out, "%d", 0);
+			if(mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1)))
+				mensaje_out = crear_mensaje(TODOOK);
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_FREE:
 			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
-			mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
 			
-			mensaje_out = crear_mensaje(TODOOK);
+			if(mem_free(carpincho->id, (int)list_get(mensaje_in, 1)))
+				mensaje_out = crear_mensaje(TODOOK);
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
-			
-			marioneta = mem_read(carpincho->id, desplazamiento_d);
-			log_info(logger, "El contenido del alloc es: %s", marioneta);
-			mensaje_out = crear_mensaje(DATA_CHAR);
-			log_info(logger, "Creo mensaje");
-
-			agregar_a_mensaje(mensaje_out, "%s", marioneta);
+			if((marioneta = mem_read(carpincho->id, (int)list_get(mensaje_in, 1)))) {
+				log_info(logger, "El contenido del alloc es: %s", marioneta);
+				mensaje_out = crear_mensaje(DATA_CHAR);
+				agregar_a_mensaje(mensaje_out, "%s", marioneta);
+			}
+			else {
+				mensaje_out = crear_mensaje(SEG_FAULT);
+			}
 			enviar_mensaje(socket, mensaje_out);
-			log_info(logger, "Envío mensaje");
 			break;
 		case MEM_WRITE:
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
 			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
 
-			marioneta = (char *)list_get(mensaje_in, 2);
 			tamanio_mensaje = strlen(marioneta);
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
 
-			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
-				free(marioneta);
-				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, strlen(marioneta));
-				
+			if(mem_write(carpincho->id, (int)list_get(mensaje_in, 1), (char *)list_get(mensaje_in, 2))) {
+				marioneta = obtener_bloque_paginacion(carpincho->id, (int)list_get(mensaje_in, 1), tamanio_mensaje);
 				log_info(logger, "Escribí: %s", marioneta);
 				free(marioneta);
-
 				mensaje_out = crear_mensaje(TODOOK);
 			}
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
-
-			enviar_mensaje(socket, mensaje_out);	
+			enviar_mensaje(socket, mensaje_out);
 			break;
 		case SUSPEND:
 			suspend(carpincho->id);
@@ -91,17 +86,14 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	carpincho->id = id;
 	carpincho->tabla_paginas = list_create();
 
+	/*
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
 		if(!asignacion_fija(carpincho)) {
 			list_destroy(carpincho->tabla_paginas);
 			free(carpincho);
 			return NULL;
 		}
-	}
-
-	// if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-	//	if(!asignacion_global(carpincho)) return NULL;
-	// }
+	}*/
 
 	list_add(lista_carpinchos, carpincho);
 	log_info(logger, "Se admitio correctamente el carpincho #%d", carpincho->id);
@@ -128,26 +120,20 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
 	bool resultado = false;
 	pthread_mutex_lock(&mutex_asignacion_marcos);
-	if(tengo_marcos_suficientes(cant_marcos)){
-		if(crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
-			for(int i = 0; i < cant_marcos; i++){
-				t_marco* marco = obtener_marco_libre_mp();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
-				t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-				list_add(carpincho->tabla_paginas, pagina);
-				pagina->nro_marco = marco->nro_real;
-				pagina->presencia = true;
-			}
-			carpincho->heap_metadata = NULL;
-			resultado = true;
-		}		
+	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
+		for(int i = 0; i < cant_marcos; i++){
+			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+			list_add(carpincho->tabla_paginas, pagina);
+			pagina->nro_marco = marco->nro_real;
+			pagina->presencia = true;
+		}
+		carpincho->heap_metadata = NULL;
+		resultado = true;
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
 
 	return resultado;
-}
-
-bool asignacion_global(t_carpincho* carpincho) {
-	return true;
 }
 
 void setear_condicion_inicial(uint32_t id) {
@@ -214,7 +200,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 			
-			if(mem_free(carpincho->id, desplazamiento_d))
+			if(mem_alloc(carpincho->id, desplazamiento_d))
 				mensaje_out = crear_mensaje(TODOOK);
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
@@ -235,14 +221,15 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 			
-			marioneta = mem_read(carpincho->id, desplazamiento_d);
-			log_info(logger, "El contenido del alloc es: %s", marioneta);
-			
-			mensaje_out = crear_mensaje(DATA_CHAR);
-			log_info(logger, "Creo mensaje");
-			agregar_a_mensaje(mensaje_out, "%s", marioneta);
+			if((marioneta = mem_read(carpincho->id, desplazamiento_d))) {
+				log_info(logger, "El contenido del alloc es: %s", marioneta);
+				mensaje_out = crear_mensaje(DATA_CHAR);
+				agregar_a_mensaje(mensaje_out, "%s", marioneta);
+			}
+			else {
+				mensaje_out = crear_mensaje(SEG_FAULT);
+			}
 			enviar_mensaje(socket, mensaje_out);
-			log_info(logger, "Envío mensaje");
 			break;
 		case MEM_WRITE:
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
