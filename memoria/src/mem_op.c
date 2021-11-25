@@ -6,8 +6,10 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
 	// Verifico que el free es válido
-	if(get_isFree(id_carpincho, dir_logica_heap))
+	if(get_isFree(id_carpincho, dir_logica_heap)) {
+		log_warning(logger, "El alloc estaba libre");
 		return false;
+	}
 
 	// Coloco el bit esFree del heap en 1 (ahora está libre)
 	set_isFree(id_carpincho, dir_logica_heap);

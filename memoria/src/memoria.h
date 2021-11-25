@@ -34,23 +34,22 @@ typedef struct {
 } t_config_memoria;
 
 typedef struct{
-	uint32_t duenio;		// 0 si está libre
-	uint32_t pagina_duenio;	// sirve para poder modificar la tabla de paginas del proceso, marcando presencia en false
-	uint32_t nro_real;
-    bool libre;				// to remove o cambiar lo de duenio
+    uint32_t nro_real;
+    
+	uint32_t duenio;
+	uint32_t pagina_duenio;
+    bool libre;
+    pthread_mutex_t mutex_espera_uso;
+    // Para reemplazo de paginas
     bool bit_uso;
     bool bit_modificado;
     char *temporal;         // "%H:%M:%S:%MS" => "12:51:59:331"
-    pthread_mutex_t mutex_espera_uso;	// TODO instanciar al inicializar memoria
     pthread_mutex_t mutex_info_algoritmo;
-    // bool en_uso;
-    // pthread_mutex_t sem_espera_uso;
 } t_marco;
 
 typedef struct {
     void* inicio;
     t_marco** mapa_fisico;
-    pthread_mutex_t mutex_mapa;
     // uint32_t puntero_clock;
 } t_memoria_ram;
 
@@ -65,10 +64,9 @@ typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
 	t_list* tabla_paginas;
+    pthread_mutex_t mutex_tabla;
     void* heap_metadata;
 } t_carpincho;
-
-// pthread_t nuevo_carpincho;
 
 pthread_mutex_t mutex_asignacion_marcos;
 
@@ -78,10 +76,8 @@ t_config_memoria config_memoria;
 
 t_log* logger;
 
+pthread_mutex_t mutex_lista_carpinchos;
 t_list* lista_carpinchos;
-
-// TOREMOVE ya existe list_size
-uint32_t cant_carpinchos;	// TODO crear función para obtener
 
 void*			inicio_memoria(uint32_t nro_marco, uint32_t offset);
 

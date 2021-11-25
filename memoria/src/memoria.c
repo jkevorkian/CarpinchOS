@@ -41,7 +41,7 @@ bool iniciar_memoria(t_config* config) {
 	pthread_mutex_init(&mutex_asignacion_marcos, NULL);
 
 	iniciar_marcos(config_memoria.cant_marcos);
-	iniciar_tlb();  
+	// iniciar_tlb();  
 
 	return true;
 }
@@ -53,6 +53,10 @@ void iniciar_marcos(uint32_t cant_marcos){
 
 		marco_auxiliar->libre = true;
 		marco_auxiliar->nro_real = i;
+		marco_auxiliar->bit_uso = false;
+		marco_auxiliar->bit_modificado = false;
+		pthread_mutex_init(&marco_auxiliar->mutex_espera_uso, NULL);
+		pthread_mutex_init(&marco_auxiliar->mutex_info_algoritmo, NULL);
 	}
 }
 
@@ -74,6 +78,8 @@ uint32_t offset_segun_posicion(uint32_t posicion) {
 }
 
 t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
+	t_carpincho *carpincho;
+	
 	bool mi_carpincho(void *un_carpincho) {
 		if(((t_carpincho *)un_carpincho)->id == id_carpincho)
 			return true;
@@ -81,7 +87,11 @@ t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
 			return false;
 	}
 
-	return list_find(lista_carpinchos, mi_carpincho);
+	pthread_mutex_lock(&mutex_lista_carpinchos);
+	carpincho = list_find(lista_carpinchos, mi_carpincho);
+	pthread_mutex_unlock(&mutex_lista_carpinchos);
+
+	return carpincho;
 }
 
 void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {

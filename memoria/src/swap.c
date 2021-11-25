@@ -257,17 +257,16 @@ t_marco** paginas_reemplazo(uint32_t id_carpincho) {
 
 ///////////////////////////////////////////////////////
 t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
-	uint32_t nro_marcos = config_memoria.cant_marcos;
-	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
+	t_marco **marcos_proceso = calloc(config_memoria.tamanio_memoria, sizeof(t_marco *));
 	uint32_t nro_marcos_encontrados = 0;
-	uint32_t marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina - 1;
-	for(int i = 0; nro_marcos > nro_marcos_encontrados && nro_marcos > marcos_memoria; i++) {
-		if(memoria_ram.mapa_fisico[i]->nro_real == id_carpincho) {
+	uint32_t nro_marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+	for(int i = 0; i < nro_marcos_memoria; i++) {
+		if(memoria_ram.mapa_fisico[i]->duenio == id_carpincho) {
 			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
 			nro_marcos_encontrados++;
 		}
 	}
-	if(nro_marcos_encontrados < nro_marcos)
+	if(nro_marcos_encontrados < nro_marcos_memoria)
 		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos_encontrados);
 	return marcos_proceso;
 }

@@ -37,7 +37,7 @@ void iniciar_servidor(char *ip, int puerto) {
 
 		// Test
 		// pthread_create(&nuevo_carpincho, NULL, rutina_creador_movimientos, (void *)info_carpincho);
-		// pthread_create(&nuevo_carpincho, NULL, rutina_test_carpincho, (void *)info_carpincho);
+		pthread_create(&nuevo_carpincho, NULL, rutina_test_carpincho, (void *)info_carpincho);
 
 		log_info(logger, "Comunico al caprincho %d el nuevo puerto con el cual se debe comunicar.", id);
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
@@ -50,8 +50,8 @@ void iniciar_servidor(char *ip, int puerto) {
 		close(fd_carpincho);
 		id++;
 
-		rutina_test_carpincho(info_carpincho);
-		exit(1);
+		// rutina_test_carpincho(info_carpincho);
+		// exit(1);
 	}
 }
 
@@ -62,8 +62,8 @@ bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 	pthread_t cliente_swap;
 	pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
 
+	// Para debuggear swap
 	// manejar_swap((void *)socket_swap);
-	log_info(logger, "Salgo de iniciar_swap");
 	return true;
 }
 

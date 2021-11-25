@@ -85,6 +85,11 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	t_carpincho* carpincho = malloc(sizeof(t_carpincho));
 	carpincho->id = id;
 	carpincho->tabla_paginas = list_create();
+	pthread_mutex_init(&carpincho->mutex_tabla, NULL);
+	// No se bien para qué sirve
+	carpincho->sem_tlb = malloc(sizeof(sem_t));
+	sem_init(carpincho->sem_tlb, 0 , 1);	//	??
+	
 
 	/*
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
@@ -99,7 +104,6 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	log_info(logger, "Se admitio correctamente el carpincho #%d", carpincho->id);
 	return carpincho;
 }
-
 
 bool asignacion_fija(t_carpincho* carpincho) {
 	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
@@ -123,10 +127,17 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
 		for(int i = 0; i < cant_marcos; i++){
 			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
-			t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-			list_add(carpincho->tabla_paginas, pagina);
+			marco->duenio = carpincho->id;
+			marco->pagina_duenio = i;
+			
+			t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));			
+			pthread_mutex_init(&pagina->mutex, NULL);
 			pagina->nro_marco = marco->nro_real;
 			pagina->presencia = true;
+
+			pthread_mutex_lock(&carpincho->mutex_tabla);
+			list_add(carpincho->tabla_paginas, pagina);
+			pthread_mutex_unlock(&carpincho->mutex_tabla);
 		}
 		carpincho->heap_metadata = NULL;
 		resultado = true;
@@ -137,6 +148,9 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 }
 
 void setear_condicion_inicial(uint32_t id) {
+	t_carpincho * carpincho = carpincho_de_lista(id);
+	asignacion_fija2(carpincho);
+
 	uint32_t tamanio_alloc[3] = { 20, 13, 32 };
 	
 	uint32_t posicion_heap = 0;
@@ -176,7 +190,7 @@ void obtener_condicion_final(uint32_t id) {
 	log_info(logger, "Valor heap 3: %d", get_isFree(id, posicion_heap));
 }
 
-void rutina_test_carpincho(data_carpincho *info_carpincho) {
+void rutina_test_carpincho(void *info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
 	bool seguir = true;
 	data_carpincho* carpincho = (data_carpincho *)info_carpincho;
@@ -265,4 +279,40 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			break;
 		}
 	}
+	eliminar_carpincho(carpincho->id);
+	free(carpincho);
+}
+
+void eliminar_carpincho(uint32_t id_carpincho) {
+	crear_movimiento_swap(EXIT_C, id_carpincho, 0, NULL);
+
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	t_marco **marcos_de_carpincho = obtener_marcos_proceso(id_carpincho);	// Podría ir afuera ??
+	for(int i = 0; i < sizeof(&marcos_de_carpincho) / sizeof(t_marco *); i++) {
+		liberar_marco(marcos_de_carpincho[i]);
+	}
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	free(marcos_de_carpincho);
+
+	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
+
+	bool mi_carpincho(void *un_carpincho) {
+		if((t_carpincho *)un_carpincho == carpincho)
+			return true;
+		else
+			return false;
+	}
+	
+	pthread_mutex_lock(&mutex_lista_carpinchos);
+	list_remove_by_condition(lista_carpinchos, mi_carpincho);
+	pthread_mutex_unlock(&mutex_lista_carpinchos);
+
+	while(list_size(carpincho->tabla_paginas)) {
+		t_entrada_tp *entrada = list_remove(carpincho->tabla_paginas, 0);
+		pthread_mutex_destroy(&entrada->mutex);
+		free(entrada);
+	}
+	list_destroy(carpincho->tabla_paginas);
+	free(carpincho);
+
 }

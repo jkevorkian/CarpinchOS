@@ -5,6 +5,7 @@ int main(void) {
 	logger = iniciar_logger();
 	config = iniciar_config();
 	lista_carpinchos = list_create();
+	pthread_mutex_init(&mutex_lista_carpinchos, NULL);
 
 	if(!iniciar_memoria(config)) {
 		log_info(logger, "FALLO EN EL ARCHIVO DE CONFIGURACIÓN");
@@ -49,7 +50,7 @@ void signal_handler_3(int sig) {
 t_log* iniciar_logger(void) {
 	t_log* nuevo_logger;
 
-	nuevo_logger = log_create("memoria.log", "memoria", 1, LOG_LEVEL_DEBUG);
+	nuevo_logger = log_create("memoria.log", "memoria", 0, LOG_LEVEL_DEBUG);
 	if (nuevo_logger == NULL)
 		printf("Falla en la creación del Logger");
 
