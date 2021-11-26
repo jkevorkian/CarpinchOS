@@ -18,6 +18,8 @@ typedef struct {
 	uint32_t id_carpincho;
 	uint32_t nro_pagina;
 	char *buffer;
+
+	sem_t sem_respuesta;
 	bool respuesta;
 }t_movimiento;
 
@@ -31,7 +33,6 @@ pthread_mutex_t mutex_movimientos;
 
 void* manejar_swap(void* socket_swap);
 bool crear_movimiento_swap(uint32_t, uint32_t, uint32_t, char *);
-t_marco** obtener_marcos_proceso(uint32_t id_carpincho);
 
 t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina);
 
@@ -39,6 +40,6 @@ uint32_t obtener_tiempo(char tipo, t_marco *marco);
 
 void* manejar_test_swap(void* socket_swap);
 
-t_marco** obtener_marcos_proceso_af(uint32_t id_carpincho);
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados);
 
 #endif /* _SWAP_H_ */

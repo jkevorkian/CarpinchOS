@@ -27,6 +27,8 @@ void soltar_marco(t_marco *);
 void reservar_marco(t_marco *);
 void liberar_marco(t_marco *marco);
 
+bool agregar_pagina(uint32_t id_carpincho);
+
 t_entrada_tp* crear_nueva_pagina(uint32_t, t_carpincho*);
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);

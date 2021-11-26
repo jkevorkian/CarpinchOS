@@ -60,7 +60,7 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	uint32_t nro_pagina_vieja = marco->pagina_duenio;
 	uint32_t id_viejo = marco->duenio;
 
-	void* buffer;
+	void* buffer = NULL;
 	pthread_mutex_lock(&marco->mutex_espera_uso);
 	if(marco->bit_modificado) {			// SWAP OUT
 		// No necesita mutex porque el proceso no lo puede tomar y tampoco lo pueden hacer los demas
@@ -72,29 +72,37 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	}
 
 	// Actualizo tlb y tabla de paginas del que perdio el marco
+	// obtener_control_tlb();
+	t_entrada_tlb* entrada_vieja_tlb = solicitar_entrada_tlb(id_viejo, nro_pagina_vieja);
+	// entrada_vieja->tiempo_lru = ...;
+	entrada_vieja_tlb->id_car = id_carpincho;
+	entrada_vieja_tlb->pagina = nro_pagina;
+	// entrada_vieja->marco = ;		// Debería ser igual
+	// liberar_control_tlb();
+
 	//if(viejo_carpincho) {
 	if(carpincho_de_lista(marco->duenio)) {
 		t_entrada_tp *entrada_vieja = pagina_de_carpincho(id_viejo, nro_pagina_vieja);
 		pthread_mutex_lock(&entrada_vieja->mutex);
 		entrada_vieja->presencia = false;
-		borrar_pagina_carpincho_tlb(id_viejo, nro_pagina_vieja);
+		// borrar_pagina_carpincho_tlb(id_viejo, nro_pagina_vieja);	// Para mi no va
 		pthread_mutex_unlock(&entrada_vieja->mutex);
 	}
 	
 	// Corrijo valores del marco actual
-	t_entrada_tp *entrada_nueva = pagina_de_carpincho(id_carpincho, nro_pagina);
-	pthread_mutex_lock(&entrada_nueva->mutex);
-	bool hago_swap_in = !entrada_nueva->esta_vacia;
-	entrada_nueva->nro_marco = marco->nro_real;
-	entrada_nueva->presencia = true;
-	pthread_mutex_unlock(&entrada_nueva->mutex);
+	t_entrada_tp *entrada_nueva_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
+	// pthread_mutex_lock(&entrada_nueva_tp->mutex); -> Se bloquea, no entiendo por que?
+	bool hago_swap_in = !entrada_nueva_tp->esta_vacia;
+	entrada_nueva_tp->nro_marco = marco->nro_real;
+	entrada_nueva_tp->presencia = true;
+	// pthread_mutex_unlock(&entrada_nueva_tp->mutex);
 	
 	if(hago_swap_in) {	// SWAP IN
-		if(!buffer)	buffer = malloc(config_memoria.tamanio_pagina);
+		buffer = malloc(config_memoria.tamanio_pagina);
 		crear_movimiento_swap(GET_PAGE, marco->duenio, marco->pagina_duenio, buffer);
 		memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
+		// free(buffer);
 	}
-	if(buffer)	free(buffer);
 
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas
 	marco->pagina_duenio = nro_pagina;	// Util para facilitar futuros reemplazos
@@ -146,9 +154,13 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
 
 t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-	list_add(carpincho->tabla_paginas, pagina);
 	pagina->nro_marco = nro_marco;
 	pagina->presencia = true;
+	pagina->esta_vacia = true;
+
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	list_add(carpincho->tabla_paginas, pagina);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
 
 	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
@@ -161,7 +173,12 @@ bool agregar_pagina(uint32_t id_carpincho) {
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
 	if(crear_movimiento_swap(NEW_PAGE, id_carpincho, 1, NULL)) {
 		t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+
+		pthread_mutex_lock(&carpincho->mutex_tabla);
 		list_add(carpincho->tabla_paginas, pagina);
+		pthread_mutex_unlock(&carpincho->mutex_tabla);
+		
+		pagina->esta_vacia = true;
 		pagina->presencia = false;
 		return true;
 	}
@@ -170,8 +187,8 @@ bool agregar_pagina(uint32_t id_carpincho) {
 }
 
 void suspend(uint32_t id) {
-	t_marco **lista_marcos = obtener_marcos_proceso(id);
-	uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
+	uint32_t cant_marcos;
+	t_marco **lista_marcos = obtener_marcos_proceso(id, &cant_marcos);
 
 	for(int i = 0; i < cant_marcos; i++) {
 		void *buffer = malloc(config_memoria.tamanio_pagina);

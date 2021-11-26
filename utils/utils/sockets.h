@@ -28,7 +28,7 @@
 // SWAMP
 #define S_NEW_PAGE		"%d%d"
 #define S_GET_PAGE		"%d%d"
-#define S_SET_PAGE		"%d%d%s"
+#define S_SET_PAGE		"%d%d%sd"
 #define S_RM_PAGE		"%d"
 // #define S_NEW_C			""
 #define S_EXIT_C		"%d"
@@ -39,7 +39,7 @@
 #define S_SEM_DESTROY	"%s"
 // Otros
 #define S_CALL_IO		"%s"
-#define S_DATA_CHAR		"%s"
+#define S_DATA_CHAR		"%sd"
 #define S_DATA_INT		"%d"
 #define S_SEND_PORT		"%d"
 #define S_SUSPEND		"%d"
