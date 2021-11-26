@@ -67,7 +67,7 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 			entrada_nueva(id_carpincho, nro_pagina, entrada);
 			liberar_control_tlb();
 			return entrada;
-		};
+		}
 	} 
 
 	if(tlb.algoritmo_reemplazo == FIFO){
@@ -98,8 +98,9 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 }
 
 void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada){
-	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
-	t_entrada_tp* pagina = (t_entrada_tp*) list_get(carpincho->tabla_paginas, nro_pagina);
+	// t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
+	// t_entrada_tp* pagina = (t_entrada_tp*) list_get(carpincho->tabla_paginas, nro_pagina);
+	t_entrada_tp* pagina = pagina_de_carpincho(id_carpincho, nro_pagina);
 
 	entrada->id_car = id_carpincho;
 	entrada->pagina = nro_pagina;
@@ -212,7 +213,7 @@ void cant_miss_carpincho(void* item){
 
 void obtener_control_tlb() {
 	t_carpincho *aux;
-	for(int i = 0; i < list_size(lista_carpinchos) - 1; i++) {
+	for(int i = 0; i < list_size(lista_carpinchos); i++) {
 		aux = list_get(lista_carpinchos, i);
 		sem_wait(aux->sem_tlb);
 	}
@@ -220,7 +221,7 @@ void obtener_control_tlb() {
 
 void liberar_control_tlb() {
 	t_carpincho *aux;
-	for(int i = 0; i < list_size(lista_carpinchos) - 1; i++) {
+	for(int i = 0; i < list_size(lista_carpinchos); i++) {
 		aux = list_get(lista_carpinchos, i);
 		sem_post(aux->sem_tlb);
 	}

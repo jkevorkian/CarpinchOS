@@ -2,7 +2,6 @@
 #include "tlb.h"
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
-	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 	t_marco* marco;
 
 	uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
@@ -53,6 +52,8 @@ void asignar_marco_libre(t_marco *marco_nuevo, uint32_t id, uint32_t nro_pagina)
 	marco_nuevo->bit_modificado = false;
 	marco_nuevo->bit_uso = false;
 	pthread_mutex_unlock(&marco_nuevo->mutex_espera_uso);
+
+	asignar_entrada_tlb(id, nro_pagina);
 }
 
 void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina) {

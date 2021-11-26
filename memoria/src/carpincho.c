@@ -117,7 +117,7 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 	pthread_mutex_lock(&mutex_asignacion_marcos);
 	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
 		for(int i = 0; i < cant_marcos; i++){
-			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			t_marco* marco = obtener_marco_libre();
 			marco->duenio = carpincho->id;
 			marco->pagina_duenio = i;
 			
@@ -130,7 +130,6 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 			list_add(carpincho->tabla_paginas, pagina);
 			pthread_mutex_unlock(&carpincho->mutex_tabla);
 		}
-		carpincho->heap_metadata = NULL;
 		resultado = true;
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
@@ -195,7 +194,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
-	//setear_condicion_inicial(carpincho->id);
+	setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
@@ -220,7 +219,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
-			//obtener_condicion_final(carpincho->id);
+			obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));

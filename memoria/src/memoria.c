@@ -42,7 +42,7 @@ bool iniciar_memoria(t_config* config) {
 	pthread_mutex_init(&mutex_asignacion_marcos, NULL);
 
 	iniciar_marcos(config_memoria.cant_marcos);
-	// iniciar_tlb();  
+	iniciar_tlb(config);  
 
 	return true;
 }
