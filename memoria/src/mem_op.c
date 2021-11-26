@@ -239,17 +239,24 @@ void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
 	if(posicion_compuesta.rem)
 		paginas_minimas++;
 	
-	while(paginas_minimas < list_size(tabla_de_paginas)) {
+	while(config_memoria.tipo_asignacion == FIJA_LOCAL && paginas_minimas < list_size(tabla_de_paginas)) {
 		entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
 		// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
 		if(entrada->presencia) {
 			pthread_mutex_lock(&mutex_asignacion_marcos);
 			marco = memoria_ram.mapa_fisico[entrada->nro_marco];
-			marco->libre = false;
+			marco->libre = true;
 			marco->duenio = 0;
 			pthread_mutex_unlock(&mutex_asignacion_marcos);
 		}
 		free(entrada);
 		crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
+	}
+
+	// Esto se hace para evitar swap out innecesarios
+	uint32_t nro_paginas_vacias = list_size(tabla_de_paginas) - paginas_minimas;
+	for(int i = paginas_minimas; i < nro_paginas_vacias; i++) {
+		entrada = list_get(tabla_de_paginas, i);
+		entrada->esta_vacia = true;
 	}
 }

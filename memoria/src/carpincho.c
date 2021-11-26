@@ -138,24 +138,30 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 	return resultado;
 }
 
+#define cant_alloc 4
+
 void setear_condicion_inicial(uint32_t id) {
 	t_carpincho * carpincho = carpincho_de_lista(id);
 	asignacion_fija2(carpincho);
 
-	uint32_t tamanio_alloc[3] = { 20, 13, 32 };
+	if(agregar_pagina(id)) {
+		log_info(logger, "Pude pedir una nueva página, grande la swap");
+	}
+	// uint32_t cant_alloc = 4;
+	uint32_t tamanio_alloc[cant_alloc] = { 20, 13, 32 , 25 };
 	
 	uint32_t posicion_heap = 0;
 	uint32_t next_alloc = tamanio_alloc[0] + TAMANIO_HEAP;
 	uint32_t prev_alloc = HEAP_NULL;
-	for(int i = 1; i < 4; i++) {
+	for(int i = 1; i < cant_alloc + 1; i++) {
 		log_info(logger, "Prev: %d; main: %d; next: %d", prev_alloc, posicion_heap, next_alloc);
 		set_prevAlloc(id, posicion_heap, prev_alloc);
 		set_nextAlloc(id, posicion_heap, next_alloc);
 		reset_isFree(id, posicion_heap);
 		prev_alloc = posicion_heap;
 		posicion_heap = next_alloc;
-		if(i < 3)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
-		else		next_alloc = HEAP_NULL;
+		if(i < cant_alloc)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
+		else				next_alloc = HEAP_NULL;
 	}
 	log_info(logger, "Prev: %d; main: %d; next: %d", prev_alloc, posicion_heap, next_alloc);
 	set_prevAlloc(id, posicion_heap, prev_alloc);
@@ -164,21 +170,22 @@ void setear_condicion_inicial(uint32_t id) {
 }
 
 void obtener_condicion_final(uint32_t id) {
-	uint32_t tamanio_alloc[3] = { 20, 13, 32 };
+	// uint32_t cant_alloc = 4;
+	uint32_t tamanio_alloc[cant_alloc] = { 20, 13, 32, 25 };
 	
 	uint32_t posicion_heap = 0;
 	uint32_t next_alloc = tamanio_alloc[0] + TAMANIO_HEAP;
-	for(int i = 1; i < 4; i++) {
+	for(int i = 1; i < cant_alloc + 1; i++) {
 		log_info(logger, "Valor heap %d: %d", i - 1, get_prevAlloc(id, posicion_heap));
 		log_info(logger, "Valor heap %d: %d", i - 1, get_nextAlloc(id, posicion_heap));
 		log_info(logger, "Valor heap %d: %d", i - 1, get_isFree(id, posicion_heap));
 		posicion_heap = next_alloc;
-		if(i < 3)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
+		if(i < cant_alloc)	next_alloc += tamanio_alloc[i] + TAMANIO_HEAP;
 		else		next_alloc = HEAP_NULL;
 	}
-	log_info(logger, "Valor heap 3: %d", get_prevAlloc(id, posicion_heap));
-	log_info(logger, "Valor heap 3: %d", get_nextAlloc(id, posicion_heap));	// El alloc de prueba ocupa 21 bytes
-	log_info(logger, "Valor heap 3: %d", get_isFree(id, posicion_heap));
+	log_info(logger, "Valor heap %d: %d", cant_alloc + 1, get_prevAlloc(id, posicion_heap));
+	log_info(logger, "Valor heap %d: %d", cant_alloc + 1, get_nextAlloc(id, posicion_heap));	// El alloc de prueba ocupa 21 bytes
+	log_info(logger, "Valor heap %d: %d", cant_alloc + 1, get_isFree(id, posicion_heap));
 }
 
 void *rutina_test_carpincho(void *info_carpincho) {
@@ -220,7 +227,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
-			obtener_condicion_final(carpincho->id);
+			// obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -279,9 +286,11 @@ void *rutina_test_carpincho(void *info_carpincho) {
 void eliminar_carpincho(uint32_t id_carpincho) {
 	crear_movimiento_swap(EXIT_C, id_carpincho, 0, NULL);
 
+	uint32_t nro_marcos_carpincho;
+
 	pthread_mutex_lock(&mutex_asignacion_marcos);
-	t_marco **marcos_de_carpincho = obtener_marcos_proceso(id_carpincho);	// Podría ir afuera ??
-	for(int i = 0; i < sizeof(&marcos_de_carpincho) / sizeof(t_marco *); i++) {
+	t_marco **marcos_de_carpincho = obtener_marcos_proceso(id_carpincho, &nro_marcos_carpincho);	// Podría ir afuera ??
+	for(int i = 0; i < nro_marcos_carpincho; i++) {
 		liberar_marco(marcos_de_carpincho[i]);
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);

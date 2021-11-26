@@ -9,7 +9,6 @@ t_movimiento *obtener_movimiento();
 
 void* manejar_swap(void* socket_swap) {
     sem_init(&sem_movimiento, 0, 0);
-	sem_init(&sem_respuesta, 0, 0);
     
 	movimientos_pendientes = queue_create();
     pthread_mutex_init(&mutex_movimientos, NULL);
@@ -103,7 +102,7 @@ void* manejar_swap(void* socket_swap) {
 			mov->respuesta = false;
         	break;
         }
-		sem_post(&sem_respuesta);
+		sem_post(&mov->sem_respuesta);
 		liberar_mensaje_out(mensaje_out);
 		liberar_mensaje_in(mensaje_in);
     }
@@ -127,6 +126,7 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 	nuevo_mov->respuesta = false;
 	if(accion == SET_PAGE)
 		nuevo_mov->buffer = buffer;
+	sem_init(&nuevo_mov->sem_respuesta, 0 , 0);
 	
 	log_info(logger, "Accion: %d/%d", nuevo_mov->accion, accion);
 	log_info(logger, "ID: %d/%d", nuevo_mov->id_carpincho, id_carpincho);
@@ -138,7 +138,7 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 
 	log_info(logger, "Posteo movimiento y espero respuesta");
 	sem_post(&sem_movimiento);
-	sem_wait(&sem_respuesta);
+	sem_wait(&nuevo_mov->sem_respuesta);
 
 	log_info(logger, "Recibo respuesta");
 	bool respuesta = nuevo_mov->respuesta;
@@ -154,6 +154,7 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 			free(nuevo_mov->buffer);
 		}
 	}
+	sem_close(&nuevo_mov->sem_respuesta);
 	free(nuevo_mov);
 
 	log_info(logger, "Finalizo movimiento. Respuesta = %d", respuesta);
@@ -225,7 +226,7 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina
 	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
 	uint32_t nro_paginas = nro_paginas_reemplazo();
 
-	t_marco* marco_a_reemplazar;
+	t_marco* marco_a_reemplazar = NULL;
 	pthread_mutex_lock(&mutex_asignacion_marcos);
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		marco_a_reemplazar = obtener_marco_libre();
@@ -250,45 +251,34 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina
 
 t_marco** paginas_reemplazo(uint32_t id_carpincho) {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return obtener_marcos_proceso_af(id_carpincho);
+		return obtener_marcos_proceso(id_carpincho, NULL);
 	else
 		return memoria_ram.mapa_fisico;
 }
 
-///////////////////////////////////////////////////////
-t_marco** obtener_marcos_proceso(uint32_t id_carpincho) {
-	t_marco **marcos_proceso = calloc(config_memoria.tamanio_memoria, sizeof(t_marco *));
-	uint32_t nro_marcos_encontrados = 0;
-	uint32_t nro_marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
-	for(int i = 0; i < nro_marcos_memoria; i++) {
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados) {
+	uint32_t nro_marcos_proceso = nro_paginas_reemplazo();
+	t_marco **marcos_proceso = calloc(nro_marcos_proceso, sizeof(t_marco *));
+
+	uint32_t nro_marcos = 0;
+	for(int i = 0; i < nro_marcos_proceso; i++) {
 		if(memoria_ram.mapa_fisico[i]->duenio == id_carpincho) {
-			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
-			nro_marcos_encontrados++;
+			marcos_proceso[nro_marcos] = memoria_ram.mapa_fisico[i];
+			nro_marcos++;
 		}
 	}
-	if(nro_marcos_encontrados < nro_marcos_memoria)
-		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos_encontrados);
+	if(nro_marcos < nro_marcos_proceso)
+		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos);
+	if(nro_marcos_encontrados)
+		*nro_marcos_encontrados = nro_marcos;
 	return marcos_proceso;
 }
 
-t_marco** obtener_marcos_proceso_af(uint32_t id_carpincho) {
-	uint32_t nro_marcos = config_memoria.cant_marcos;
-	t_marco **marcos_proceso = calloc(nro_marcos, sizeof(t_marco *));
-	uint32_t nro_marcos_encontrados = 0;
-	for(int i = 0; nro_marcos > nro_marcos_encontrados; i++) {
-		if(memoria_ram.mapa_fisico[i]->nro_real == id_carpincho) {
-			marcos_proceso[nro_marcos_encontrados] = memoria_ram.mapa_fisico[i];
-			nro_marcos_encontrados++;
-		}
-	}
-	return marcos_proceso;
-}
-///////////////////////////////////////////////////////
 uint32_t nro_paginas_reemplazo() {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return config_memoria.cant_marcos;
+		return config_memoria.cant_marcos_carpincho;
 	else
-		return config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+		return config_memoria.cant_marcos;
 }
 
 bool marco_mas_viejo(t_marco *marco1, t_marco *marco2) {
