@@ -226,7 +226,7 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina
 	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
 	uint32_t nro_paginas = nro_paginas_reemplazo();
 
-	t_marco* marco_a_reemplazar;
+	t_marco* marco_a_reemplazar = NULL;
 	pthread_mutex_lock(&mutex_asignacion_marcos);
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		marco_a_reemplazar = obtener_marco_libre();
@@ -257,16 +257,17 @@ t_marco** paginas_reemplazo(uint32_t id_carpincho) {
 }
 
 t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados) {
-	uint32_t nro_marcos_memoria = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
-	t_marco **marcos_proceso = calloc(nro_marcos_memoria, sizeof(t_marco *));
+	uint32_t nro_marcos_proceso = nro_paginas_reemplazo();
+	t_marco **marcos_proceso = calloc(nro_marcos_proceso, sizeof(t_marco *));
+
 	uint32_t nro_marcos = 0;
-	for(int i = 0; i < nro_marcos_memoria; i++) {
+	for(int i = 0; i < nro_marcos_proceso; i++) {
 		if(memoria_ram.mapa_fisico[i]->duenio == id_carpincho) {
 			marcos_proceso[nro_marcos] = memoria_ram.mapa_fisico[i];
 			nro_marcos++;
 		}
 	}
-	if(nro_marcos < nro_marcos_memoria)
+	if(nro_marcos < nro_marcos_proceso)
 		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos);
 	if(nro_marcos_encontrados)
 		*nro_marcos_encontrados = nro_marcos;
@@ -275,9 +276,9 @@ t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_enc
 
 uint32_t nro_paginas_reemplazo() {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return config_memoria.cant_marcos;
+		return config_memoria.cant_marcos_carpincho;
 	else
-		return config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+		return config_memoria.cant_marcos;
 }
 
 bool marco_mas_viejo(t_marco *marco1, t_marco *marco2) {

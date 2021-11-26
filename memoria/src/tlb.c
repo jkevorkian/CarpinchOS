@@ -45,7 +45,6 @@ uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 		// log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
 		return entrada->marco;
 	}
-
 }
 
 t_entrada_tlb* solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
