@@ -34,7 +34,7 @@ uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 		usleep(tlb.retardo_fallo * 1000);
 		hit_miss->cant_miss += 1;
 		tlb.cant_miss += 1;
-		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
+		// log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
 		return -1;
 	}
 	else {
@@ -42,7 +42,7 @@ uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 		hit_miss->cant_hit += 1;
 		tlb.cant_hit += 1;
 		entrada->tiempo_lru = time(0);
-		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
+		// log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
 		return entrada->marco;
 	}
 

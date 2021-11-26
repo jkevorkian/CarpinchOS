@@ -278,12 +278,14 @@ void *rutina_test_carpincho(void *info_carpincho) {
 void eliminar_carpincho(uint32_t id_carpincho) {
 	crear_movimiento_swap(EXIT_C, id_carpincho, 0, NULL);
 
+	uint32_t nro_marcos_carpincho;
+
 	pthread_mutex_lock(&mutex_asignacion_marcos);
-	t_marco **marcos_de_carpincho = obtener_marcos_proceso(id_carpincho);	// Podría ir afuera ??
-	for(int i = 0; i < sizeof(&marcos_de_carpincho) / sizeof(t_marco *); i++) {
+	t_marco **marcos_de_carpincho = obtener_marcos_proceso(id_carpincho, &nro_marcos_carpincho);	// Podría ir afuera ??
+	for(int i = 0; i < nro_marcos_carpincho; i++) {
 		liberar_marco(marcos_de_carpincho[i]);
 	}
-	pthread_mutex_lock(&mutex_asignacion_marcos);
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
 	free(marcos_de_carpincho);
 
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
