@@ -126,7 +126,7 @@ void borrar_entrada_tlb(uint32_t nro_entrada) {
 	liberar_control_tlb();
 }
 
-t_tlb_por_proceso* get_hit_miss_proceso(uint32_t id_carpincho){
+t_tlb_por_proceso* get_hit_miss_proceso(uint32_t id_carpincho) {
 	bool encontrar_carpincho(void* item){
 		t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
 		return entrada->id_proceso == id_carpincho;

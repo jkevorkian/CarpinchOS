@@ -63,7 +63,7 @@ void* manejar_swap(void* socket_swap) {
         	log_info(logger, "Recibo un set_page");
 
 			mensaje_out = crear_mensaje(mov->accion);
-			agregar_a_mensaje(mensaje_out, "%d%d%s", mov->id_carpincho, mov->nro_pagina, mov->buffer);
+			agregar_a_mensaje(mensaje_out, "%d%d%sd", mov->id_carpincho, mov->nro_pagina, config_memoria.tamanio_pagina, mov->buffer);
 			enviar_mensaje(socket, mensaje_out);
 
 			mensaje_in = recibir_mensaje(socket);
