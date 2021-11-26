@@ -1,13 +1,31 @@
 #include "marcos.h"
+#include "tlb.h"
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
-	if(!carpincho_de_lista(id_carpincho)) {
-		log_warning(logger, "El carpincho no existe");
-		return NULL;
+	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+	t_marco* marco;
+
+	uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
+	if(nro_marco_tlb != -1) {	// TLB hit
+		marco = memoria_ram.mapa_fisico[nro_marco_tlb];
+		reservar_marco(marco);
+		return marco;
 	}
-	t_marco* marco = obtener_marco_mp(id_carpincho, nro_pagina);
-	if(!marco) {	// Page fault
+
+	// TLB miss
+	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
+	
+	if(entrada_tp->presencia) {
+		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
+		reservar_marco(marco);
+		asignar_entrada_tlb(id_carpincho, nro_pagina);
+	}
+	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
+		//DUDA: aca tambien asigno a tlb?
+		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro sino porque inmediatamente existiría un tlb_miss,
+		// ya que el que pide la página la pide porque la va a usar.
+		asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	log_info(logger, "Obtengo marco %d (pag %d, car %d)", marco->nro_real, nro_pagina, id_carpincho);
 	return marco;
@@ -38,8 +56,8 @@ void asignar_marco_libre(t_marco *marco_nuevo, uint32_t id, uint32_t nro_pagina)
 }
 
 void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina) {
-	t_carpincho *nuevo_carpincho = carpincho_de_lista(id_carpincho);
-	t_carpincho *viejo_carpincho = carpincho_de_lista(marco->duenio);
+	// t_carpincho *nuevo_carpincho = carpincho_de_lista(id_carpincho);
+	// t_carpincho *viejo_carpincho = carpincho_de_lista(marco->duenio);
 
 	uint32_t nro_pagina_vieja = marco->pagina_duenio;
 	uint32_t id_viejo = marco->duenio;
@@ -56,13 +74,12 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	}
 
 	// Actualizo tlb y tabla de paginas del que perdio el marco
-	if(viejo_carpincho) {
+	//if(viejo_carpincho) {
+	if(carpincho_de_lista(marco->duenio)) {
 		t_entrada_tp *entrada_vieja = pagina_de_carpincho(id_viejo, nro_pagina_vieja);
 		pthread_mutex_lock(&entrada_vieja->mutex);
 		entrada_vieja->presencia = false;
 		pthread_mutex_unlock(&entrada_vieja->mutex);
-
-		// TODO actualizar_tlb();
 	}
 	
 	// Corrijo valores del marco actual
@@ -84,32 +101,6 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	marco->pagina_duenio = nro_pagina;	// Util para facilitar futuros reemplazos
 	marco->bit_uso = false;
 	pthread_mutex_unlock(&marco->mutex_espera_uso);
-}
-
-t_marco *obtener_marco_mp(uint32_t id_carpincho, uint32_t nro_pagina) {
-	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
-	pthread_mutex_lock(&entrada_tp->mutex);
-	bool presencia = entrada_tp->presencia;
-	pthread_mutex_unlock(&entrada_tp->mutex);
-
-	t_marco *marco;
-	if(presencia) {
-		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
-		// pthread_mutex_lock(&marco->mutex_espera_uso);
-		reservar_marco(marco);
-		if(marco->duenio == id_carpincho)
-			return marco;
-		else {
-			// pthread_mutex_unlock(&marco->mutex_espera_uso);
-			soltar_marco(marco);
-
-			pthread_mutex_lock(&entrada_tp->mutex);
-			entrada_tp->presencia = false;
-			pthread_mutex_unlock(&entrada_tp->mutex);
-			return NULL;
-		}
-	}
-	return NULL;
 }
 
 void reservar_marco(t_marco *marco) {
@@ -163,14 +154,9 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	pagina->nro_marco = nro_marco;
 	pagina->presencia = true;
 
-	// -> Esto agregaría yo, si el marco está en memoria
-	// t_marco* marco_nuevo = asignar_marco_libre(nro_marco, carpincho->id);
-	// marco_nuevo->pagina_duenio = list_size(carpincho->tabla_paginas) - 1;
-	// <- */
-
 	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
-
+	asignar_entrada_tlb(carpincho->id, list_size(carpincho->tabla_paginas) - 1);
 	return pagina;
 }
 

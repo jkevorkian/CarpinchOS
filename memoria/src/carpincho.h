@@ -13,7 +13,7 @@ t_carpincho* 	crear_carpincho(uint32_t);
 bool 			asignacion_fija(t_carpincho*);
 bool 			asignacion_global(t_carpincho*);
 
-void rutina_test_carpincho(void *info_carpincho);
+void *rutina_test_carpincho(void *info_carpincho);
 
 void eliminar_carpincho(uint32_t);
 

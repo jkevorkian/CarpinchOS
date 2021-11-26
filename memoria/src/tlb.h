@@ -34,24 +34,24 @@ typedef struct {
 typedef struct {
 	uint32_t cant_hit;
     uint32_t cant_miss;
-	uint32_t cant_entradas;   
+	uint32_t cant_entradas;
     uint32_t algoritmo_reemplazo;
     uint32_t retardo_acierto;
     uint32_t retardo_fallo;
     uint32_t puntero_fifo;
+    char* path_dump;
     t_entrada_tlb** mapa;
     t_list* hit_miss_proceso; 
 } t_tlb;
 
 t_tlb 				tlb;
 
-void 				iniciar_tlb();t_entrada_tlb*		solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+void 				iniciar_tlb(t_config* config);
+t_entrada_tlb*		solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void 				borrar_entrada_tlb(uint32_t nro_entrada);
 t_entrada_tlb*		es_entrada(uint32_t, uint32_t, uint32_t);
 void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
-
-
 uint32_t			leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 
 void 				obtener_control_tlb();

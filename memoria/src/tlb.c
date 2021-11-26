@@ -1,8 +1,6 @@
 #include "tlb.h"
-// TODO: agregar path al nombre de dump
-// DUDA: hay que considerar milisegundos para lru?
 
-void iniciar_tlb(){
+void iniciar_tlb(t_config* config){
 	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
 	if(!strcmp(algoritmo_reemplazo, "FIFO"))
 		tlb.algoritmo_reemplazo = FIFO;
@@ -10,6 +8,7 @@ void iniciar_tlb(){
 		tlb.algoritmo_reemplazo = LRU;
 
 	tlb.cant_entradas = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
+	tlb.path_dump = config_get_string_value(config, "PATH_DUMP_TLB");
 	tlb.cant_hit = 0;
 	tlb.cant_miss = 0;
 	tlb.puntero_fifo = 0;
@@ -25,7 +24,6 @@ void iniciar_tlb(){
 	} 
 
 	log_info(logger,"TLB inicializada. Nro de entradas: %d", tlb.cant_entradas);
-
 } 
 
 uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
@@ -36,8 +34,8 @@ uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 		usleep(tlb.retardo_fallo * 1000);
 		hit_miss->cant_miss += 1;
 		tlb.cant_miss += 1;
-		entrada = asignar_entrada_tlb(id_carpincho, nro_pagina);
 		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
+		return -1;
 	}
 	else {
 		usleep(tlb.retardo_acierto * 1000);
@@ -45,9 +43,9 @@ uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
 		tlb.cant_hit += 1;
 		entrada->tiempo_lru = time(0);
 		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
+		return entrada->marco;
 	}
 
-	return entrada->marco;
 }
 
 t_entrada_tlb* solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
@@ -109,6 +107,9 @@ void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* en
 	entrada->tiempo_lru = time(0);
 }
 
+/* void borrar_pagina_carpincho(uint32_t id_carpincho, uint32_t nro_pagina) {
+} */
+
 void borrar_entrada_tlb(uint32_t nro_entrada) {
 	obtener_control_tlb();
 	t_entrada_tlb* entrada = tlb.mapa[nro_entrada];
@@ -143,7 +144,7 @@ t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pa
 
 void print_tlb() {
 	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
-    char* filename = string_from_format("Dump_<%s>.dmp", temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
+    char* filename = string_from_format("%s/Dump_<%s>.dmp", tlb.path_dump, temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
     FILE* dump_file = fopen(filename, "w");
 
 	fprintf(dump_file, "-------------------------------------------------------------------------- \n");
@@ -189,6 +190,7 @@ void resetear_tlb() {
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		borrar_entrada_tlb(i);
 	}
+	log_info(logger, "TLB reseteada.");
 }
 
 void print_hit_miss(){

@@ -11,7 +11,6 @@ void *rutina_carpincho(void* info_carpincho) {
 	
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
-	uint32_t desplazamiento_d;
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
@@ -86,34 +85,26 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	carpincho->id = id;
 	carpincho->tabla_paginas = list_create();
 	pthread_mutex_init(&carpincho->mutex_tabla, NULL);
-	// No se bien para qué sirve
-	carpincho->sem_tlb = malloc(sizeof(sem_t));
-	sem_init(carpincho->sem_tlb, 0 , 1);	//	??
-	
+	carpincho->sem_tlb = malloc(sizeof(sem_t));	// No se bien para qué sirve
+	sem_init(carpincho->sem_tlb, 0 , 1);
+	carpincho->heap_metadata = NULL;
 
-	/*
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(!asignacion_fija(carpincho)) {
-			list_destroy(carpincho->tabla_paginas);
-			free(carpincho);
-			return NULL;
-		}
-	}*/
-
+	pthread_mutex_lock(&mutex_lista_carpinchos);
 	list_add(lista_carpinchos, carpincho);
+	pthread_mutex_unlock(&mutex_lista_carpinchos);
+
 	log_info(logger, "Se admitio correctamente el carpincho #%d", carpincho->id);
 	return carpincho;
 }
 
 bool asignacion_fija(t_carpincho* carpincho) {
-	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
+	uint32_t cant_marcos = config_memoria.cant_marcos_carpincho;
 
-	if(tengo_marcos_suficientes(cant_marcos)){
+	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)){
 		for(int i = 0; i < cant_marcos; i++){
-			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			t_marco* marco = obtener_marco_libre();	// busqueda solo en memoria
 			crear_nueva_pagina(marco->nro_real, carpincho);
 		}
-		carpincho->heap_metadata = NULL;
 		return true;
 	}
 
@@ -190,7 +181,7 @@ void obtener_condicion_final(uint32_t id) {
 	log_info(logger, "Valor heap 3: %d", get_isFree(id, posicion_heap));
 }
 
-void rutina_test_carpincho(void *info_carpincho) {
+void *rutina_test_carpincho(void *info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
 	bool seguir = true;
 	data_carpincho* carpincho = (data_carpincho *)info_carpincho;
@@ -204,7 +195,7 @@ void rutina_test_carpincho(void *info_carpincho) {
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
-	setear_condicion_inicial(carpincho->id);
+	//setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
@@ -229,7 +220,7 @@ void rutina_test_carpincho(void *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
-			obtener_condicion_final(carpincho->id);
+			//obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -281,6 +272,8 @@ void rutina_test_carpincho(void *info_carpincho) {
 	}
 	eliminar_carpincho(carpincho->id);
 	free(carpincho);
+	
+	return NULL;
 }
 
 void eliminar_carpincho(uint32_t id_carpincho) {
