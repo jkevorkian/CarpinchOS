@@ -13,5 +13,6 @@ float calcular_HRRN(carpincho* carp, char* tiempo_actual);
 int encontrar_carpincho(t_list *lista, carpincho *carp_quitar);
 void desbloquear(carpincho* carp);
 semaforo* buscar_sem_por_id(t_list *lista, int id);
+void hacer_post_semaforo(semaforo* sem);
 
 #endif /* UTILIDADES_H_ */

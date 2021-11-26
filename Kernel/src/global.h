@@ -31,6 +31,8 @@ typedef struct {
 	char *tiempo_llegada;
 	bool esta_suspendido;
 	bool responder;
+	bool responder_wait;
+	bool responder_IO;
 	t_list *semaforos_asignados;
 	int id_semaforo_bloqueante; //es -1 cuando no esta siendo bloqueado por espera de un semaforo
 	bool debe_morir;
