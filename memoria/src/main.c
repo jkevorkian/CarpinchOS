@@ -50,7 +50,7 @@ void signal_handler_3(int sig) {
 t_log* iniciar_logger(void) {
 	t_log* nuevo_logger;
 
-	nuevo_logger = log_create("memoria.log", "memoria", 0, LOG_LEVEL_DEBUG);
+	nuevo_logger = log_create("memoria.log", "memoria", 1, LOG_LEVEL_DEBUG);
 	if (nuevo_logger == NULL)
 		printf("Falla en la creación del Logger");
 

@@ -2,8 +2,10 @@
 
 void iniciar_tlb(t_config* config){
 	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
-	if(!strcmp(algoritmo_reemplazo, "FIFO"))
+	if(!strcmp(algoritmo_reemplazo, "FIFO")) {
 		tlb.algoritmo_reemplazo = FIFO;
+		tlb.puntero_fifo = 0;
+	}	
 	if(!strcmp(algoritmo_reemplazo, "LRU"))
 		tlb.algoritmo_reemplazo = LRU;
 
@@ -108,8 +110,15 @@ void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* en
 	entrada->tiempo_lru = time(0);
 }
 
-/* void borrar_pagina_carpincho(uint32_t id_carpincho, uint32_t nro_pagina) {
-} */
+void borrar_pagina_carpincho_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
+	t_entrada_tlb* entrada;
+	for(int i = 0; i < tlb.cant_entradas; i++) {
+		if((entrada = es_entrada(i, id_carpincho, nro_pagina))) {
+			borrar_entrada_tlb(i);
+			return;
+		}
+	}
+}
 
 void borrar_entrada_tlb(uint32_t nro_entrada) {
 	obtener_control_tlb();
@@ -168,7 +177,7 @@ void print_tlb() {
 	free(filename);
 }
 
-void resetear_entradas_proceso(uint32_t id_carpincho) {
+void flush_proceso_tlb(uint32_t id_carpincho) {
 	bool encontrar_carpincho(void* item){
 		t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
 		return entrada->id_proceso == id_carpincho;

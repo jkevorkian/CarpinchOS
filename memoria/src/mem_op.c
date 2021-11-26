@@ -68,7 +68,6 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		if(list_size(carpincho->tabla_paginas) == 0) {
 			if(!asignacion_fija(carpincho)) return 0;
 		}
-		// ya se que tiene todos los marcos asignados que va a usar, por lo que solo debo fijarme que nro_frames_necesarios no exceda la cantidad maxima de marcos en swap?
 		// deberia fijarme que mi cantidad de marcos libres sea mayor a la cant de marcos necesarios?
 	}
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {

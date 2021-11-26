@@ -1,5 +1,6 @@
 #include "carpincho.h"
 #include "memoria.h"
+#include "tlb.h"
 
 void *rutina_carpincho(void* info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
@@ -283,7 +284,7 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 	for(int i = 0; i < sizeof(&marcos_de_carpincho) / sizeof(t_marco *); i++) {
 		liberar_marco(marcos_de_carpincho[i]);
 	}
-	pthread_mutex_lock(&mutex_asignacion_marcos);
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
 	free(marcos_de_carpincho);
 
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
@@ -305,6 +306,7 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 		free(entrada);
 	}
 	list_destroy(carpincho->tabla_paginas);
+	flush_proceso_tlb(id_carpincho);
 	free(carpincho);
 
 }

@@ -21,9 +21,6 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	}
 	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
-		//DUDA: aca tambien asigno a tlb?
-		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro sino porque inmediatamente existiría un tlb_miss,
-		// ya que el que pide la página la pide porque la va a usar.
 		asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	log_info(logger, "Obtengo marco %d (pag %d, car %d)", marco->nro_real, nro_pagina, id_carpincho);
@@ -80,6 +77,7 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 		t_entrada_tp *entrada_vieja = pagina_de_carpincho(id_viejo, nro_pagina_vieja);
 		pthread_mutex_lock(&entrada_vieja->mutex);
 		entrada_vieja->presencia = false;
+		borrar_pagina_carpincho_tlb(id_viejo, nro_pagina_vieja);
 		pthread_mutex_unlock(&entrada_vieja->mutex);
 	}
 	
@@ -133,9 +131,6 @@ uint32_t cant_marcos_necesarios(uint32_t tamanio) {
 }
 
 bool tengo_marcos_suficientes(uint32_t necesarios){
-	// no entiendo si yo aca devuelvo que tengo marcos necesarios pero despues mientras le asigno
-	// me quedo sin marcos porque los uso otro proceso que pasa?
-    // para eso esta el mutex_asignacion_marcos
 	uint32_t contador_necesarios = necesarios;
 
     for(int i = 0; i < config_memoria.cant_marcos; i++) {
@@ -161,6 +156,7 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	return pagina;
 }
 
+// TODO: funcion fantasma
 bool agregar_pagina(uint32_t id_carpincho) {
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
 	if(crear_movimiento_swap(NEW_PAGE, id_carpincho, 1, NULL)) {
@@ -185,6 +181,7 @@ void suspend(uint32_t id) {
 		lista_marcos[i]->libre = true;
 		// actualizar tlb y tabla de paginas
 	}
+	flush_proceso_tlb(id);
 }
 
 void unsuspend(uint32_t id) {
@@ -199,6 +196,8 @@ void unsuspend(uint32_t id) {
 		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
 		crear_movimiento_swap(GET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
 	}*/
+
+	// TODO: agregar a tlb
 }
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {
