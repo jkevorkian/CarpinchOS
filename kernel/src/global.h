@@ -19,14 +19,11 @@
 #define MEMORIA_ACTIVADA 0
 
 #define LOGUEAR_MENSAJES_INICIALIZADOR 0
-<<<<<<< HEAD:kernel/src/global.h
 #define LOGUEAR_MENSAJES_COLAS 1
-=======
-
->>>>>>> rama-kernel:Kernel/src/global.h
 
 //carpincho
-typedef struct {
+typedef struct
+{
 	int id;
 	int socket_memoria;
 	int socket_mateLib;
@@ -35,37 +32,33 @@ typedef struct {
 	char *tiempo_llegada;
 	bool esta_suspendido;
 	bool responder;
-<<<<<<< HEAD:kernel/src/global.h
-=======
 	bool responder_wait;
 	bool responder_IO;
 	t_list *semaforos_asignados;
 	int id_semaforo_bloqueante; //es -1 cuando no esta siendo bloqueado por espera de un semaforo
 	bool debe_morir;
->>>>>>> rama-kernel:Kernel/src/global.h
-}carpincho;
+} carpincho;
 
 //semaforo
-typedef struct {
+typedef struct
+{
 	char *nombre;
-<<<<<<< HEAD:kernel/src/global.h
-=======
-	int id;	//agrego el id para mas facil de manejo inequivoco de semaforos en el deadlock
->>>>>>> rama-kernel:Kernel/src/global.h
+	int id; //agrego el id para mas facil de manejo inequivoco de semaforos en el deadlock
 	int instancias_iniciadas;
 	t_queue *cola_espera;
 	pthread_mutex_t mutex_espera;
-}semaforo;
+} semaforo;
 
 //IO
-typedef struct {
+typedef struct
+{
 	char *nombre;
 	int duracion;
 	t_queue *cola_espera;
 	pthread_mutex_t mutex_espera;
 	sem_t carpinchos_esperando;
 	pthread_t hilo_IO;
-}IO;
+} IO;
 
 t_log *logger, *logger_colas;
 t_config *config;
