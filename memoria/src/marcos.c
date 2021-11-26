@@ -1,19 +1,28 @@
 #include "marcos.h"
+#include "tlb.h"
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	// uint32_t nro_marcos = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
 	t_marco* marco;
 	t_carpincho* mi_carpincho = carpincho_de_lista(id_carpincho);
-	// t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+
+	uint32_t nro_marco_tlb = leer_tlb(mi_carpincho->id, nro_pagina);
+	if(nro_marco_tlb != -1) return memoria_ram.mapa_fisico[nro_marco_tlb];
+
 	t_entrada_tp *entrada_tp = (t_entrada_tp *)list_get(mi_carpincho->tabla_paginas, nro_pagina);
+	
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
+		asignar_entrada_tlb(mi_carpincho->id, nro_pagina);
 	}
 	else {
 		// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho);
 		reasignar_marco(id_carpincho, nro_pagina, marco);
+		//DUDA: aca tambien asigno a tlb?
+		asignar_entrada_tlb(mi_carpincho->id, nro_pagina);
+		
 	}
 	return marco;
 }
@@ -51,7 +60,6 @@ void reasignar_marco(uint32_t id_carpincho, uint32_t nro_pagina, t_marco* marco)
 	crear_movimiento_swap(GET_PAGE, id_carpincho, nro_pagina, NULL);
 
 	//actualizar_tlb();
-
 
 	// Actualizar tabla de paginas del que perdio el marco
 }
@@ -100,10 +108,11 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
         if(contador_necesarios == 0) return true;
     }
 
-	if(crear_movimiento_swap(NEW_PAGE, /*id_carpincho*/1, contador_necesarios, NULL))
+	if(crear_movimiento_swap(NEW_PAGE, /* id_carpincho */1, contador_necesarios, NULL))
 		return true;
 	else
 		return false;
+
 }
 
 t_marco* asignar_marco_libre(uint32_t nro_marco, uint32_t id) {
@@ -125,14 +134,9 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	pagina->nro_marco = nro_marco;
 	pagina->presencia = true;
 
-	// -> Esto agregaría yo, si el marco está en memoria
-	t_marco* marco_nuevo = asignar_marco_libre(nro_marco, carpincho->id);
-	marco_nuevo->pagina_duenio = list_size(carpincho->tabla_paginas) - 1;
-	// <- */
-
 	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
-
+	asignar_entrada_tlb(carpincho->id, list_size(carpincho->tabla_paginas) - 1);
 	return pagina;
 }
 

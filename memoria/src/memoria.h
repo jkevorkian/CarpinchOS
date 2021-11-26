@@ -31,6 +31,8 @@ typedef struct {
     uint32_t algoritmo_reemplazo;
     uint32_t tipo_asignacion;
     uint32_t cant_marcos;
+    uint32_t cant_marcos_carpincho;
+
 } t_config_memoria;
 
 typedef struct{
@@ -68,7 +70,6 @@ typedef struct {
 pthread_mutex_t mutex_asignacion_marcos;
 
 t_memoria_ram memoria_ram;
-t_config* config;			// Creo que no tiene que ser global
 t_config_memoria config_memoria;
 
 t_log* logger;

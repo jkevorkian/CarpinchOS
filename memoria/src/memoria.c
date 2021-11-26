@@ -4,6 +4,7 @@
 bool iniciar_memoria(t_config* config) {
 	config_memoria.tamanio_memoria = config_get_int_value(config, "TAMANIO");
 	config_memoria.tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
+	config_memoria.cant_marcos_carpincho = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
 	
 	if(config_memoria.tamanio_memoria % config_memoria.tamanio_pagina > 0) {
         log_error(logger, "Hubo un error al crear la memoria.");
@@ -41,7 +42,7 @@ bool iniciar_memoria(t_config* config) {
 	pthread_mutex_init(&mutex_asignacion_marcos, NULL);
 
 	iniciar_marcos(config_memoria.cant_marcos);
-	iniciar_tlb();  
+	iniciar_tlb(config);  
 
 	return true;
 }

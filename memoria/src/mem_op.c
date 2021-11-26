@@ -59,19 +59,32 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 
 	uint32_t nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP);
 	uint32_t dir_logica = 0;
-	
-	// esto esta mal porque podria tener un monton de marcos en swap
+	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
+	bool crear_footer = true;
+
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(nro_frames_necesarios > config_get_int_value(config, "MARCOS_POR_CARPINCHO")) {
-			return 0;
+		if(list_size(carpincho->tabla_paginas) == 0) {
+			if(!asignacion_fija(carpincho)) return 0;
+		}
+		// ya se que tiene todos los marcos asignados que va a usar, por lo que solo debo fijarme que nro_frames_necesarios no exceda la cantidad maxima de marcos en swap?
+		// deberia fijarme que mi cantidad de marcos libres sea mayor a la cant de marcos necesarios?
+	}
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
+		// lo hago solo la primera vez, despues asigno solo cuando me quedo sin paginas
+		if(list_size(carpincho->tabla_paginas) == 0) {
+			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
+				for(int i = 0; i < nro_frames_necesarios; i++){
+					t_marco* marco_a_reemplazar = realizar_algoritmo_reemplazo(id_carpincho);
+					crear_nueva_pagina(marco_a_reemplazar->nro_real, carpincho);
+				}
+			}
+			else return 0;
 		}
 	}
 
-	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
-
 	if(carpincho->heap_metadata == NULL) {
 		carpincho->heap_metadata = dir_fisica_proceso(carpincho->tabla_paginas);
-		dir_logica = heap_header(carpincho, tamanio, 0);
+		dir_logica = heap_header(carpincho, tamanio, 0, &crear_footer);
 		heap_footer(carpincho, tamanio, dir_logica + tamanio, HEAP_NULL);
 	}
 	else {
@@ -85,14 +98,21 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 
 			if(alloc_sig == HEAP_NULL){
 				if(is_free) {
-					if (desplazamiento + 2*TAMANIO_HEAP > config_get_int_value(config, "MARCOS_POR_CARPINCHO") * config_memoria.tamanio_pagina) {
-						//no entra al final
-						//con asig global asigno pagina de cualquier marco
-						//con asig fija reemplazo de mis paginas. lo que hago seria:
-						//*el marco victima mio pasa a swap
-						//*escribo en una nueva pagina los nuevos datos usando el marco victima
+					uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
+					if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
+						if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
+							// en algun caso puede sobrar espacio negativo? no creo
+							uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
+							nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
+							
+							for(int i = 0; i < nro_frames_necesarios; i++){
+								t_marco* marco_a_reemplazar = realizar_algoritmo_reemplazo(id_carpincho);
+								crear_nueva_pagina(marco_a_reemplazar->nro_real, carpincho);
+							}
+						}
+						else return 0;
 					}
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento);
+					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
 					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
 					break;
 				};
@@ -100,14 +120,16 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 			}
 			else {
 				if(is_free) {
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento);
+					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
 
-					//no entra en ese espacio alocado, buscar otro
+					// no entra en ese espacio alocado, buscar otro
+					// o tambien: no necesito el footer porque entra justo
 					if(dir_logica == 0) {
 						desplazamiento = alloc_sig;
 						continue;
 					};
 
+					if(!crear_footer) break;
 					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
 					break;
 				};
@@ -122,7 +144,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	return dir_logica; 
 }
 
-uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento){
+uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, bool* crear_footer){
 	bool tiene_footer = get_nextAlloc(carpincho->id, desplazamiento) != 0 || get_nextAlloc(carpincho->id, desplazamiento) != HEAP_NULL;
 	uint32_t bytes_allocados = get_nextAlloc(carpincho->id, desplazamiento) - desplazamiento - TAMANIO_HEAP;
 
@@ -130,6 +152,8 @@ uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamien
 	if(tiene_footer){
 		if(bytes_allocados == tam){
 			//printf("Entra entero pero sin footer intermedio");
+			*crear_footer = false;
+			return desplazamiento + TAMANIO_HEAP;
 		}
 		else if(bytes_allocados >= tam + TAMANIO_HEAP){
 			//printf("Entra con footer intermedio");

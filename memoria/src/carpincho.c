@@ -90,14 +90,7 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	t_carpincho* carpincho = malloc(sizeof(t_carpincho));
 	carpincho->id = id;
 	carpincho->tabla_paginas = list_create();
-
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(!asignacion_fija(carpincho)) return NULL;
-	}
-
-	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-		if(!asignacion_global(carpincho)) return NULL;
-	}
+	carpincho->heap_metadata = NULL;
 
 	list_add(lista_carpinchos, carpincho);
 	log_info(logger, "Se admitio correctamente el carpincho #%d", carpincho->id);
@@ -106,14 +99,13 @@ t_carpincho* crear_carpincho(uint32_t id) {
 
 
 bool asignacion_fija(t_carpincho* carpincho) {
-	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
+	uint32_t cant_marcos = config_memoria.cant_marcos_carpincho;
 
-	if(tengo_marcos_suficientes(cant_marcos)){
+	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)){
 		for(int i = 0; i < cant_marcos; i++){
-			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			t_marco* marco = obtener_marco_libre();	// busqueda solo en memoria
 			crear_nueva_pagina(marco->nro_real, carpincho);
 		}
-		carpincho->heap_metadata = NULL;
 		return true;
 	}
 
@@ -178,7 +170,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
-	setear_condicion_inicial(carpincho->id);
+	//setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
@@ -188,7 +180,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 			
-			if(mem_free(carpincho->id, desplazamiento_d))
+			if(mem_alloc(carpincho->id, desplazamiento_d))
 				mensaje_out = crear_mensaje(TODOOK);
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
@@ -203,7 +195,7 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(SEG_FAULT);
 			enviar_mensaje(socket, mensaje_out);
-			obtener_condicion_final(carpincho->id);
+			//obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
