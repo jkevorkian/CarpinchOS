@@ -11,7 +11,7 @@ build-utils:
 
 build-lib: build-utils
 	cd $(RUTA_MATELIB) && \
-	$(CC) -c -Wall -Werror -fpic mateLib.c -L"../../utils/bin" -lutils && \
+	$(CC) -c -Wall -Werror -fpic mateLib.c && \
 	$(CC) -shared mateLib.o -o libmate.so && \
 	rm mateLib.o
 
