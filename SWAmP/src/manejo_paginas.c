@@ -43,7 +43,7 @@ void cargar_pagina_en_tabla(char tabla_paginas[][cantidad_total_paginas],int n_p
 	int i;
 	for(i = lugar_libre; tabla_paginas[1][i] == itoc(id_carpincho) && tabla_paginas[2][i] != 'V'; i++);
 	tabla_paginas[2][i] = itoc(n_pagina);
-	espacio_disponible[n_particion] -= pagina_size;
+
 }
 
 int proximo_marco_libre(char tabla_paginas[][cantidad_total_paginas],int n_particion){
@@ -116,6 +116,7 @@ int existe_pagina(int id_carpincho, int n_pagina, int n_particion, char tabla_pa
 void eliminar_pagina(char tabla_paginas[][cantidad_total_paginas], int id_carpincho, int n_pagina, void** particiones){
 	int desplazamiento;
 	int n_particion;
+
 	for(int i = 0; i < cantidad_total_paginas; i++){
 		if(tabla_paginas[1][i] == itoc(id_carpincho) && tabla_paginas[2][i] == itoc(n_pagina)){
 			log_info(logger, "Eliminando pagina %d del carpincho %d de memoria...",n_pagina, id_carpincho);
@@ -124,7 +125,7 @@ void eliminar_pagina(char tabla_paginas[][cantidad_total_paginas], int id_carpin
 			borrar_contenido_pagina(particiones[n_particion], desplazamiento);
 			log_info(logger, "Eliminando pagina %d del carpincho %d de la tabla...",n_pagina, id_carpincho);
 			tabla_paginas[2][i] = 'V';
-			espacio_disponible[n_particion] += pagina_size;
+			//espacio_disponible[n_particion] += pagina_size;
 		}
 	}
 	log_info(logger, "Pagina eliminada completamente");
@@ -136,9 +137,10 @@ void borrar_contenido_pagina(void* particion, int desplazamiento){
 		}
 }
 
-void reservar_marcos(int id_carpincho, int cantidad_marcos, char tabla_paginas[][cantidad_total_paginas], void** particiones){
+int reservar_marcos(int id_carpincho, int cantidad_marcos, char tabla_paginas[][cantidad_total_paginas], void** particiones){
 	int n_particion;
-	int desplazamiento = carpincho_existente(tabla_paginas, id_carpincho);
+	int desplazamiento = carpincho_ya_existia(tabla_paginas, id_carpincho);
+	//printf("el desplazamiento es %d",desplazamiento);
 	if(desplazamiento == -1){ //si no existe el carpincho en ninguna particion
 		void* particion = algoritmo_de_particiones(particiones, espacio_disponible);
 		n_particion = obtener_n_particion(particiones, particion);
@@ -150,13 +152,19 @@ void reservar_marcos(int id_carpincho, int cantidad_marcos, char tabla_paginas[]
 	}
 	if(tipo_asignacion == FIJA){
 		if(cantidad_marcos > marcos_maximos){
-			log_warning(logger, "Se pidieron mas marcos que el maximo, entregando %d marcos",marcos_maximos);
+			log_warning(logger, "Se pidieron mas marcos que el maximo");
+			return -1;
 		}
 		reservar_marcos_fijo(id_carpincho, n_particion, tabla_paginas);
 	}
 	else
-		reservar_marcos_global(id_carpincho, n_particion, cantidad_marcos, tabla_paginas);
-	return;
+	{
+		int i = reservar_marcos_global(id_carpincho, n_particion, cantidad_marcos, tabla_paginas);
+		if(i < 0){
+		return -1;
+		}
+	}
+	return 1;
 }
 
 void reservar_marcos_fijo(int id_carpincho, int n_particion, char tabla_paginas[][cantidad_total_paginas]){
@@ -168,13 +176,15 @@ void reservar_marcos_fijo(int id_carpincho, int n_particion, char tabla_paginas[
 				return;
 			}
 		}
+	int marcos = 0;
 	for(int i = lugar_libre, marcos = 0; marcos < marcos_maximos; i++, marcos++){
 		tabla_paginas[1][i] = itoc(id_carpincho);
 	}
+	espacio_disponible[n_particion] -= pagina_size * marcos;
 	log_info(logger, "Marcos Reservados");
 }
 
-void reservar_marcos_global(int id_carpincho, int n_particion, int cantidad_marcos, char tabla_paginas[][cantidad_total_paginas]){
+int reservar_marcos_global(int id_carpincho, int n_particion, int cantidad_marcos, char tabla_paginas[][cantidad_total_paginas]){
 	log_info(logger, "Reservando %d marcos para el carpincho %d",cantidad_marcos, id_carpincho);
 	int lugar_libre;
 
@@ -188,19 +198,33 @@ void reservar_marcos_global(int id_carpincho, int n_particion, int cantidad_marc
 	log_info(logger, "Marcos disponibles %d",marcos_libres);
 	if(marcos_libres < cantidad_marcos){
 		log_warning(logger, "No entra en la Particion");
-		return;
+		return -1;
 	}
 	for(lugar_libre = (n_particion * paginas_por_particion); (tabla_paginas[0][lugar_libre] == itoc(n_particion) && tabla_paginas[1][lugar_libre] != 'V'); lugar_libre++);
-
-	int marcos_asignados;
-	for(int i = lugar_libre, marcos_asignados = 0; marcos_asignados < cantidad_marcos; i++, marcos_asignados++){
+	printf("Lugar libre = %d\n", lugar_libre);
+	int marcos_asignados = 0;
+	for(int i = lugar_libre, aux = 0; aux < cantidad_marcos; i++, aux++){
 		if(tabla_paginas[1][i] == 'V'){
 			tabla_paginas[1][i] = itoc(id_carpincho);
+			marcos_asignados = aux;
 		}
 		else
 			cantidad_marcos++;
 	}
+	espacio_disponible[n_particion] -= (pagina_size * (marcos_asignados + 1));
 	log_info(logger, "Marcos Reservados");
+	return 1;
 }
+
+int ultima_pagina_carpincho(int n_carpincho,char tabla_paginas[][cantidad_total_paginas]){
+	int ultima_pagina;
+	for(int i = 0; i < cantidad_total_paginas; i++){
+		if(tabla_paginas[1][i] == itoc(n_carpincho) && tabla_paginas[2][i] != 'V'){
+			ultima_pagina = ctoi(tabla_paginas[2][i]);
+		}
+	}
+	return ultima_pagina;
+}
+
 
 

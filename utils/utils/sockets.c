@@ -162,6 +162,7 @@ void agregar_a_mensaje(t_mensaje *mensaje, char *formato, ...) {
 
 		uint32_t valor_parametro;
 		uint32_t tamanio_buffer;
+
 		switch(*ptr_form) {
 		case 'd':
 			mensaje->buffer->contenido = realloc(mensaje->buffer->contenido, mensaje->buffer->tamanio + sizeof(uint32_t));
@@ -170,8 +171,14 @@ void agregar_a_mensaje(t_mensaje *mensaje, char *formato, ...) {
 			tamanio_buffer = sizeof(uint32_t);
 			break;
 		case 's':
-			parametro_nuevo = (void *)va_arg(ptr_arg, char *);
-			tamanio_buffer = strlen((char *)parametro_nuevo) + 1;
+			if(*(ptr_form + 1) == 'd') {
+				tamanio_buffer = va_arg(ptr_arg, uint32_t);
+				parametro_nuevo = (void *)va_arg(ptr_arg, char *);
+			}
+			else {
+				parametro_nuevo = (void *)va_arg(ptr_arg, char *);
+				tamanio_buffer = strlen((char *)parametro_nuevo) + 1;
+			}
 			mensaje->buffer->contenido = realloc(mensaje->buffer->contenido, mensaje->buffer->tamanio + sizeof(uint32_t) + tamanio_buffer);
 
 			memcpy(mensaje->buffer->contenido + mensaje->buffer->tamanio, &tamanio_buffer, sizeof(uint32_t));
@@ -261,27 +268,29 @@ t_list* recibir_mensaje(int socket) {
 	case MATE_CLOSE:
 		break;
 	// Memoria
-	case MEM_ALLOC:	recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);	break;
-	case MEM_FREE:	recibir_parametros(socket, lista_parametros, S_MEM_FREE);	break;
-	case MEM_READ:	recibir_parametros(socket, lista_parametros, S_MEM_READ);	break;
-	case MEM_WRITE:	recibir_parametros(socket, lista_parametros, S_MEM_WRITE);	break;
+	case MEM_ALLOC:		recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);	break;
+	case MEM_FREE:		recibir_parametros(socket, lista_parametros, S_MEM_FREE);	break;
+	case MEM_READ:		recibir_parametros(socket, lista_parametros, S_MEM_READ);	break;
+	case MEM_WRITE:		recibir_parametros(socket, lista_parametros, S_MEM_WRITE);	break;
 	// SWAMP
-	case GET_PAGE:	recibir_parametros(socket, lista_parametros, S_GET_PAGE);	break;
-	case SET_PAGE:	recibir_parametros(socket, lista_parametros, S_SET_PAGE);	break;
-	case SUSPEND:	recibir_parametros(socket, lista_parametros, S_SUSPEND);	break;
-	case UNSUSPEND:	recibir_parametros(socket, lista_parametros, S_UNSUSPEND);	break;
-	case NEW_C:		recibir_parametros(socket, lista_parametros, S_NEW_C);		break;
-	case EXIT_C:	recibir_parametros(socket, lista_parametros, S_EXIT_C);		break;
+	case NEW_PAGE:		recibir_parametros(socket, lista_parametros, S_NEW_PAGE);	break;
+	case GET_PAGE:		recibir_parametros(socket, lista_parametros, S_GET_PAGE);	break;
+	case SET_PAGE:		recibir_parametros(socket, lista_parametros, S_SET_PAGE);	break;
+	case RM_PAGE:		recibir_parametros(socket, lista_parametros, S_RM_PAGE);	break;
+	// case NEW_C:		recibir_parametros(socket, lista_parametros, S_NEW_C);		break;
+	case EXIT_C:		recibir_parametros(socket, lista_parametros, S_EXIT_C);		break;
 	// Semaforos
-	case SEM_INIT:	recibir_parametros(socket, lista_parametros, S_SEM_INIT);	break;
-	case SEM_WAIT:	recibir_parametros(socket, lista_parametros, S_SEM_WAIT);	break;
-	case SEM_POST:	recibir_parametros(socket, lista_parametros, S_SEM_POST);	break;
+	case SEM_INIT:		recibir_parametros(socket, lista_parametros, S_SEM_INIT);	break;
+	case SEM_WAIT:		recibir_parametros(socket, lista_parametros, S_SEM_WAIT);	break;
+	case SEM_POST:		recibir_parametros(socket, lista_parametros, S_SEM_POST);	break;
 	case SEM_DESTROY:	recibir_parametros(socket, lista_parametros, S_SEM_DESTROY);	break;
-	// I/O
-	case CALL_IO:	recibir_parametros(socket, lista_parametros, S_CALL_IO);	break;
 	// Otros
-	case DATA:	recibir_parametros(socket, lista_parametros, S_DATA);			break;
-	case SEND_PORT:	recibir_parametros(socket, lista_parametros, S_SEND_PORT);	break;
+	case CALL_IO:		recibir_parametros(socket, lista_parametros, S_CALL_IO);	break;
+	case DATA_CHAR:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);	break;
+	case DATA_INT:		recibir_parametros(socket, lista_parametros, S_DATA_INT);	break;
+	case SEND_PORT:		recibir_parametros(socket, lista_parametros, S_SEND_PORT);	break;
+	case SUSPEND:		recibir_parametros(socket, lista_parametros, S_SUSPEND);	break;
+	case UNSUSPEND:		recibir_parametros(socket, lista_parametros, S_UNSUSPEND);	break;
 
 	default:
 		break;

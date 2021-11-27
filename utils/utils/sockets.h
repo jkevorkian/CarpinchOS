@@ -1,10 +1,3 @@
-/*
- *  sockets.h
- *
- *  Created on: 21 jun. 2021
- *  Author: AprobadOS
- */
-
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_
 
@@ -26,11 +19,11 @@
 #define S_MEM_READ		"%d"
 #define S_MEM_WRITE		"%d%s"
 // SWAMP
+#define S_NEW_PAGE		"%d%d"
 #define S_GET_PAGE		"%d%d"
 #define S_SET_PAGE		"%d%d%s"
-#define S_SUSPEND		"%d"
-#define S_UNSUSPEND		"%d"
-#define S_NEW_C			""
+#define S_RM_PAGE		"%d"
+// #define S_NEW_C			""
 #define S_EXIT_C		"%d"
 // Semaforos
 #define S_SEM_INIT		"%s%d"
@@ -39,23 +32,28 @@
 #define S_SEM_DESTROY	"%s"
 // Otros
 #define S_CALL_IO		"%s"
-#define S_DATA			"%s"
+#define S_DATA_CHAR		"%s"
+#define S_DATA_INT		"%d"
 #define S_SEND_PORT		"%d"
+#define S_SUSPEND		"%d"
+#define S_UNSUSPEND		"%d"
 
 typedef enum {
 	// Validaciones
-	ER_SOC,		ER_RCV,		TODOOK,		NO_MEMORY,	SEG_FAULT,
+	ER_SOC,		ER_RCV,		TODOOK,		NO_MEMORY,
+	SEG_FAULT,
 	// Inicializacion
 	MATE_INIT,	MATE_CLOSE,
 	// Memoria
 	MEM_ALLOC,	MEM_FREE,	MEM_READ,	MEM_WRITE,
 	// SWAMP
-	GET_PAGE,	SET_PAGE,	SUSPEND,	UNSUSPEND,
-	NEW_C,		EXIT_C,
+	NEW_PAGE,	GET_PAGE,	SET_PAGE,	RM_PAGE,
+	EXIT_C,
 	// Semaforos
 	SEM_INIT,	SEM_WAIT,	SEM_POST,	SEM_DESTROY,
 	// Otros
-	CALL_IO,	DATA,		SEND_PORT
+	CALL_IO,	DATA_CHAR,	DATA_INT,	SEND_PORT,
+	SUSPEND,	UNSUSPEND,
 } protocolo_msj;
 
 typedef struct {

@@ -8,7 +8,6 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <math.h>
-
 #include <stdbool.h>
 
 #define IP_RAM "127.0.0.1"
@@ -61,8 +60,9 @@ typedef struct {
     uint32_t id;
 	sem_t* sem_tlb;
 	t_list* tabla_paginas;
-    void* heap_metadata;
 } t_carpincho;
+
+pthread_t nuevo_carpincho;
 
 t_memoria_ram memoria_ram;
 t_config* config;			// Creo que no tiene que ser global
@@ -83,7 +83,5 @@ void		    iniciar_marcos(uint32_t);
 uint32_t		pagina_segun_posicion(uint32_t posicion);
 uint32_t		offset_segun_posicion(uint32_t posicion);
 t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
-
-void*           dir_fisica_proceso(t_list* tabla_paginas);
 
 #endif /* _MEMORIA_H_ */

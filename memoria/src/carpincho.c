@@ -8,13 +8,7 @@ void *rutina_carpincho(void* info_carpincho) {
 	int socket = esperar_cliente(carpincho->socket);
 	close(carpincho->socket);
 	data_socket(socket, logger);
-	// Para mi hay que hacerlo en el servidor
-	/*
-		// TODO: generar id en memoria, NO leerla del mensaje
-		t_list *mensaje_in = recibir_mensaje(socket);
-		int id = (int)list_get(mensaje_in, 2);
-		t_carpincho* carpincho = crear_carpincho(id);
-	*/
+	
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
 
@@ -23,7 +17,7 @@ void *rutina_carpincho(void* info_carpincho) {
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
-			mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
+			// mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1));
 
 			mensaje_out = crear_mensaje(MEM_ALLOC);
 			agregar_a_mensaje(mensaje_out, "%d", 0);
@@ -31,7 +25,7 @@ void *rutina_carpincho(void* info_carpincho) {
 			break;
 		case MEM_FREE:
 			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
-			mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
+			// mem_free(carpincho->id, (int)list_get(mensaje_in, 1));
 			
 			mensaje_out = crear_mensaje(TODOOK);
 			enviar_mensaje(socket, mensaje_out);
@@ -39,7 +33,7 @@ void *rutina_carpincho(void* info_carpincho) {
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
 			
-			mensaje_out = crear_mensaje(DATA);
+			mensaje_out = crear_mensaje(DATA_CHAR);
 			log_info(logger, "Creo mensaje");
 			agregar_a_mensaje(mensaje_out, "%s", "Luke, yo soy tu padre");
 			enviar_mensaje(socket, mensaje_out);
@@ -54,12 +48,16 @@ void *rutina_carpincho(void* info_carpincho) {
 			// mem_write(id_carpincho, dir_logica, data);
 			break;
 		case SUSPEND:
-			// ...;
+			suspend(carpincho->id);
+			break;
+		case UNSUSPEND:
+			unsuspend(carpincho->id);
 			break;
 		case MATE_CLOSE:
 		default:
 			seguir = false;
 			log_info(logger, "Murio el carpincho, nos vemos.");
+			crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 			break;
 		}
 	}
@@ -91,10 +89,10 @@ bool asignacion_fija(t_carpincho* carpincho) {
 
 	if(tengo_marcos_suficientes(cant_marcos)){
 		for(int i = 0; i < cant_marcos; i++){
-			    t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
-			    crear_nueva_pagina(marco->nro_real, carpincho);
+			t_marco* marco = obtener_marco_libre();	// La búsqueda en swap no debería hacerse, de última aclarar en el nombre que es solo de memoria
+			crear_nueva_pagina(marco->nro_real, carpincho);
 		}
-		carpincho->heap_metadata = NULL;
+
 		return true;
 	}
 
@@ -102,7 +100,23 @@ bool asignacion_fija(t_carpincho* carpincho) {
 }
 
 bool asignacion_global(t_carpincho* carpincho) {
-	return false;
+	return true;
+}
+
+void setear_condicion_inicial(uint32_t id) {
+	uint32_t tamanio_alloc_1 = 20;
+	// uint32_t tamanio_alloc_2 = 13;
+	// uint32_t tamanio_alloc_3 = 32;
+	
+	uint32_t posicion_heap = 0;
+	set_prevAlloc(id, posicion_heap, HEAP_NULL);
+	set_nextAlloc(id, posicion_heap, tamanio_alloc_1 + TAMANIO_HEAP);	// El alloc de prueba ocupa 20 bytes
+	reset_isFree(id, posicion_heap);
+
+	posicion_heap = posicion_heap + tamanio_alloc_1 + TAMANIO_HEAP;
+	set_prevAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, 0);
+	set_nextAlloc(id, tamanio_alloc_1 + TAMANIO_HEAP, HEAP_NULL);	// El alloc de prueba ocupa 21 bytes
+	reset_isFree(id, tamanio_alloc_1 + TAMANIO_HEAP);
 }
 
 void rutina_test_carpincho(data_carpincho *info_carpincho) {
@@ -118,6 +132,8 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 	uint32_t desplazamiento_d;
 	char* marioneta;
 	uint32_t tamanio_mensaje;
+
+	setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
@@ -138,10 +154,14 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
-
-			mensaje_out = crear_mensaje(DATA);
+			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			
+			marioneta = mem_read(carpincho->id, desplazamiento_d);
+			log_info(logger, "El contenido del alloc es: %s", marioneta);
+			
+			mensaje_out = crear_mensaje(DATA_CHAR);
 			log_info(logger, "Creo mensaje");
-			agregar_a_mensaje(mensaje_out, "%s", "Luke, yo soy tu padre");
+			agregar_a_mensaje(mensaje_out, "%s", marioneta);
 			enviar_mensaje(socket, mensaje_out);
 			log_info(logger, "Envío mensaje");
 			break;
@@ -152,23 +172,25 @@ void rutina_test_carpincho(data_carpincho *info_carpincho) {
 			tamanio_mensaje = strlen(marioneta);
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 
-			actualizar_bloque_paginacion(carpincho->id, desplazamiento_d, marioneta, strlen(marioneta));
-			marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, strlen(marioneta));
+			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
+				free(marioneta);
+				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, tamanio_mensaje);
+				
+				log_info(logger, "Escribí: %s", marioneta);
+				free(marioneta);
 
-			// Hago esto para que se pase como string porque si lo paso como stream (sin /0) me puede inventar fruta.
-			// Esto solo hace falta en el mem_read
-			char final = '\0';
-			memcpy(marioneta + tamanio_mensaje, &final, 1);
-
-			log_info(logger, "Escribí: %s", marioneta);
-			free(marioneta);
-
-			mensaje_out = crear_mensaje(TODOOK);
+				mensaje_out = crear_mensaje(TODOOK);
+			}
+			else
+				mensaje_out = crear_mensaje(SEG_FAULT);
+			
 			enviar_mensaje(socket, mensaje_out);
-			// mem_write(id_carpincho, dir_logica, data);
 			break;
 		case SUSPEND:
-			// ...;
+			suspend(carpincho->id);
+			break;
+		case UNSUSPEND:
+			unsuspend(carpincho->id);
 			break;
 		case MATE_CLOSE:
 		default:
