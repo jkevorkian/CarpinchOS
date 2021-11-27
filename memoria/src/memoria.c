@@ -58,6 +58,11 @@ void iniciar_marcos(uint32_t cant_marcos){
 		marco_auxiliar->bit_modificado = false;
 		pthread_mutex_init(&marco_auxiliar->mutex_espera_uso, NULL);
 		pthread_mutex_init(&marco_auxiliar->mutex_info_algoritmo, NULL);
+
+		/*void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(i, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);*/
 	}
 }
 
@@ -103,4 +108,16 @@ void* dir_fisica_proceso(t_list* tabla_paginas) {
     t_entrada_tp* pagina = (t_entrada_tp*) list_get(tabla_paginas, 0);
 	// TODO: obtener marco
     return memoria_ram.inicio + pagina->nro_marco * config_memoria.tamanio_pagina;;
+}
+
+void loggear_pagina(t_log *logger, void *pagina) {
+	uint8_t byte;
+	for(int i = 0; i < 32; i++) {
+		memcpy(&byte, pagina + i, 1);
+		printf("%3d|", byte);
+
+		div_t barra_n = div(i + 1, 4);
+		if(i > 0 && !barra_n.rem)
+			printf("\n");
+	}
 }

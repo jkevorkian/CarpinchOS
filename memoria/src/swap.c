@@ -63,7 +63,7 @@ void* manejar_swap(void* socket_swap) {
         	log_info(logger, "Recibo un set_page");
 
 			mensaje_out = crear_mensaje(mov->accion);
-			agregar_a_mensaje(mensaje_out, "%d%d%s", mov->id_carpincho, mov->nro_pagina, mov->buffer);
+			agregar_a_mensaje(mensaje_out, "%d%d%sd", mov->id_carpincho, mov->nro_pagina, config_memoria.tamanio_pagina, mov->buffer);
 			enviar_mensaje(socket, mensaje_out);
 
 			mensaje_in = recibir_mensaje(socket);
@@ -124,8 +124,17 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 	nuevo_mov->id_carpincho = id_carpincho;
 	nuevo_mov->nro_pagina = nro_pagina;
 	nuevo_mov->respuesta = false;
-	if(accion == SET_PAGE)
-		nuevo_mov->buffer = buffer;
+	if(accion == SET_PAGE) {
+		nuevo_mov->buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(nuevo_mov->buffer, buffer, config_memoria.tamanio_pagina);
+
+		log_info(logger, "Lleno el buffer con set_page");
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, buffer, config_memoria.tamanio_pagina);
+		loggear_pagina(logger, buffer);
+		free(pagina_generica);
+	}
+		
 	sem_init(&nuevo_mov->sem_respuesta, 0 , 0);
 	
 	log_info(logger, "Accion: %d/%d", nuevo_mov->accion, accion);
@@ -152,6 +161,12 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 		if(accion == GET_PAGE) {
 			memcpy(buffer, nuevo_mov->buffer, config_memoria.tamanio_pagina);
 			free(nuevo_mov->buffer);
+
+			log_info(logger, "Leo el buffer con get_page");
+			void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+			memcpy(pagina_generica, buffer, config_memoria.tamanio_pagina);
+			loggear_pagina(logger, buffer);
+			free(pagina_generica);
 		}
 	}
 	sem_close(&nuevo_mov->sem_respuesta);

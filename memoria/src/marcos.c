@@ -71,7 +71,13 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 		marco->bit_modificado = false;
 		buffer = malloc(config_memoria.tamanio_pagina);
 		memcpy(buffer, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
-		crear_movimiento_swap(SET_PAGE, marco->duenio, marco->pagina_duenio, buffer);
+
+		log_info(logger, "Reasigno marco %d. Información a enviar:", marco->nro_real);
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);
+		crear_movimiento_swap(SET_PAGE, id_viejo, nro_pagina_vieja, buffer);
 	}
 
 	// Actualizo tlb y tabla de paginas del que perdio el marco
@@ -101,9 +107,16 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	
 	if(hago_swap_in) {	// SWAP IN
 		buffer = malloc(config_memoria.tamanio_pagina);
-		crear_movimiento_swap(GET_PAGE, marco->duenio, marco->pagina_duenio, buffer);
+
+		crear_movimiento_swap(GET_PAGE, id_carpincho, nro_pagina, buffer);
 		memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
 		// free(buffer);
+		
+		log_info(logger, "Reasigno marco %d. Información recuperada:", marco->nro_real);
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);
 	}
 
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas
