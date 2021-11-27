@@ -96,9 +96,9 @@ int mate_call_io(mate_instance *lib_ref, char *io, void *msg)
 	agregar_a_mensaje(mensaje_out, "%s", (char *)msg);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
-	t_list *mensaje_in = recibir_mensaje(inst->socket);
-	log_info(logger, "%s", string_desde_mensaje((int)list_get(mensaje_ins, 0))); //se imprime el mensaje de IO que llega
-	liberar_mensaje_in(mensaje_ins);
+	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+	log_info(logger, "%s", string_desde_mensaje((int)list_get(mensaje_in, 0))); //se imprime el mensaje de IO que llega
+	liberar_mensaje_in(mensaje_in);
 	return 0;
 }
 

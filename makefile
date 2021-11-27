@@ -11,8 +11,9 @@ build-utils:
 
 build-lib: build-utils
 	cd $(RUTA_MATELIB) && \
-	$(CC) -c -Wall -Werror -fpic mateLib.c && \
-	$(CC) -shared mateLib.o -o libmate.so && \
+	$(CC) -c -Wall  -fpic mateLib.c && \
+	$(CC) -c -Wall  -fpic sockets.c && \
+	$(CC) -shared mateLib.o sockets.o -o libmatelib.so && \
 	rm mateLib.o
 
 clean:
