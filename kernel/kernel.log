@@ -1166,3 +1166,50 @@
 [INFO] 11:11:57:599 KERNEL/(2579:2579): Kernel esperando algun carpincho
 [WARNING] 11:12:00:455 KERNEL/(2579:2579): Se ha conectado un carpincho
 [INFO] 11:12:00:455 KERNEL/(2579:2579): Kernel esperando algun carpincho
+[ERROR] 12:21:44:878 KERNEL/(7195:7195): error al crear hilo de deteccion de deadlock
+[INFO] 12:21:44:878 KERNEL/(7195:7195): Kernel esperando algun carpincho
+[WARNING] 12:25:14:373 KERNEL/(7195:7195): Se ha conectado un carpincho
+[ERROR] 12:25:14:375 KERNEL/(7195:7195): Error en la recepcion del puerto de la memoria
+[INFO] 12:25:14:375 KERNEL/(7195:7195): Kernel esperando algun carpincho
+[INFO] 12:25:14:376 KERNEL/(7195:7199): Carpincho 0 empezando a trabajar en el instante 12:25:14:375
+[INFO] 12:25:14:376 KERNEL/(7195:7199): Carpincho 0 devolviendo un TODOOK luego de ser bloqueado
+[WARNING] 12:27:52:931 KERNEL/(7195:7199): Carpincho 0 envio un MEM_ALLOC
+[WARNING] 12:28:57:626 KERNEL/(7195:7199): Carpincho 0 envio un MEM_ALLOC
+[WARNING] 12:29:02:522 KERNEL/(7195:7199): Carpincho 0 envio un MEM_ALLOC
+[WARNING] 12:29:29:007 KERNEL/(7195:7199): Carpincho 0 envio un MEM_ALLOC
+[WARNING] 12:31:28:837 KERNEL/(7195:7199): Ha ocurrido un fallo inesperado en la recepción del mensaje.
+[ERROR] 12:31:28:837 KERNEL/(7195:7199): Carpincho 0 desconectado :p
+[INFO] 12:31:28:837 KERNEL/(7195:7199): Carpincho 0 termino de trabajar en el instante 12:31:28:837
+[ERROR] 12:32:56:747 KERNEL/(8254:8254): error al crear hilo de deteccion de deadlock
+[INFO] 12:32:56:747 KERNEL/(8254:8254): Kernel esperando algun carpincho
+[WARNING] 12:33:03:242 KERNEL/(8254:8254): Se ha conectado un carpincho
+[ERROR] 12:33:03:242 KERNEL/(8254:8254): Error en la recepcion del puerto de la memoria
+[INFO] 12:33:03:243 KERNEL/(8254:8254): Kernel esperando algun carpincho
+[INFO] 12:33:03:243 KERNEL/(8254:8258): Carpincho 0 empezando a trabajar en el instante 12:33:03:243
+[WARNING] 12:33:25:600 KERNEL/(8254:8258): Carpincho 0 envio un MEM_ALLOC
+[ERROR] 12:35:43:959 KERNEL/(8305:8305): error al crear hilo de deteccion de deadlock
+[INFO] 12:35:43:959 KERNEL/(8305:8305): Kernel esperando algun carpincho
+[ERROR] 12:35:58:535 KERNEL/(8419:8419): error al crear hilo de deteccion de deadlock
+[INFO] 12:35:58:535 KERNEL/(8419:8419): Kernel esperando algun carpincho
+[WARNING] 12:36:03:399 KERNEL/(8419:8419): Se ha conectado un carpincho
+[ERROR] 12:36:03:399 KERNEL/(8419:8419): Error en la recepcion del puerto de la memoria
+[INFO] 12:36:03:400 KERNEL/(8419:8419): Kernel esperando algun carpincho
+[INFO] 12:36:03:400 KERNEL/(8419:8423): Carpincho 0 empezando a trabajar en el instante 12:36:03:400
+[WARNING] 12:36:10:814 KERNEL/(8419:8423): Carpincho 0 envio un MEM_ALLOC
+[INFO] 12:36:10:814 KERNEL/(8419:8423): Carpincho 0 entrando a la comunicacion con la memoria
+[ERROR] 12:40:11:690 KERNEL/(8705:8705): error al crear hilo de deteccion de deadlock
+[INFO] 12:40:11:690 KERNEL/(8705:8705): Kernel esperando algun carpincho
+[WARNING] 12:40:50:526 KERNEL/(8705:8705): Se ha conectado un carpincho
+[ERROR] 12:40:50:527 KERNEL/(8705:8705): Error en la recepcion del puerto de la memoria
+[INFO] 12:40:50:527 KERNEL/(8705:8705): Kernel esperando algun carpincho
+[INFO] 12:40:50:527 KERNEL/(8705:8712): Carpincho 0 empezando a trabajar en el instante 12:40:50:527
+[WARNING] 12:41:00:038 KERNEL/(8705:8712): Carpincho 0 envio un MEM_ALLOC
+[INFO] 12:41:00:038 KERNEL/(8705:8712): Carpincho 0 entrando a la comunicacion con la memoria
+[INFO] 12:41:00:038 KERNEL/(8705:8712): Carpincho 0 creo el mensaje MEM_ALLOC y le agrego el parametro 3
+[WARNING] 12:42:09:850 KERNEL/(8705:8705): Se ha conectado un carpincho
+[ERROR] 12:42:09:850 KERNEL/(8705:8705): Error en la recepcion del puerto de la memoria
+[INFO] 12:42:09:850 KERNEL/(8705:8705): Kernel esperando algun carpincho
+[INFO] 12:42:09:852 KERNEL/(8705:8711): Carpincho 1 empezando a trabajar en el instante 12:42:09:852
+[WARNING] 12:42:33:041 KERNEL/(8705:8711): Carpincho 1 envio un MEM_ALLOC
+[INFO] 12:42:33:041 KERNEL/(8705:8711): Carpincho 1 entrando a la comunicacion con la memoria
+[INFO] 12:42:33:041 KERNEL/(8705:8711): Carpincho 1 creo el mensaje MEM_ALLOC y le agrego el parametro 3

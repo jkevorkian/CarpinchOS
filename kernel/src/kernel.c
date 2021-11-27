@@ -30,8 +30,7 @@ int main() {
 			nuevo_carpincho->estimacion_proxima_rafaga = estimacion_inicial;
 			nuevo_carpincho->id = id_proximo_carpincho;
 			nuevo_carpincho->esta_suspendido = false;
-			nuevo_carpincho->responder_wait = false;
-			nuevo_carpincho->responder_IO = false;
+			nuevo_carpincho->responder = false;
 			nuevo_carpincho->id_semaforo_bloqueante = -1;
 			nuevo_carpincho->debe_morir = false;
 			nuevo_carpincho->semaforos_asignados = list_create();
