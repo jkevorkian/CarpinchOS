@@ -250,6 +250,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			
 			enviar_mensaje(socket, mensaje_out);
 			break;
+		
 		case SUSPEND:
 			suspend(carpincho->id);
 			break;
@@ -260,6 +261,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 		default:
 			seguir = false;
 			log_info(logger, "Murio el carpincho, nos vemos.");
+			crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 			break;
 		}
 	}

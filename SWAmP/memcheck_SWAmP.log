@@ -1,0 +1,28 @@
+==28306== Memcheck, a memory error detector
+==28306== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==28306== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==28306== Command: bin/SWAmP
+==28306== Parent PID: 28305
+==28306== 
+==28306== Syscall param open(mode) contains uninitialised byte(s)
+==28306==    at 0x406B8D3: __open_nocancel (syscall-template.S:84)
+==28306==    by 0x8049D0E: crear_archivo (manejo_archivos.c:5)
+==28306==    by 0x80497A2: main (swamp.c:34)
+==28306== 
+==28306== 
+==28306== HEAP SUMMARY:
+==28306==     in use at exit: 924 bytes in 37 blocks
+==28306==   total heap usage: 312 allocs, 275 frees, 22,157 bytes allocated
+==28306== 
+==28306== LEAK SUMMARY:
+==28306==    definitely lost: 0 bytes in 0 blocks
+==28306==    indirectly lost: 0 bytes in 0 blocks
+==28306==      possibly lost: 0 bytes in 0 blocks
+==28306==    still reachable: 924 bytes in 37 blocks
+==28306==         suppressed: 0 bytes in 0 blocks
+==28306== Reachable blocks (those to which a pointer was found) are not shown.
+==28306== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==28306== 
+==28306== For counts of detected and suppressed errors, rerun with: -v
+==28306== Use --track-origins=yes to see where uninitialised values come from
+==28306== ERROR SUMMARY: 2 errors from 1 contexts (suppressed: 0 from 0)
