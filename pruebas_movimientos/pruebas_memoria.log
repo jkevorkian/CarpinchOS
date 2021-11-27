@@ -751,3 +751,65 @@
 [INFO] 22:56:13:476 I'm Batman/(26441:26441): Estoy Aqui
 [INFO] 22:56:25:160 I'm Batman/(26441:26441): Voy a matar al carpincho 2
 [INFO] 22:56:25:160 I'm Batman/(26441:26441): Let's die. See you on next world.
+[ERROR] 10:04:00:191 I'm Batman/(4387:4387): Error al crear socket. Fallo al conectarse al servidor
+[INFO] 10:04:12:919 I'm Batman/(4487:4487): Hola. Un puerto, por favor
+[INFO] 10:04:12:919 I'm Batman/(4487:4487): Me pude conectar exitosamente con la RAM
+[INFO] 10:04:12:919 I'm Batman/(4487:4487): Dirección local: 127.0.0.1:40448
+[INFO] 10:04:12:919 I'm Batman/(4487:4487): Dirección remota: 127.0.0.1:1236
+[INFO] 10:04:12:919 I'm Batman/(4487:4487): Estoy Aqui
+[INFO] 10:04:16:613 I'm Batman/(4487:4487): Voy a asignar una nueva pagina
+[INFO] 10:04:16:613 I'm Batman/(4487:4487): Esperando respuesta
+[INFO] 10:04:16:614 I'm Batman/(4487:4487): Recibo un 2
+[INFO] 10:04:16:614 I'm Batman/(4487:4487): Estoy Aqui
+[INFO] 10:04:49:285 I'm Batman/(4487:4487): Voy a asignar una nueva pagina
+[INFO] 10:04:49:285 I'm Batman/(4487:4487): Esperando respuesta
+[INFO] 10:04:49:286 I'm Batman/(4487:4487): Recibo un 2
+[INFO] 10:04:49:286 I'm Batman/(4487:4487): Estoy Aqui
+[INFO] 10:07:33:660 I'm Batman/(4863:4863): Hola. Un puerto, por favor
+[INFO] 10:07:33:660 I'm Batman/(4863:4863): Me pude conectar exitosamente con la RAM
+[INFO] 10:07:33:660 I'm Batman/(4863:4863): Dirección local: 127.0.0.1:40456
+[INFO] 10:07:33:660 I'm Batman/(4863:4863): Dirección remota: 127.0.0.1:1236
+[INFO] 10:07:33:660 I'm Batman/(4863:4863): Estoy Aqui
+[INFO] 10:07:46:535 I'm Batman/(4863:4863): Voy a asignar una nueva pagina
+[INFO] 10:07:46:535 I'm Batman/(4863:4863): Esperando respuesta
+[INFO] 10:07:46:762 I'm Batman/(4863:4863): Recibo un 0
+[INFO] 10:07:46:762 I'm Batman/(4863:4863): Estoy Aqui
+[INFO] 10:08:10:024 I'm Batman/(4994:4994): Hola. Un puerto, por favor
+[INFO] 10:08:10:024 I'm Batman/(4994:4994): Me pude conectar exitosamente con la RAM
+[INFO] 10:08:10:025 I'm Batman/(4994:4994): Dirección local: 127.0.0.1:40460
+[INFO] 10:08:10:025 I'm Batman/(4994:4994): Dirección remota: 127.0.0.1:1236
+[INFO] 10:08:10:025 I'm Batman/(4994:4994): Estoy Aqui
+[INFO] 10:08:18:603 I'm Batman/(4994:4994): Voy a asignar una nueva pagina
+[INFO] 10:08:18:603 I'm Batman/(4994:4994): Esperando respuesta
+[INFO] 10:08:18:819 I'm Batman/(4994:4994): Recibo un 0
+[INFO] 10:08:18:820 I'm Batman/(4994:4994): Estoy Aqui
+[INFO] 10:11:53:858 I'm Batman/(4994:4994): Voy a asignar una nueva pagina
+[INFO] 10:11:53:858 I'm Batman/(4994:4994): Esperando respuesta
+[INFO] 10:11:53:858 I'm Batman/(4994:4994): Recibo un 0
+[INFO] 10:11:53:858 I'm Batman/(4994:4994): Estoy Aqui
+[INFO] 10:11:54:692 I'm Batman/(4994:4994): Voy a asignar una nueva pagina
+[INFO] 10:11:56:012 I'm Batman/(5970:5970): Hola. Un puerto, por favor
+[INFO] 10:11:56:012 I'm Batman/(5970:5970): Me pude conectar exitosamente con la RAM
+[INFO] 10:11:56:012 I'm Batman/(5970:5970): Dirección local: 127.0.0.1:40468
+[INFO] 10:11:56:012 I'm Batman/(5970:5970): Dirección remota: 127.0.0.1:1236
+[INFO] 10:11:56:012 I'm Batman/(5970:5970): Estoy Aqui
+[INFO] 10:12:01:115 I'm Batman/(5970:5970): Voy a asignar una nueva pagina
+[INFO] 10:12:01:116 I'm Batman/(5970:5970): Esperando respuesta
+[INFO] 10:12:01:117 I'm Batman/(5970:5970): Recibo un 2
+[INFO] 10:12:01:117 I'm Batman/(5970:5970): Estoy Aqui
+[INFO] 10:12:05:150 I'm Batman/(5970:5970): Voy a asignar una nueva pagina
+[INFO] 10:12:05:150 I'm Batman/(5970:5970): Esperando respuesta
+[INFO] 10:12:05:151 I'm Batman/(5970:5970): Recibo un 2
+[INFO] 10:12:05:151 I'm Batman/(5970:5970): Estoy Aqui
+[INFO] 10:12:10:124 I'm Batman/(5970:5970): Voy a asignar una nueva pagina
+[INFO] 10:12:10:124 I'm Batman/(5970:5970): Esperando respuesta
+[INFO] 10:12:10:125 I'm Batman/(5970:5970): Recibo un 2
+[INFO] 10:12:10:125 I'm Batman/(5970:5970): Estoy Aqui
+[INFO] 10:12:15:477 I'm Batman/(5970:5970): Voy a asignar una nueva pagina
+[INFO] 10:12:15:477 I'm Batman/(5970:5970): Esperando respuesta
+[INFO] 10:12:15:478 I'm Batman/(5970:5970): Recibo un 2
+[INFO] 10:12:15:478 I'm Batman/(5970:5970): Estoy Aqui
+[INFO] 10:12:21:114 I'm Batman/(5970:5970): Voy a asignar una nueva pagina
+[INFO] 10:12:21:114 I'm Batman/(5970:5970): Esperando respuesta
+[INFO] 10:12:21:115 I'm Batman/(5970:5970): Recibo un 2
+[INFO] 10:12:21:115 I'm Batman/(5970:5970): Estoy Aqui

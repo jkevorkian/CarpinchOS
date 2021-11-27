@@ -177,10 +177,12 @@ void reservar_marcos_fijo(int id_carpincho, int n_particion, char tabla_paginas[
 			}
 		}
 	int marcos = 0;
-	for(int i = lugar_libre, marcos = 0; marcos < marcos_maximos; i++, marcos++){
+	//int i;
+	for(int i = lugar_libre, aux = 0; aux < marcos_maximos; i++, aux++){
 		tabla_paginas[1][i] = itoc(id_carpincho);
+		marcos = aux;
 	}
-	espacio_disponible[n_particion] -= pagina_size * marcos;
+	espacio_disponible[n_particion] -= pagina_size * (marcos + 1);
 	log_info(logger, "Marcos Reservados");
 }
 
