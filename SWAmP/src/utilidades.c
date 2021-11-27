@@ -1,16 +1,18 @@
 #include "utilidades.h"
 
-void liberar_split(char** split) {
+void liberar_split(char **split)
+{
 	int i = 0;
 
-	while(split[i] != NULL) {
+	while (split[i] != NULL)
+	{
 		free(split[i]);
 		i++;
 	}
 
 	free(split);
 }
-
+/*
 char* string_desde_mensaje(int mensaje) {
 	char* listaDeStrings[] = {
 			// Validaciones
@@ -28,4 +30,4 @@ char* string_desde_mensaje(int mensaje) {
 
 	return listaDeStrings[mensaje];
 }
-
+*/
