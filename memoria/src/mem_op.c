@@ -75,8 +75,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		if(list_size(carpincho->tabla_paginas) == 0) {
 			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
 				for(int i = 0; i < nro_frames_necesarios; i++){
-					t_marco* marco_a_reemplazar = realizar_algoritmo_reemplazo(id_carpincho, i);
-					crear_nueva_pagina(marco_a_reemplazar->nro_real, carpincho);
+					agregar_pagina2(carpincho->id);
 				}
 			}
 			else return 0;
@@ -102,13 +101,11 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 					uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
 					if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
 						if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-							// en algun caso puede sobrar espacio negativo? no creo
 							uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
 							nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
 							
 							for(int i = 0; i < nro_frames_necesarios; i++){
-								t_marco* marco_a_reemplazar = realizar_algoritmo_reemplazo(id_carpincho, i);
-								crear_nueva_pagina(marco_a_reemplazar->nro_real, carpincho);
+								agregar_pagina2(carpincho->id);
 							}
 						}
 						else return 0;
@@ -124,12 +121,12 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
 
 					// no entra en ese espacio alocado, buscar otro
-					// o tambien: no necesito el footer porque entra justo
 					if(dir_logica == 0) {
 						desplazamiento = alloc_sig;
 						continue;
 					};
 
+					// no necesito el footer porque entra justo
 					if(!crear_footer) break;
 					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
 					break;

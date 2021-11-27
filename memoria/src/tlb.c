@@ -146,8 +146,9 @@ t_tlb_por_proceso* get_hit_miss_proceso(uint32_t id_carpincho) {
 }
 
 t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
+	t_entrada_tp* pagina = pagina_de_carpincho(id_car, nro_pagina);
 	t_entrada_tlb* entrada = tlb.mapa[nro_entrada];
-	return entrada->id_car == id_car && entrada->pagina == nro_pagina ? entrada : NULL;
+	return entrada->id_car == id_car && entrada->pagina == nro_pagina && !pagina->esta_vacia ? entrada : NULL;
 }
 
 void print_tlb() {

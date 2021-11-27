@@ -11,9 +11,9 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 		return marco;
 	}
 
-	// TLB miss
+	// TLB miss	
 	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
-	
+
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
@@ -21,7 +21,6 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	}
 	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
-		asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	log_info(logger, "Obtengo marco %d (pag %d, car %d)", marco->nro_real, nro_pagina, id_carpincho);
 	return marco;
@@ -42,12 +41,18 @@ void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
 }
 
 void asignar_marco_libre(t_marco *marco_nuevo, uint32_t id, uint32_t nro_pagina) {
+	t_entrada_tp *entrada_tp = pagina_de_carpincho(id, nro_pagina);
+
 	pthread_mutex_lock(&marco_nuevo->mutex_espera_uso);
 	marco_nuevo->duenio = id;
 	marco_nuevo->pagina_duenio = nro_pagina;
     marco_nuevo->libre = false;
 	marco_nuevo->bit_modificado = false;
 	marco_nuevo->bit_uso = false;
+
+	entrada_tp->nro_marco = marco_nuevo->nro_real;
+	entrada_tp->presencia = true;
+	entrada_tp->esta_vacia = false;
 	pthread_mutex_unlock(&marco_nuevo->mutex_espera_uso);
 
 	asignar_entrada_tlb(id, nro_pagina);
@@ -99,10 +104,13 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	
 	if(hago_swap_in) {	// SWAP IN
 		buffer = malloc(config_memoria.tamanio_pagina);
+		entrada_nueva_tp->esta_vacia = false;
 		crear_movimiento_swap(GET_PAGE, marco->duenio, marco->pagina_duenio, buffer);
 		memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
 		// free(buffer);
 	}
+
+	asignar_entrada_tlb(id_carpincho, nro_pagina);
 
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas
 	marco->pagina_duenio = nro_pagina;	// Util para facilitar futuros reemplazos
@@ -185,6 +193,21 @@ bool agregar_pagina(uint32_t id_carpincho) {
 	else
 		return false;
 }
+
+// en la otra agregar_pagina si necesito agregar de a muchas pero me falla alguna request a swap no tengo forma de volver atras 
+t_entrada_tp* agregar_pagina2(uint32_t id_carpincho) {
+	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
+	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	list_add(carpincho->tabla_paginas, pagina);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
+
+	pagina->presencia = false;
+	pagina->esta_vacia = true;
+	return pagina;
+}
+
 
 void suspend(uint32_t id) {
 	uint32_t cant_marcos;
