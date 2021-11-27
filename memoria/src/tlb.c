@@ -79,7 +79,7 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 		else tlb.puntero_fifo = tlb.puntero_fifo + 1;
 	}
 	else if(tlb.algoritmo_reemplazo == LRU){
-		double result;
+		bool result;
 		t_entrada_tlb* entrada_menor = tlb.mapa[0];
 
 		for(int i = 0; i < tlb.cant_entradas; i++) {
@@ -87,6 +87,7 @@ t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
 			if(entrada->tiempo_lru){
 				result = es_mas_vieja(entrada, entrada_menor);
 				if(result) entrada_menor = entrada;
+				//printf("menor: %d", entrada_menor->pagina);
 			};
 		} 
 
@@ -255,7 +256,7 @@ uint32_t tiempo_a_milisegundos(t_entrada_tlb* entrada) {
 uint32_t obtener_tiempo_lru(char tipo, t_entrada_tlb* entrada){
 	// Formato temporal para LRU de tlb: HH:MM:SS:mmm
 	char tiempo[2];
-	char tiempo_ms[3];
+	char tiempo_ms[3] = {0,0,0};
 	switch(tipo) {
 	case 'H':
 		memcpy(tiempo, entrada->tiempo_lru, 2);
