@@ -15,7 +15,7 @@ void rellenar_archivo(void* particion){
 	int desplazamiento = 0;
 	log_info(logger, "Rellenando archivo...");
 	for(desplazamiento = 0; desplazamiento < particion_size; desplazamiento++){
-		memcpy(particion + desplazamiento, "0", sizeof(char));
+		memcpy(particion + desplazamiento, "\0", sizeof(char));
 	}
 	log_info(logger, "Archivo rellenado con exito");
 }
