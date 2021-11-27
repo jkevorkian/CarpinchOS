@@ -22,7 +22,7 @@ typedef struct {
 	uint32_t id_car;
 	uint32_t pagina;
 	uint32_t marco;
-    time_t tiempo_lru;
+    char* tiempo_lru;
 } t_entrada_tlb;
 
 typedef struct {
@@ -62,7 +62,10 @@ t_tlb_por_proceso* 	get_hit_miss_proceso(uint32_t id_carpincho);
 void                flush_proceso_tlb(uint32_t id_carpincho);
 
 //LRU
-void                print_tiempo(t_entrada_tlb* entrada);
+bool                es_mas_vieja(t_entrada_tlb* entrada1, t_entrada_tlb* entrada2);
+uint32_t            tiempo_a_milisegundos(t_entrada_tlb* entrada);
+uint32_t            obtener_tiempo_lru(char tipo, t_entrada_tlb* entrada);
+//void                print_tiempo(t_entrada_tlb* entrada);
 
 // SEÑALES
 void 				print_tlb(void);
