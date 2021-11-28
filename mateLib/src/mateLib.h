@@ -23,7 +23,7 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
-#include <utils/sockets.h>
+#include "sockets.h"
 
 #define ip_kernel "127.0.0.1"
 #define ip_memoria "127.0.0.1"

@@ -1,277 +1,106 @@
-[INFO] 16:39:42:970 memoria/(10404:10404): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
-[INFO] 16:39:42:972 memoria/(10404:10404): TLB inicializada. Nro de entradas: 4096
-[INFO] 16:39:42:973 memoria/(10404:10404): Creo socket de escucha para recibir los carpinchos
-[INFO] 16:39:42:973 memoria/(10404:10404): Servidor listo
-[INFO] 16:39:42:975 memoria/(10404:10405): Dirección local: 127.0.0.1:39690
-[INFO] 16:39:42:975 memoria/(10404:10405): Dirección remota: 127.0.0.1:9999
-[INFO] 16:39:42:976 memoria/(10404:10405): Espero nuevo movimiento
-[INFO] 16:39:42:975 memoria/(10404:10404): Espero a que llegue un nuevo carpincho
-[INFO] 16:39:46:598 memoria/(10404:10404): Creo un nuevo carpincho
-[INFO] 16:39:46:599 memoria/(10404:10404): Creo carpincho
-[INFO] 16:39:46:601 memoria/(10404:10404): Se admitio correctamente el carpincho #1
-[INFO] 16:39:46:601 memoria/(10404:10404): Dirección local: 127.0.0.1:43639
-[WARNING] 16:39:46:601 memoria/(10404:10404): El socket no está conectado a un socket remoto
-[INFO] 16:39:46:602 memoria/(10404:10404): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
-[INFO] 16:39:46:602 memoria/(10404:10404): Espero a que llegue un nuevo carpincho
-[INFO] 16:39:46:603 memoria/(10404:10407): Nace un nuevo carpincho
-[INFO] 16:39:46:604 memoria/(10404:10407): Dirección local: 127.0.0.1:43639
-[INFO] 16:39:46:604 memoria/(10404:10407): Dirección remota: 127.0.0.1:49154
-[INFO] 16:39:46:604 memoria/(10404:10407): Accion: 11/11
-[INFO] 16:39:46:604 memoria/(10404:10407): ID: 1/1
-[INFO] 16:39:46:604 memoria/(10404:10407): NRO_PAGINA: 4/4
-[INFO] 16:39:46:604 memoria/(10404:10407): Posteo movimiento y espero respuesta
-[INFO] 16:39:46:605 memoria/(10404:10405): Accion: 11
-[INFO] 16:39:46:605 memoria/(10404:10405): ID: 1
-[INFO] 16:39:46:605 memoria/(10404:10405): NRO_PAGINA: 4
-[INFO] 16:39:46:605 memoria/(10404:10405): Recibo un new_page
-[INFO] 16:39:46:610 memoria/(10404:10405): La swap me devuelve 2
-[INFO] 16:39:46:611 memoria/(10404:10405): Espero nuevo movimiento
-[INFO] 16:39:46:613 memoria/(10404:10407): Recibo respuesta
-[INFO] 16:39:46:614 memoria/(10404:10407): 0
-[INFO] 16:39:46:615 memoria/(10404:10407): 0
-[INFO] 16:39:46:616 memoria/(10404:10407): Finalizo movimiento. Respuesta = 1
-[INFO] 16:39:46:616 memoria/(10404:10407): Accion: 11/11
-[INFO] 16:39:46:616 memoria/(10404:10407): ID: 1/1
-[INFO] 16:39:46:616 memoria/(10404:10407): NRO_PAGINA: 1/1
-[INFO] 16:39:46:616 memoria/(10404:10407): Posteo movimiento y espero respuesta
-[INFO] 16:39:46:616 memoria/(10404:10405): Accion: 11
-[INFO] 16:39:46:617 memoria/(10404:10405): ID: 1
-[INFO] 16:39:46:617 memoria/(10404:10405): NRO_PAGINA: 1
-[INFO] 16:39:46:617 memoria/(10404:10405): Recibo un new_page
-[INFO] 16:39:46:619 memoria/(10404:10405): La swap me devuelve 2
-[INFO] 16:39:46:619 memoria/(10404:10405): Espero nuevo movimiento
-[INFO] 16:39:46:619 memoria/(10404:10407): Recibo respuesta
-[INFO] 16:39:46:619 memoria/(10404:10407): 0
-[INFO] 16:39:46:620 memoria/(10404:10407): 0
-[INFO] 16:39:46:620 memoria/(10404:10407): Finalizo movimiento. Respuesta = 1
-[INFO] 16:39:46:620 memoria/(10404:10407): Pude pedir una nueva página, grande la swap
-[INFO] 16:39:46:621 memoria/(10404:10407): Prev: -1; main: 0; next: 29
-[INFO] 16:39:46:623 memoria/(10404:10407): Obtengo marco 0 (pag 0, car 1)
-[INFO] 16:39:46:624 memoria/(10404:10407): Prev: 0; main: 29; next: 51
-[INFO] 16:39:46:626 memoria/(10404:10407): Obtengo marco 1 (pag 1, car 1)
-[INFO] 16:39:46:627 memoria/(10404:10407): Prev: 29; main: 51; next: 92
-[INFO] 16:39:46:629 memoria/(10404:10407): Prev: 51; main: 92; next: 126
-[INFO] 16:39:46:630 memoria/(10404:10407): Obtengo marco 2 (pag 2, car 1)
-[INFO] 16:39:46:631 memoria/(10404:10407): Obtengo marco 3 (pag 3, car 1)
-[INFO] 16:39:46:631 memoria/(10404:10407): Prev: 92; main: 126; next: -1
-[INFO] 16:39:46:633 memoria/(10404:10407): Accion: 13/13
-[INFO] 16:39:46:635 memoria/(10404:10407): ID: 1/1
-[INFO] 16:39:46:637 memoria/(10404:10407): NRO_PAGINA: 0/0
-[INFO] 16:39:46:639 memoria/(10404:10407): Posteo movimiento y espero respuesta
-[INFO] 16:39:46:640 memoria/(10404:10405): Accion: 13
-[INFO] 16:39:46:640 memoria/(10404:10405): ID: 1
-[INFO] 16:39:46:641 memoria/(10404:10405): NRO_PAGINA: 0
-[INFO] 16:39:46:641 memoria/(10404:10405): Recibo un set_page
-[INFO] 16:39:46:643 memoria/(10404:10405): La swap me devuelve 2
-[INFO] 16:39:46:643 memoria/(10404:10405): Espero nuevo movimiento
-[INFO] 16:39:46:644 memoria/(10404:10407): Recibo respuesta
-[INFO] 16:39:46:645 memoria/(10404:10407): 0
-[INFO] 16:39:46:646 memoria/(10404:10407): 0
-[INFO] 16:39:46:647 memoria/(10404:10407): Finalizo movimiento. Respuesta = 1
-[INFO] 16:39:46:649 memoria/(10404:10407): Obtengo marco 0 (pag 4, car 1)
-[INFO] 16:42:40:023 memoria/(10684:10684): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
-[INFO] 16:42:40:025 memoria/(10684:10684): TLB inicializada. Nro de entradas: 4096
-[INFO] 16:42:40:026 memoria/(10684:10684): Creo socket de escucha para recibir los carpinchos
-[INFO] 16:42:40:027 memoria/(10684:10684): Servidor listo
-[INFO] 16:42:40:027 memoria/(10684:10685): Dirección local: 127.0.0.1:39696
-[INFO] 16:42:40:027 memoria/(10684:10684): Espero a que llegue un nuevo carpincho
-[INFO] 16:42:40:028 memoria/(10684:10685): Dirección remota: 127.0.0.1:9999
-[INFO] 16:42:40:028 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:42:42:872 memoria/(10684:10684): Creo un nuevo carpincho
-[INFO] 16:42:42:872 memoria/(10684:10684): Creo carpincho
-[INFO] 16:42:42:872 memoria/(10684:10684): Se admitio correctamente el carpincho #1
-[INFO] 16:42:42:872 memoria/(10684:10684): Dirección local: 127.0.0.1:39351
-[WARNING] 16:42:42:872 memoria/(10684:10684): El socket no está conectado a un socket remoto
-[INFO] 16:42:42:873 memoria/(10684:10684): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
-[INFO] 16:42:42:873 memoria/(10684:10684): Espero a que llegue un nuevo carpincho
-[INFO] 16:42:42:873 memoria/(10684:10687): Nace un nuevo carpincho
-[INFO] 16:42:42:873 memoria/(10684:10687): Dirección local: 127.0.0.1:39351
-[INFO] 16:42:42:874 memoria/(10684:10687): Dirección remota: 127.0.0.1:57812
-[INFO] 16:42:42:875 memoria/(10684:10687): Accion: 11/11
-[INFO] 16:42:42:876 memoria/(10684:10687): ID: 1/1
-[INFO] 16:42:42:877 memoria/(10684:10687): NRO_PAGINA: 4/4
-[INFO] 16:42:42:879 memoria/(10684:10687): Posteo movimiento y espero respuesta
-[INFO] 16:42:42:880 memoria/(10684:10685): Accion: 11
-[INFO] 16:42:42:880 memoria/(10684:10685): ID: 1
-[INFO] 16:42:42:881 memoria/(10684:10685): NRO_PAGINA: 4
-[INFO] 16:42:42:881 memoria/(10684:10685): Recibo un new_page
-[INFO] 16:42:42:883 memoria/(10684:10685): La swap me devuelve 2
-[INFO] 16:42:42:883 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:42:42:884 memoria/(10684:10687): Recibo respuesta
-[INFO] 16:42:42:886 memoria/(10684:10687): 0
-[INFO] 16:42:42:887 memoria/(10684:10687): 0
-[INFO] 16:42:42:888 memoria/(10684:10687): Finalizo movimiento. Respuesta = 1
-[INFO] 16:42:42:889 memoria/(10684:10687): Accion: 11/11
-[INFO] 16:42:42:890 memoria/(10684:10687): ID: 1/1
-[INFO] 16:42:42:891 memoria/(10684:10687): NRO_PAGINA: 1/1
-[INFO] 16:42:42:891 memoria/(10684:10687): Posteo movimiento y espero respuesta
-[INFO] 16:42:42:892 memoria/(10684:10685): Accion: 11
-[INFO] 16:42:42:892 memoria/(10684:10685): ID: 1
-[INFO] 16:42:42:892 memoria/(10684:10685): NRO_PAGINA: 1
-[INFO] 16:42:42:892 memoria/(10684:10685): Recibo un new_page
-[INFO] 16:42:42:893 memoria/(10684:10685): La swap me devuelve 2
-[INFO] 16:42:42:893 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:42:42:893 memoria/(10684:10687): Recibo respuesta
-[INFO] 16:42:42:893 memoria/(10684:10687): 0
-[INFO] 16:42:42:893 memoria/(10684:10687): 0
-[INFO] 16:42:42:894 memoria/(10684:10687): Finalizo movimiento. Respuesta = 1
-[INFO] 16:42:42:894 memoria/(10684:10687): Pude pedir una nueva página, grande la swap
-[INFO] 16:42:42:894 memoria/(10684:10687): Prev: -1; main: 0; next: 29
-[INFO] 16:42:42:895 memoria/(10684:10687): Obtengo marco 0 (pag 0, car 1)
-[INFO] 16:42:42:896 memoria/(10684:10687): Prev: 0; main: 29; next: 51
-[INFO] 16:42:42:897 memoria/(10684:10687): Obtengo marco 1 (pag 1, car 1)
-[INFO] 16:42:42:898 memoria/(10684:10687): Prev: 29; main: 51; next: 92
-[INFO] 16:42:42:899 memoria/(10684:10687): Prev: 51; main: 92; next: 126
-[INFO] 16:42:42:902 memoria/(10684:10687): Obtengo marco 2 (pag 2, car 1)
-[INFO] 16:42:42:904 memoria/(10684:10687): Obtengo marco 3 (pag 3, car 1)
-[INFO] 16:42:42:905 memoria/(10684:10687): Prev: 92; main: 126; next: -1
-[INFO] 16:42:42:907 memoria/(10684:10687): Accion: 13/13
-[INFO] 16:42:42:908 memoria/(10684:10687): ID: 1/1
-[INFO] 16:42:42:908 memoria/(10684:10687): NRO_PAGINA: 0/0
-[INFO] 16:42:42:909 memoria/(10684:10687): Posteo movimiento y espero respuesta
-[INFO] 16:42:42:910 memoria/(10684:10685): Accion: 13
-[INFO] 16:42:42:910 memoria/(10684:10685): ID: 1
-[INFO] 16:42:42:910 memoria/(10684:10685): NRO_PAGINA: 0
-[INFO] 16:42:42:911 memoria/(10684:10685): Recibo un set_page
-[INFO] 16:42:42:928 memoria/(10684:10685): La swap me devuelve 2
-[INFO] 16:42:42:928 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:42:42:928 memoria/(10684:10687): Recibo respuesta
-[INFO] 16:42:42:928 memoria/(10684:10687): 0
-[INFO] 16:42:42:928 memoria/(10684:10687): 0
-[INFO] 16:42:42:928 memoria/(10684:10687): Finalizo movimiento. Respuesta = 1
-[INFO] 16:42:42:929 memoria/(10684:10687): Obtengo marco 0 (pag 4, car 1)
-[INFO] 16:43:12:468 memoria/(10684:10687): Me llego un mem_free para la posicion 9
-[INFO] 16:43:12:469 memoria/(10684:10687): Accion: 13/13
-[INFO] 16:43:12:469 memoria/(10684:10687): ID: 1/1
-[INFO] 16:43:12:469 memoria/(10684:10687): NRO_PAGINA: 1/1
-[INFO] 16:43:12:469 memoria/(10684:10687): Posteo movimiento y espero respuesta
-[INFO] 16:43:12:469 memoria/(10684:10685): Accion: 13
-[INFO] 16:43:12:469 memoria/(10684:10685): ID: 1
-[INFO] 16:43:12:469 memoria/(10684:10685): NRO_PAGINA: 1
-[INFO] 16:43:12:470 memoria/(10684:10685): Recibo un set_page
-[INFO] 16:43:12:477 memoria/(10684:10685): La swap me devuelve 2
-[INFO] 16:43:12:477 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:43:12:477 memoria/(10684:10687): Recibo respuesta
-[INFO] 16:43:12:478 memoria/(10684:10687): 0
-[INFO] 16:43:12:478 memoria/(10684:10687): 0
-[INFO] 16:43:12:478 memoria/(10684:10687): Finalizo movimiento. Respuesta = 1
-[INFO] 16:43:12:478 memoria/(10684:10687): Accion: 12/12
-[INFO] 16:43:12:479 memoria/(10684:10687): ID: 1/1
-[INFO] 16:43:12:479 memoria/(10684:10687): NRO_PAGINA: 1/1
-[INFO] 16:43:12:479 memoria/(10684:10687): Posteo movimiento y espero respuesta
-[INFO] 16:43:12:480 memoria/(10684:10685): Accion: 12
-[INFO] 16:43:12:480 memoria/(10684:10685): ID: 1
-[INFO] 16:43:12:480 memoria/(10684:10685): NRO_PAGINA: 1
-[INFO] 16:43:12:480 memoria/(10684:10685): Recibo un get_page
-[INFO] 16:43:12:481 memoria/(10684:10685): La swap me devuelve 21
-[INFO] 16:43:12:481 memoria/(10684:10685): Contenido: 
-[INFO] 16:43:12:481 memoria/(10684:10685): Cargo la pagina
-[INFO] 16:43:12:483 memoria/(10684:10685): Espero nuevo movimiento
-[INFO] 16:43:12:483 memoria/(10684:10687): Recibo respuesta
-[INFO] 16:43:12:483 memoria/(10684:10687): 0
-[INFO] 16:43:12:483 memoria/(10684:10687): 0
-[INFO] 16:43:12:483 memoria/(10684:10687): Finalizo movimiento. Respuesta = 1
-[INFO] 16:43:12:483 memoria/(10684:10687): Obtengo marco 1 (pag 0, car 1)
-[INFO] 16:44:48:023 memoria/(10692:10692): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
-[INFO] 16:44:48:024 memoria/(10692:10692): TLB inicializada. Nro de entradas: 4096
-[INFO] 16:44:48:024 memoria/(10692:10692): Creo socket de escucha para recibir los carpinchos
-[INFO] 16:44:48:024 memoria/(10692:10692): Servidor listo
-[INFO] 16:44:48:024 memoria/(10692:10692): Espero a que llegue un nuevo carpincho
-[INFO] 16:44:48:025 memoria/(10692:10696): Dirección local: 127.0.0.1:39702
-[INFO] 16:44:48:025 memoria/(10692:10696): Dirección remota: 127.0.0.1:9999
-[INFO] 16:44:48:025 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:44:52:154 memoria/(10692:10692): Creo un nuevo carpincho
-[INFO] 16:44:52:154 memoria/(10692:10692): Creo carpincho
-[INFO] 16:44:52:154 memoria/(10692:10692): Se admitio correctamente el carpincho #1
-[INFO] 16:44:52:154 memoria/(10692:10692): Dirección local: 127.0.0.1:35298
-[WARNING] 16:44:52:154 memoria/(10692:10692): El socket no está conectado a un socket remoto
-[INFO] 16:44:52:155 memoria/(10692:10692): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
-[INFO] 16:44:52:155 memoria/(10692:10692): Espero a que llegue un nuevo carpincho
-[INFO] 16:44:52:155 memoria/(10692:10698): Nace un nuevo carpincho
-[INFO] 16:44:52:155 memoria/(10692:10698): Dirección local: 127.0.0.1:35298
-[INFO] 16:44:52:155 memoria/(10692:10698): Dirección remota: 127.0.0.1:54468
-[INFO] 16:44:52:155 memoria/(10692:10698): Accion: 11/11
-[INFO] 16:44:52:155 memoria/(10692:10698): ID: 1/1
-[INFO] 16:44:52:155 memoria/(10692:10698): NRO_PAGINA: 4/4
-[INFO] 16:44:52:155 memoria/(10692:10698): Posteo movimiento y espero respuesta
-[INFO] 16:44:52:155 memoria/(10692:10696): Accion: 11
-[INFO] 16:44:52:156 memoria/(10692:10696): ID: 1
-[INFO] 16:44:52:156 memoria/(10692:10696): NRO_PAGINA: 4
-[INFO] 16:44:52:156 memoria/(10692:10696): Recibo un new_page
-[INFO] 16:44:52:158 memoria/(10692:10696): La swap me devuelve 2
-[INFO] 16:44:52:159 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:44:52:159 memoria/(10692:10698): Recibo respuesta
-[INFO] 16:44:52:159 memoria/(10692:10698): 0
-[INFO] 16:44:52:159 memoria/(10692:10698): 0
-[INFO] 16:44:52:159 memoria/(10692:10698): Finalizo movimiento. Respuesta = 1
-[INFO] 16:44:52:159 memoria/(10692:10698): Accion: 11/11
-[INFO] 16:44:52:159 memoria/(10692:10698): ID: 1/1
-[INFO] 16:44:52:159 memoria/(10692:10698): NRO_PAGINA: 1/1
-[INFO] 16:44:52:159 memoria/(10692:10698): Posteo movimiento y espero respuesta
-[INFO] 16:44:52:159 memoria/(10692:10696): Accion: 11
-[INFO] 16:44:52:159 memoria/(10692:10696): ID: 1
-[INFO] 16:44:52:160 memoria/(10692:10696): NRO_PAGINA: 1
-[INFO] 16:44:52:160 memoria/(10692:10696): Recibo un new_page
-[INFO] 16:44:52:160 memoria/(10692:10696): La swap me devuelve 2
-[INFO] 16:44:52:161 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:44:52:161 memoria/(10692:10698): Recibo respuesta
-[INFO] 16:44:52:161 memoria/(10692:10698): 0
-[INFO] 16:44:52:161 memoria/(10692:10698): 0
-[INFO] 16:44:52:161 memoria/(10692:10698): Finalizo movimiento. Respuesta = 1
-[INFO] 16:44:52:161 memoria/(10692:10698): Pude pedir una nueva página, grande la swap
-[INFO] 16:44:52:161 memoria/(10692:10698): Prev: -1; main: 0; next: 29
-[INFO] 16:45:02:748 memoria/(10692:10698): Obtengo marco 0 (pag 0, car 1)
-[INFO] 16:45:33:268 memoria/(10692:10698): Prev: 0; main: 29; next: 51
-[INFO] 16:45:39:869 memoria/(10692:10698): Obtengo marco 1 (pag 1, car 1)
-[INFO] 16:46:07:613 memoria/(10692:10698): Prev: 29; main: 51; next: 92
-[INFO] 16:46:10:886 memoria/(10692:10698): Prev: 51; main: 92; next: 126
-[INFO] 16:46:11:253 memoria/(10692:10698): Obtengo marco 2 (pag 2, car 1)
-[INFO] 16:46:12:549 memoria/(10692:10698): Obtengo marco 3 (pag 3, car 1)
-[INFO] 16:46:14:356 memoria/(10692:10698): Prev: 92; main: 126; next: -1
-[INFO] 16:46:15:125 memoria/(10692:10698): Accion: 13/13
-[INFO] 16:46:15:125 memoria/(10692:10698): ID: 1/1
-[INFO] 16:46:15:126 memoria/(10692:10698): NRO_PAGINA: 0/0
-[INFO] 16:46:15:127 memoria/(10692:10698): Posteo movimiento y espero respuesta
-[INFO] 16:46:15:127 memoria/(10692:10696): Accion: 13
-[INFO] 16:46:15:127 memoria/(10692:10696): ID: 1
-[INFO] 16:46:15:128 memoria/(10692:10696): NRO_PAGINA: 0
-[INFO] 16:46:15:128 memoria/(10692:10696): Recibo un set_page
-[INFO] 16:46:15:136 memoria/(10692:10696): La swap me devuelve 2
-[INFO] 16:46:15:136 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:46:15:136 memoria/(10692:10698): Recibo respuesta
-[INFO] 16:46:15:137 memoria/(10692:10698): 0
-[INFO] 16:46:15:137 memoria/(10692:10698): 0
-[INFO] 16:46:15:137 memoria/(10692:10698): Finalizo movimiento. Respuesta = 1
-[INFO] 16:46:15:137 memoria/(10692:10698): Obtengo marco 0 (pag 4, car 1)
-[INFO] 16:46:31:811 memoria/(10692:10698): Me llego un mem_free para la posicion 9
-[INFO] 16:46:31:815 memoria/(10692:10698): Accion: 13/13
-[INFO] 16:46:31:815 memoria/(10692:10698): ID: 1/1
-[INFO] 16:46:31:815 memoria/(10692:10698): NRO_PAGINA: 1/1
-[INFO] 16:46:31:815 memoria/(10692:10698): Posteo movimiento y espero respuesta
-[INFO] 16:46:31:815 memoria/(10692:10696): Accion: 13
-[INFO] 16:46:31:815 memoria/(10692:10696): ID: 1
-[INFO] 16:46:31:815 memoria/(10692:10696): NRO_PAGINA: 1
-[INFO] 16:46:31:815 memoria/(10692:10696): Recibo un set_page
-[INFO] 16:46:31:817 memoria/(10692:10696): La swap me devuelve 2
-[INFO] 16:46:31:817 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:46:31:817 memoria/(10692:10698): Recibo respuesta
-[INFO] 16:46:31:817 memoria/(10692:10698): 0
-[INFO] 16:46:31:817 memoria/(10692:10698): 0
-[INFO] 16:46:31:817 memoria/(10692:10698): Finalizo movimiento. Respuesta = 1
-[INFO] 16:46:31:817 memoria/(10692:10698): Accion: 12/12
-[INFO] 16:46:31:817 memoria/(10692:10698): ID: 1/1
-[INFO] 16:46:31:817 memoria/(10692:10698): NRO_PAGINA: 1/1
-[INFO] 16:46:31:817 memoria/(10692:10698): Posteo movimiento y espero respuesta
-[INFO] 16:46:31:817 memoria/(10692:10696): Accion: 12
-[INFO] 16:46:31:817 memoria/(10692:10696): ID: 1
-[INFO] 16:46:31:817 memoria/(10692:10696): NRO_PAGINA: 1
-[INFO] 16:46:31:817 memoria/(10692:10696): Recibo un get_page
-[INFO] 16:46:31:817 memoria/(10692:10696): La swap me devuelve 21
-[INFO] 16:46:31:818 memoria/(10692:10696): Contenido: 
-[INFO] 16:46:31:818 memoria/(10692:10696): Cargo la pagina
-[INFO] 16:46:31:818 memoria/(10692:10696): Espero nuevo movimiento
-[INFO] 16:46:31:818 memoria/(10692:10698): Recibo respuesta
-[INFO] 16:46:31:818 memoria/(10692:10698): 0
-[INFO] 16:46:31:818 memoria/(10692:10698): 0
-[INFO] 16:46:31:818 memoria/(10692:10698): Finalizo movimiento. Respuesta = 1
-[INFO] 16:46:31:818 memoria/(10692:10698): Obtengo marco 1 (pag 0, car 1)
+[INFO] 12:18:53:678 memoria/(6873:6873): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:18:53:679 memoria/(6873:6873): TLB inicializada. Nro de entradas: 4096
+[INFO] 12:18:53:679 memoria/(6873:6873): Creo socket de escucha para recibir los carpinchos
+[WARNING] 12:18:53:679 memoria/(6873:6874): El socket no está iniciado
+[INFO] 12:18:53:680 memoria/(6873:6873): Servidor listo
+[INFO] 12:18:53:680 memoria/(6873:6873): Espero a que llegue un nuevo carpincho
+[WARNING] 12:18:53:680 memoria/(6873:6874): El socket no está conectado a un socket remoto
+[INFO] 12:18:53:680 memoria/(6873:6874): Espero nuevo movimiento
+[INFO] 12:21:32:809 memoria/(7098:7098): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:21:32:810 memoria/(7098:7098): TLB inicializada. Nro de entradas: 4096
+[INFO] 12:21:32:810 memoria/(7098:7098): Creo socket de escucha para recibir los carpinchos
+[INFO] 12:21:32:810 memoria/(7098:7098): Servidor listo
+[INFO] 12:21:32:810 memoria/(7098:7098): Espero a que llegue un nuevo carpincho
+[INFO] 12:21:32:810 memoria/(7098:7099): Dirección local: 127.0.0.1:51608
+[INFO] 12:21:32:811 memoria/(7098:7099): Dirección remota: 127.0.0.1:10072
+[INFO] 12:21:32:811 memoria/(7098:7099): Espero nuevo movimiento
+[INFO] 12:25:14:373 memoria/(7098:7098): Creo un nuevo carpincho
+[INFO] 12:25:14:373 memoria/(7098:7098): Creo carpincho
+[INFO] 12:25:14:374 memoria/(7098:7098): Se admitio correctamente el carpincho #1
+[INFO] 12:25:14:374 memoria/(7098:7098): Dirección local: 127.0.0.1:37792
+[WARNING] 12:25:14:374 memoria/(7098:7098): El socket no está conectado a un socket remoto
+[INFO] 12:25:14:375 memoria/(7098:7098): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
+[INFO] 12:25:14:375 memoria/(7098:7098): Espero a que llegue un nuevo carpincho
+[INFO] 12:25:14:375 memoria/(7098:7914): Nace un nuevo carpincho
+[INFO] 12:31:36:661 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:36:661 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:39:044 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:39:044 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:39:547 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:39:547 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:39:908 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:39:908 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:40:316 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:40:316 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:40:675 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:40:677 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:41:035 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:41:035 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:41:371 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:41:371 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:41:796 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:41:796 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:42:147 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:42:147 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:42:515 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:42:515 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:42:915 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:42:915 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:31:43:331 memoria/(7098:7098): Cantidad de TLB Hit totales: 0
+[INFO] 12:31:43:332 memoria/(7098:7098): Cantidad de TLB Miss totales: 0
+[INFO] 12:32:45:541 memoria/(8034:8034): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:32:45:542 memoria/(8034:8034): TLB inicializada. Nro de entradas: 4096
+[INFO] 12:32:45:542 memoria/(8034:8034): Creo socket de escucha para recibir los carpinchos
+[INFO] 12:32:45:542 memoria/(8034:8034): Servidor listo
+[INFO] 12:32:45:542 memoria/(8034:8034): Espero a que llegue un nuevo carpincho
+[INFO] 12:32:45:542 memoria/(8034:8035): Dirección local: 127.0.0.1:51654
+[INFO] 12:32:45:542 memoria/(8034:8035): Dirección remota: 127.0.0.1:10072
+[INFO] 12:32:45:542 memoria/(8034:8035): Espero nuevo movimiento
+[INFO] 12:33:03:242 memoria/(8034:8034): Creo un nuevo carpincho
+[INFO] 12:33:03:242 memoria/(8034:8034): Creo carpincho
+[INFO] 12:33:03:242 memoria/(8034:8034): Se admitio correctamente el carpincho #1
+[INFO] 12:33:03:243 memoria/(8034:8034): Dirección local: 127.0.0.1:42427
+[WARNING] 12:33:03:243 memoria/(8034:8034): El socket no está conectado a un socket remoto
+[INFO] 12:33:03:243 memoria/(8034:8034): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
+[INFO] 12:33:03:243 memoria/(8034:8034): Espero a que llegue un nuevo carpincho
+[INFO] 12:33:03:244 memoria/(8034:8275): Nace un nuevo carpincho
+[INFO] 12:35:38:639 memoria/(8303:8303): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:35:38:640 memoria/(8303:8303): TLB inicializada. Nro de entradas: 4096
+[INFO] 12:35:38:640 memoria/(8303:8303): Creo socket de escucha para recibir los carpinchos
+[INFO] 12:35:38:640 memoria/(8303:8303): Servidor listo
+[INFO] 12:35:38:640 memoria/(8303:8303): Espero a que llegue un nuevo carpincho
+[WARNING] 12:35:38:641 memoria/(8303:8304): El socket no está iniciado
+[WARNING] 12:35:38:641 memoria/(8303:8304): El socket no está conectado a un socket remoto
+[INFO] 12:35:38:641 memoria/(8303:8304): Espero nuevo movimiento
+[INFO] 12:36:03:399 memoria/(8303:8303): Creo un nuevo carpincho
+[INFO] 12:36:03:399 memoria/(8303:8303): Creo carpincho
+[INFO] 12:36:03:400 memoria/(8303:8303): Se admitio correctamente el carpincho #1
+[INFO] 12:36:03:400 memoria/(8303:8303): Dirección local: 127.0.0.1:41036
+[WARNING] 12:36:03:400 memoria/(8303:8303): El socket no está conectado a un socket remoto
+[INFO] 12:36:03:400 memoria/(8303:8303): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
+[INFO] 12:36:03:400 memoria/(8303:8303): Espero a que llegue un nuevo carpincho
+[INFO] 12:36:03:400 memoria/(8303:8436): Nace un nuevo carpincho
+[INFO] 12:40:46:744 memoria/(8731:8731): Estoy en paginación, con entrada valida. Nro marcos: 128. Tamaño marco: 32 bytes
+[INFO] 12:40:46:745 memoria/(8731:8731): TLB inicializada. Nro de entradas: 4096
+[INFO] 12:40:46:745 memoria/(8731:8731): Creo socket de escucha para recibir los carpinchos
+[INFO] 12:40:46:745 memoria/(8731:8731): Servidor listo
+[INFO] 12:40:46:746 memoria/(8731:8731): Espero a que llegue un nuevo carpincho
+[INFO] 12:40:46:746 memoria/(8731:8732): Dirección local: 127.0.0.1:51678
+[INFO] 12:40:46:746 memoria/(8731:8732): Dirección remota: 127.0.0.1:10072
+[INFO] 12:40:46:746 memoria/(8731:8732): Espero nuevo movimiento
+[INFO] 12:40:50:527 memoria/(8731:8731): Creo un nuevo carpincho
+[INFO] 12:40:50:528 memoria/(8731:8731): Creo carpincho
+[INFO] 12:40:50:528 memoria/(8731:8731): Se admitio correctamente el carpincho #1
+[INFO] 12:40:50:528 memoria/(8731:8731): Dirección local: 127.0.0.1:39209
+[WARNING] 12:40:50:528 memoria/(8731:8731): El socket no está conectado a un socket remoto
+[INFO] 12:40:50:528 memoria/(8731:8731): Comunico al caprincho 1 el nuevo puerto con el cual se debe comunicar.
+[INFO] 12:40:50:528 memoria/(8731:8731): Espero a que llegue un nuevo carpincho
+[INFO] 12:40:50:528 memoria/(8731:8733): Nace un nuevo carpincho
+[INFO] 12:42:09:850 memoria/(8731:8731): Creo un nuevo carpincho
+[INFO] 12:42:09:851 memoria/(8731:8731): Creo carpincho
+[INFO] 12:42:09:851 memoria/(8731:8731): Se admitio correctamente el carpincho #2
+[INFO] 12:42:09:851 memoria/(8731:8731): Dirección local: 127.0.0.1:43266
+[WARNING] 12:42:09:851 memoria/(8731:8731): El socket no está conectado a un socket remoto
+[INFO] 12:42:09:852 memoria/(8731:8731): Comunico al caprincho 2 el nuevo puerto con el cual se debe comunicar.
+[INFO] 12:42:09:852 memoria/(8731:8731): Espero a que llegue un nuevo carpincho
+[INFO] 12:42:09:852 memoria/(8731:8754): Nace un nuevo carpincho

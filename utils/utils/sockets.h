@@ -1,10 +1,3 @@
-/*
- *  sockets.h
- *
- *  Created on: 21 jun. 2021
- *  Author: AprobadOS
- */
-
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_
 

@@ -1,0 +1,31 @@
+[INFO] 12:25:14:373 MATELIB/(7913:7913): Socket auxiliar funcionando
+[INFO] 12:25:14:373 MATELIB/(7913:7913): Puerto recibido
+[INFO] 12:25:14:376 MATELIB/(7913:7913): Cantidad de carpinchos iniciados 1 - ID proximo carpincho 2
+[INFO] 12:27:52:931 MATELIB/(7913:7913): Mensaje a enviar MEM_ALLOC
+[INFO] 12:27:52:931 MATELIB/(7913:7913): Mensaje Recibido TODOOK
+[INFO] 12:28:57:626 MATELIB/(7913:7913): Mensaje a enviar MEM_ALLOC
+[INFO] 12:28:57:626 MATELIB/(7913:7913): Mensaje Recibido ER_RCV
+[INFO] 12:29:02:522 MATELIB/(7913:7913): Mensaje a enviar MEM_ALLOC
+[INFO] 12:29:02:522 MATELIB/(7913:7913): Mensaje Recibido ER_RCV
+[INFO] 12:29:29:006 MATELIB/(7913:7913): Mensaje a enviar MEM_ALLOC
+[INFO] 12:29:29:006 MATELIB/(7913:7913): Mensaje Recibido ER_RCV
+[INFO] 12:33:03:242 MATELIB/(8274:8274): Socket auxiliar funcionando
+[INFO] 12:33:03:242 MATELIB/(8274:8274): Puerto recibido
+[INFO] 12:33:03:243 MATELIB/(8274:8274): Cantidad de carpinchos iniciados 1 - ID proximo carpincho 2
+[INFO] 12:33:25:600 MATELIB/(8274:8274): Mensaje a enviar MEM_ALLOC
+[INFO] 12:33:25:600 MATELIB/(8274:8274): Mensaje Recibido ER_RCV
+[INFO] 12:36:03:399 MATELIB/(8435:8435): Socket auxiliar funcionando
+[INFO] 12:36:03:399 MATELIB/(8435:8435): Puerto recibido
+[INFO] 12:36:03:400 MATELIB/(8435:8435): Cantidad de carpinchos iniciados 1 - ID proximo carpincho 2
+[INFO] 12:36:10:813 MATELIB/(8435:8435): Mensaje a enviar MEM_ALLOC
+[INFO] 12:36:10:814 MATELIB/(8435:8435): Mensaje Recibido ER_RCV
+[INFO] 12:40:50:527 MATELIB/(8730:8730): Socket auxiliar funcionando
+[INFO] 12:40:50:527 MATELIB/(8730:8730): Puerto recibido
+[INFO] 12:40:50:527 MATELIB/(8730:8730): Cantidad de carpinchos iniciados 1 - ID proximo carpincho 2
+[INFO] 12:41:00:038 MATELIB/(8730:8730): Mensaje a enviar MEM_ALLOC
+[INFO] 12:41:00:038 MATELIB/(8730:8730): Mensaje Recibido ER_RCV
+[INFO] 12:42:09:850 MATELIB/(8730:8730): Socket auxiliar funcionando
+[INFO] 12:42:09:850 MATELIB/(8730:8730): Puerto recibido
+[INFO] 12:42:09:850 MATELIB/(8730:8730): Cantidad de carpinchos iniciados 2 - ID proximo carpincho 3
+[INFO] 12:42:33:040 MATELIB/(8730:8730): Mensaje a enviar MEM_ALLOC
+[INFO] 12:42:33:041 MATELIB/(8730:8730): Mensaje Recibido ER_RCV
