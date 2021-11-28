@@ -6,8 +6,6 @@ int main() {
 
 	bool seguir = true;
 
-	iniciar_deteccion_deadlock(tiempo_deadlock);
-	
 	//proceso de recepcion de los mate_init
 	while(seguir) {
 		log_info(logger, "Kernel esperando algun carpincho");
@@ -17,8 +15,7 @@ int main() {
 		if(socket_auxiliar_carpincho < 0) {
 			log_error(logger, "Error en el socket recibido del carpincho que se intento conectar");
 			seguir = false;
-		}
-		else {
+		} else {
 			log_warning(logger, "Se ha conectado un carpincho");
 
 			//creo la estructura para el nuevo carpincho
@@ -55,11 +52,13 @@ int conectar_memoria(int socket_auxiliar_carpincho) {
 			log_error(logger, "Error en el socket generado para la memoria");
 		}
 
-		t_list* mensaje_in = recibir_mensaje(socket_kernel);
+		t_list* mensaje_in = recibir_mensaje(socket_auxiliar_memoria);
 
-		if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-			socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (char*)list_get(mensaje_in, 1));
-		else
+		if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
+			char puerto[7];
+			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
+			socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, puerto);
+		} else
 			log_error(logger, "Error en la recepcion del puerto de la memoria");
 
 		liberar_mensaje_in(mensaje_in);

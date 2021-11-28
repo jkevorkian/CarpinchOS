@@ -22,8 +22,7 @@
 #define LOGUEAR_MENSAJES_COLAS 1
 
 //carpincho
-typedef struct
-{
+typedef struct {
 	int id;
 	int socket_memoria;
 	int socket_mateLib;
@@ -38,8 +37,7 @@ typedef struct
 } carpincho;
 
 //semaforo
-typedef struct
-{
+typedef struct {
 	char *nombre;
 	int id; //agrego el id para mas facil de manejo inequivoco de semaforos en el deadlock
 	int instancias_iniciadas;
@@ -48,8 +46,7 @@ typedef struct
 } semaforo;
 
 //IO
-typedef struct
-{
+typedef struct {
 	char *nombre;
 	int duracion;
 	t_queue *cola_espera;
@@ -57,6 +54,12 @@ typedef struct
 	sem_t carpinchos_esperando;
 	pthread_t hilo_IO;
 } IO;
+
+//deadlock
+typedef struct{
+        int milisegundos_entre_detecciones;
+        void* semaforosMaybe;
+} t_deadlock;
 
 t_log *logger, *logger_colas;
 t_config *config;
@@ -83,5 +86,11 @@ sem_t multiprogramacion, multiprocesamiento;
 pthread_mutex_t mutex_cola_new, mutex_lista_ready, mutex_lista_running, mutex_lista_blocked, mutex_cola_suspendidosReady, mutex_lista_suspendidosBlocked, mutex_lista_semaforos;
 
 pthread_t hilo_planificador_largo_plazo, hilo_planificador_corto_plazo, hilo_planificador_mediano_plazo;
+
+/////////////DEADLOCK/////////////
+pthread_t detector;
+
+t_list *carpinchos_en_deadlock;
+t_list *lista_a_evaluar;
 
 #endif /* GLOBAL_H_ */

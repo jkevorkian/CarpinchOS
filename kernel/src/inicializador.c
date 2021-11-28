@@ -1,7 +1,6 @@
 #include "inicializador.h"
 
-int inicializar_kernel()
-{
+int inicializar_kernel() {
 	logger = log_create("kernel.log", "KERNEL", 1, LOG_LEVEL_INFO);
 	config = config_create("kernel.config");
 
@@ -12,8 +11,7 @@ int inicializar_kernel()
 
 	socket_kernel = crear_conexion_servidor(ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"), 1);
 
-	if (!validar_socket(socket_kernel, logger))
-	{
+	if (!validar_socket(socket_kernel, logger)) {
 		close(socket_kernel);
 		log_destroy(logger);
 		return 1;
@@ -27,6 +25,7 @@ int inicializar_kernel()
 	iniciar_planificadores();
 	iniciar_hilos_cpu();
 	inicializar_io();
+	iniciar_deteccion_deadlock(tiempo_deadlock);
 
 	lista_semaforos = list_create();
 	pthread_mutex_init(&mutex_lista_semaforos, NULL);
@@ -40,8 +39,7 @@ int inicializar_kernel()
 	return 0;
 }
 
-void leer_configuraciones()
-{
+void leer_configuraciones() {
 	ip_kernel = config_get_string_value(config, "IP_KERNEL");
 	ip_memoria = config_get_string_value(config, "IP_MEMORIA");
 	puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
@@ -52,12 +50,12 @@ void leer_configuraciones()
 	alfa = config_get_double_value(config, "ALFA");
 	estimacion_inicial = config_get_int_value(config, "ESTIMACION_INICIAL");
 	tiempo_deadlock = config_get_int_value(config, "TIEMPO_DEADLOCK");
+
 	if (LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tConfiguracion leida correctamente");
 }
 
-void crear_estructuras_planificacion()
-{
+void crear_estructuras_planificacion() {
 	cola_new = queue_create();
 	cola_suspendidosReady = queue_create();
 	cola_running = queue_create();
@@ -73,8 +71,7 @@ void crear_estructuras_planificacion()
 		log_info(logger, "\tCreadas las estructuras de planificacion");
 }
 
-void inicializar_semaforos_planificacion()
-{
+void inicializar_semaforos_planificacion() {
 	pthread_mutex_init(&mutex_cola_new, NULL);
 	pthread_mutex_init(&mutex_cola_suspendidosReady, NULL);
 

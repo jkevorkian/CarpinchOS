@@ -421,11 +421,11 @@ char *string_desde_mensaje(int mensaje)
 		// Memoria
 		"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE",
 		// SWAMP
-		"GET_PAGE", "SET_PAGE", "SUSPEND", "UNSUSPEND", "NEW_C", "EXIT_C",
+		"NEW_PAGE", "GET_PAGE", "SET_PAGE", "RM_PAGE", "EXIT_C",
 		// Semaforos
 		"SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY",
 		// Otros
-		"CALL_IO", "DATA", "SEND_PORT"};
+		"CALL_IO", "DATA_CHAR", "DATA_INT", "SEND_PORT", "SUSPEND", "UNSUSPEND"};
 
 	return listaDeStrings[mensaje];
 }
