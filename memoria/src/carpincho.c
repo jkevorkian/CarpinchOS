@@ -12,18 +12,17 @@ void *rutina_carpincho(void* info_carpincho) {
 	
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
-	char* marioneta;
-	uint32_t tamanio_mensaje;
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
 		switch((int)list_get(mensaje_in, 0)) { 
 		case MEM_ALLOC:
 			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
+
 			if(mem_alloc(carpincho->id, (int)list_get(mensaje_in, 1)))
 				mensaje_out = crear_mensaje(TODOOK);
 			else
-				mensaje_out = crear_mensaje(SEG_FAULT);
+				mensaje_out = crear_mensaje(NO_MEMORY);
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_FREE:
@@ -31,52 +30,65 @@ void *rutina_carpincho(void* info_carpincho) {
 			
 			if(mem_free(carpincho->id, (int)list_get(mensaje_in, 1)))
 				mensaje_out = crear_mensaje(TODOOK);
-			else
+			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				seguir = false;
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_FREE_FAULT);
+			}
+
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
-			if((marioneta = mem_read(carpincho->id, (int)list_get(mensaje_in, 1)))) {
-				log_info(logger, "El contenido del alloc es: %s", marioneta);
+
+			char *buffer;
+			if((buffer = mem_read(carpincho->id, (int)list_get(mensaje_in, 1)))) {
 				mensaje_out = crear_mensaje(DATA_CHAR);
-				agregar_a_mensaje(mensaje_out, "%s", marioneta);
+				agregar_a_mensaje(mensaje_out, "%s", buffer);
 			}
 			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				seguir = false;
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_READ_FAULT);
 			}
+
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_WRITE:
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
-			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
 
-			tamanio_mensaje = strlen(marioneta);
-
-			if(mem_write(carpincho->id, (int)list_get(mensaje_in, 1), (char *)list_get(mensaje_in, 2))) {
-				marioneta = obtener_bloque_paginacion(carpincho->id, (int)list_get(mensaje_in, 1), tamanio_mensaje);
-				log_info(logger, "Escribí: %s", marioneta);
-				free(marioneta);
+			if(mem_write(carpincho->id, (int)list_get(mensaje_in, 1), (char *)list_get(mensaje_in, 2)))
 				mensaje_out = crear_mensaje(TODOOK);
-			}
-			else
+			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				seguir = false;
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_WRITE_FAULT);
+			}
+				
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case SUSPEND:
+			log_info(logger, "Me llego una orden de suspensión");
+
 			suspend(carpincho->id);
 			break;
 		case UNSUSPEND:
+			log_info(logger, "Me llego un permiso para volver a memoria");
+
 			unsuspend(carpincho->id);
 			break;
 		case MATE_CLOSE:
 		default:
 			seguir = false;
-			log_info(logger, "Murio el carpincho, nos vemos.");
-			crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 			break;
 		}
 	}
+	
+	log_info(logger, "Murio el carpincho, nos vemos.");
+	crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 	return NULL;
 }
 
@@ -210,8 +222,13 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			
 			if(mem_free(carpincho->id, desplazamiento_d))
 				mensaje_out = crear_mensaje(TODOOK);
-			else
+			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				// seguir = false;		// Comentado para probar
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_FREE_FAULT);
+			}
+
 			enviar_mensaje(socket, mensaje_out);
 			// obtener_condicion_final(carpincho->id);
 			break;
@@ -225,8 +242,12 @@ void *rutina_test_carpincho(void *info_carpincho) {
 				agregar_a_mensaje(mensaje_out, "%s", marioneta);
 			}
 			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				// seguir = false;		// Comentado para probar
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_READ_FAULT);
 			}
+
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_WRITE:
@@ -239,14 +260,16 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
 				free(marioneta);
 				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, tamanio_mensaje);
-				
 				log_info(logger, "Escribí: %s", marioneta);
 				free(marioneta);
-
 				mensaje_out = crear_mensaje(TODOOK);
 			}
-			else
+			else {
+				log_info(logger, "SEGMENTATION FAULT");
+				// seguir = false;		// Comentado para probar
 				mensaje_out = crear_mensaje(SEG_FAULT);
+				agregar_a_mensaje(mensaje_out, "%d", MATE_WRITE_FAULT);
+			}
 			
 			enviar_mensaje(socket, mensaje_out);
 			break;
@@ -266,6 +289,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 		}
 	}
 	eliminar_carpincho(carpincho->id);
+	// crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 	free(carpincho);
 	
 	return NULL;

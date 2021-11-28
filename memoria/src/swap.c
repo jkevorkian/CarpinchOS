@@ -42,10 +42,7 @@ void* manejar_swap(void* socket_swap) {
 				mov->respuesta = true;
 			
 			// PARA TESTEAR
-			// liberar_mensaje_out(mensaje_out);
-			// liberar_mensaje_in(mensaje_in);
 			// seguir = false;
-        	// continue;
 			break;
 		case NEW_PAGE:
 			log_info(logger, "Recibo un new_page");
@@ -66,6 +63,9 @@ void* manejar_swap(void* socket_swap) {
 			agregar_a_mensaje(mensaje_out, "%d%d%sd", mov->id_carpincho, mov->nro_pagina, config_memoria.tamanio_pagina, mov->buffer);
 			enviar_mensaje(socket, mensaje_out);
 
+			log_info(logger, "FREE BUFFER");
+			free(mov->buffer);
+
 			mensaje_in = recibir_mensaje(socket);
 			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
 			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
@@ -78,12 +78,11 @@ void* manejar_swap(void* socket_swap) {
 			enviar_mensaje(socket, mensaje_out);
 
 			mensaje_in = recibir_mensaje(socket);
-			log_info(logger, "La swap me devuelve %d", (uint32_t)list_get(mensaje_in, 0));
-			log_info(logger, "Contenido: %s", (char *)list_get(mensaje_in, 1));
-			if((uint32_t)list_get(mensaje_in, 0) == DATA_CHAR) {
+			if((uint32_t)list_get(mensaje_in, 0) == DATA_PAGE) {
 				log_info(logger, "Cargo la pagina");
 				mov->respuesta = true;
-				mov->buffer = (void *)list_get(mensaje_in, 1);
+				mov->buffer = malloc(config_memoria.tamanio_pagina);
+				memcpy(mov->buffer, (void *)list_get(mensaje_in, 1), config_memoria.tamanio_pagina);
 			}
         	break;
 		case RM_PAGE:
@@ -124,8 +123,22 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 	nuevo_mov->id_carpincho = id_carpincho;
 	nuevo_mov->nro_pagina = nro_pagina;
 	nuevo_mov->respuesta = false;
-	if(accion == SET_PAGE)
-		nuevo_mov->buffer = buffer;
+	nuevo_mov->buffer = NULL;
+
+	if(accion == SET_PAGE) {
+		nuevo_mov->buffer = malloc(config_memoria.tamanio_pagina);
+		memcpy(nuevo_mov->buffer, buffer, config_memoria.tamanio_pagina);
+
+		// Para testear
+		// >>>>>>>>>>>>>>>>>>>
+		log_info(logger, "Lleno el buffer con set_page");
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, buffer, config_memoria.tamanio_pagina);
+		loggear_pagina(logger, buffer);
+		free(pagina_generica);
+		// <<<<<<<<<<<<<<<<<<<
+	}
+		
 	sem_init(&nuevo_mov->sem_respuesta, 0 , 0);
 	
 	log_info(logger, "Accion: %d/%d", nuevo_mov->accion, accion);
@@ -143,17 +156,20 @@ bool crear_movimiento_swap(uint32_t accion, uint32_t id_carpincho, uint32_t nro_
 	log_info(logger, "Recibo respuesta");
 	bool respuesta = nuevo_mov->respuesta;
 
-	log_info(logger, "0");
-	if(nuevo_mov->buffer) {
-		log_info(logger, "0");
-		if(accion == SET_PAGE) {
-			free(nuevo_mov->buffer);
-		}
-		if(accion == GET_PAGE) {
-			memcpy(buffer, nuevo_mov->buffer, config_memoria.tamanio_pagina);
-			free(nuevo_mov->buffer);
-		}
+	if(accion == GET_PAGE) {
+		memcpy(buffer, nuevo_mov->buffer, config_memoria.tamanio_pagina);
+
+		// Para testear
+		// >>>>>>>>>>>>>>>>>>>
+		log_info(logger, "Leo el buffer con get_page");
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, buffer, config_memoria.tamanio_pagina);
+		loggear_pagina(logger, buffer);
+		free(pagina_generica);
+		// <<<<<<<<<<<<<<<<<<<
+		free(nuevo_mov->buffer);
 	}
+	
 	sem_close(&nuevo_mov->sem_respuesta);
 	free(nuevo_mov);
 

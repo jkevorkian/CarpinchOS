@@ -92,4 +92,6 @@ t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
 
 void*           dir_fisica_proceso(t_list* tabla_paginas);
 
+void loggear_pagina(t_log *logger, void *pagina);
+
 #endif /* _MEMORIA_H_ */

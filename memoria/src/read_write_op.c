@@ -21,6 +21,12 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 
 		memcpy(data + bytes_cargados, inicio, bytes_disponibles);
 
+		log_info(logger, "Loggeo marco %d por lectura", marco_auxiliar->nro_real);
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(marco_auxiliar->nro_real, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);
+
 		actualizar_info_algoritmo(marco_auxiliar, false);
 		soltar_marco(marco_auxiliar);
 
@@ -29,7 +35,7 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 		inicio_pagina = 0;
 		pagina_actual++;
 	}
-    return data;
+	return data;
 }
 
 void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio) {
@@ -50,6 +56,12 @@ void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* da
 		t_marco* marco_auxiliar = obtener_marco(id, pagina_actual);
 		inicio = inicio_memoria(marco_auxiliar->nro_real, inicio_pagina);
 		memcpy(inicio, data + bytes_cargados, bytes_disponibles);
+
+		log_info(logger, "Loggeo marco %d por escritura", marco_auxiliar->nro_real);
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(marco_auxiliar->nro_real, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);
 
 		actualizar_info_algoritmo(marco_auxiliar, true);
 		soltar_marco(marco_auxiliar);
