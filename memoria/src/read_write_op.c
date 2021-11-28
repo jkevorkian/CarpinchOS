@@ -35,7 +35,7 @@ void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t t
 		inicio_pagina = 0;
 		pagina_actual++;
 	}
-    return data;
+	return data;
 }
 
 void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio) {

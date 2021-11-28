@@ -201,7 +201,6 @@ void enviar_mensaje(int socket, t_mensaje* mensaje) {
 
 void recibir_parametros(int socket, t_list* parametros, char* formato) {
 	uint32_t parametro;
-	// char *ptr_form = formato_msj[(int)list_get(parametros, 0)];
 	char *ptr_form = formato;
 
 	while(*ptr_form) {
@@ -261,36 +260,36 @@ t_list* recibir_mensaje(int socket) {
 	case ER_SOC:
 	case TODOOK:
 	case NO_MEMORY:
-	case SEG_FAULT:
 		break;
+	case SEG_FAULT:		recibir_parametros(socket, lista_parametros, S_SEG_FAULT);		break;
 	// Inicialización
 	case MATE_INIT:
 	case MATE_CLOSE:
 		break;
 	// Memoria
-	case MEM_ALLOC:		recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);	break;
-	case MEM_FREE:		recibir_parametros(socket, lista_parametros, S_MEM_FREE);	break;
-	case MEM_READ:		recibir_parametros(socket, lista_parametros, S_MEM_READ);	break;
-	case MEM_WRITE:		recibir_parametros(socket, lista_parametros, S_MEM_WRITE);	break;
+	case MEM_ALLOC:		recibir_parametros(socket, lista_parametros, S_MEM_ALLOC);		break;
+	case MEM_FREE:		recibir_parametros(socket, lista_parametros, S_MEM_FREE);		break;
+	case MEM_READ:		recibir_parametros(socket, lista_parametros, S_MEM_READ);		break;
+	case MEM_WRITE:		recibir_parametros(socket, lista_parametros, S_MEM_WRITE);		break;
 	// SWAMP
-	case NEW_PAGE:		recibir_parametros(socket, lista_parametros, S_NEW_PAGE);	break;
-	case GET_PAGE:		recibir_parametros(socket, lista_parametros, S_GET_PAGE);	break;
-	case SET_PAGE:		recibir_parametros(socket, lista_parametros, S_SET_PAGE);	break;
-	case RM_PAGE:		recibir_parametros(socket, lista_parametros, S_RM_PAGE);	break;
-	// case NEW_C:		recibir_parametros(socket, lista_parametros, S_NEW_C);		break;
-	case EXIT_C:		recibir_parametros(socket, lista_parametros, S_EXIT_C);		break;
+	case NEW_PAGE:		recibir_parametros(socket, lista_parametros, S_NEW_PAGE);		break;
+	case GET_PAGE:		recibir_parametros(socket, lista_parametros, S_GET_PAGE);		break;
+	case SET_PAGE:		recibir_parametros(socket, lista_parametros, S_SET_PAGE);		break;
+	case RM_PAGE:		recibir_parametros(socket, lista_parametros, S_RM_PAGE);		break;
+	case EXIT_C:		recibir_parametros(socket, lista_parametros, S_EXIT_C);			break;
 	// Semaforos
-	case SEM_INIT:		recibir_parametros(socket, lista_parametros, S_SEM_INIT);	break;
-	case SEM_WAIT:		recibir_parametros(socket, lista_parametros, S_SEM_WAIT);	break;
-	case SEM_POST:		recibir_parametros(socket, lista_parametros, S_SEM_POST);	break;
+	case SEM_INIT:		recibir_parametros(socket, lista_parametros, S_SEM_INIT);		break;
+	case SEM_WAIT:		recibir_parametros(socket, lista_parametros, S_SEM_WAIT);		break;
+	case SEM_POST:		recibir_parametros(socket, lista_parametros, S_SEM_POST);		break;
 	case SEM_DESTROY:	recibir_parametros(socket, lista_parametros, S_SEM_DESTROY);	break;
 	// Otros
-	case CALL_IO:		recibir_parametros(socket, lista_parametros, S_CALL_IO);	break;
-	case DATA_CHAR:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);	break;
-	case DATA_INT:		recibir_parametros(socket, lista_parametros, S_DATA_INT);	break;
-	case SEND_PORT:		recibir_parametros(socket, lista_parametros, S_SEND_PORT);	break;
-	case SUSPEND:		recibir_parametros(socket, lista_parametros, S_SUSPEND);	break;
-	case UNSUSPEND:		recibir_parametros(socket, lista_parametros, S_UNSUSPEND);	break;
+	case CALL_IO:		recibir_parametros(socket, lista_parametros, S_CALL_IO);		break;
+	case DATA_CHAR:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);		break;
+	case DATA_INT:		recibir_parametros(socket, lista_parametros, S_DATA_INT);		break;
+	case DATA_PAGE:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);		break;
+	case SEND_PORT:		recibir_parametros(socket, lista_parametros, S_SEND_PORT);		break;
+	case SUSPEND:		recibir_parametros(socket, lista_parametros, S_SUSPEND);		break;
+	case UNSUSPEND:		recibir_parametros(socket, lista_parametros, S_UNSUSPEND);		break;
 
 	default:
 		break;
@@ -331,18 +330,19 @@ bool validar_mensaje(t_list* mensaje_in, void* logger) {
 
 char* string_desde_mensaje(int mensaje) {
 	char* listaDeStrings[] = {
-			// Validaciones
-			"ER_SOC", "ER_RCV", "TODOOK", "NO_MEMORY", "SEG_FAULT",
-			// Inicializacion
-			"MATE_INIT", "MATE_CLOSE",
-			// Memoria
-			"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE",
-			// SWAMP
-			"GET_PAGE", "SET_PAGE", "SUSPEND", "UNSUSPEND", "NEW_C", "EXIT_C",
-			// Semaforos
-			"SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY",
-			// Otros
-			"CALL_IO", "DATA", "SEND_PORT"};
-
+		// Validaciones
+		"ER_SOC", "ER_RCV", "TODOOK", "NO_MEMORY", "SEG_FAULT",
+		// Inicializacion
+		"MATE_INIT", "MATE_CLOSE",
+		// Memoria
+		"MEM_ALLOC", "MEM_FREE", "MEM_READ", "MEM_WRITE",
+		// SWAMP
+		"NEX_PAGE", "GET_PAGE", "SET_PAGE", "RM_PAGE", "EXIT_C",
+		// Semaforos
+		"SEM_INIT", "SEM_WAIT", "SEM_POST", "SEM_DESTROY",
+		// Otros
+		"CALL_IO", "DATA_CHAR", "DATA_INT", "DATA_PAGE", "SEND_PORT",  "SUSPEND", "UNSUSPEND"
+		};
+	
 	return listaDeStrings[mensaje];
 }

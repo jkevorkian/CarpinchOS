@@ -4,12 +4,14 @@
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_marco* marco;
 
+	/*
 	uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
 	if(nro_marco_tlb != -1) {	// TLB hit
 		marco = memoria_ram.mapa_fisico[nro_marco_tlb];
 		reservar_marco(marco);
 		return marco;
 	}
+	*/
 
 	// TLB miss
 	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
@@ -17,14 +19,14 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
-		asignar_entrada_tlb(id_carpincho, nro_pagina);
+		// asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
 		//DUDA: aca tambien asigno a tlb?
 		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro sino porque inmediatamente existiría un tlb_miss,
 		// ya que el que pide la página la pide porque la va a usar.
-		asignar_entrada_tlb(id_carpincho, nro_pagina);
+		// asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	log_info(logger, "Obtengo marco %d (pag %d, car %d)", marco->nro_real, nro_pagina, id_carpincho);
 	return marco;
@@ -63,60 +65,79 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	uint32_t nro_pagina_vieja = marco->pagina_duenio;
 	uint32_t id_viejo = marco->duenio;
 
-	void* buffer = NULL;
 	pthread_mutex_lock(&marco->mutex_espera_uso);
 	if(marco->bit_modificado) {			// SWAP OUT
+		log_info(logger, "Hago swap out");
 		// No necesita mutex porque el proceso no lo puede tomar y tampoco lo pueden hacer los demas
 		// porque esta bloqueada la asignacion
 		marco->bit_modificado = false;
-		buffer = malloc(config_memoria.tamanio_pagina);
+		void* buffer = malloc(config_memoria.tamanio_pagina);
 		memcpy(buffer, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
 
+		// Para testear
+		// >>>>>>>>>>>>>>>>>>>
 		log_info(logger, "Reasigno marco %d. Información a enviar:", marco->nro_real);
 		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
 		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
 		loggear_pagina(logger, pagina_generica);
 		free(pagina_generica);
+		// <<<<<<<<<<<<<<<<<<<
+		
 		crear_movimiento_swap(SET_PAGE, id_viejo, nro_pagina_vieja, buffer);
+		log_info(logger, "Libero buffer marcos.c : 83");
+		free(buffer);
 	}
 
+	/*
 	// Actualizo tlb y tabla de paginas del que perdio el marco
-	// obtener_control_tlb();
+	obtener_control_tlb();
 	t_entrada_tlb* entrada_vieja_tlb = solicitar_entrada_tlb(id_viejo, nro_pagina_vieja);
 	// entrada_vieja->tiempo_lru = ...;
 	entrada_vieja_tlb->id_car = id_carpincho;
 	entrada_vieja_tlb->pagina = nro_pagina;
-	// entrada_vieja->marco = ;		// Debería ser igual
-	// liberar_control_tlb();
+	entrada_vieja->marco = marco->nro_real;		// Debería ser igual
+	liberar_control_tlb();
+	*/
 
-	//if(viejo_carpincho) {
-	if(carpincho_de_lista(marco->duenio)) {
+	if(carpincho_de_lista(id_viejo)) {
 		t_entrada_tp *entrada_vieja_tp = pagina_de_carpincho(id_viejo, nro_pagina_vieja);
-		pthread_mutex_lock(&entrada_vieja_tp->mutex);
+		// pthread_mutex_lock(&entrada_vieja_tp->mutex);	-> Se bloquea, no entiendo por que
 		entrada_vieja_tp->presencia = false;
-		pthread_mutex_unlock(&entrada_vieja_tp->mutex);
+		// pthread_mutex_unlock(&entrada_vieja_tp->mutex);
 	}
 	
 	// Corrijo valores del marco actual
 	t_entrada_tp *entrada_nueva_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
-	// pthread_mutex_lock(&entrada_nueva_tp->mutex); -> Se bloquea, no entiendo por que?
+	// pthread_mutex_lock(&entrada_nueva_tp->mutex);		-> Se bloquea, no entiendo por que
 	bool hago_swap_in = !entrada_nueva_tp->esta_vacia;
 	entrada_nueva_tp->nro_marco = marco->nro_real;
 	entrada_nueva_tp->presencia = true;
 	// pthread_mutex_unlock(&entrada_nueva_tp->mutex);
 	
 	if(hago_swap_in) {	// SWAP IN
-		buffer = malloc(config_memoria.tamanio_pagina);
+		log_info(logger, "Hago swap in");
+		// buffer = malloc(config_memoria.tamanio_pagina);
+		void* buffer = malloc(config_memoria.tamanio_pagina);
 
 		crear_movimiento_swap(GET_PAGE, id_carpincho, nro_pagina, buffer);
-		memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-		// free(buffer);
+
+		log_info(logger, "Memcpy marcos.c. Nro. marco %d. Buffer = %p. Memoria %p", marco->nro_real, buffer, memoria_ram.inicio);
 		
+		void *inicio = inicio_memoria(marco->nro_real, 0);
+		log_info(logger, "Desplazamiento inicio marco: %d", inicio - memoria_ram.inicio);
+		memcpy(inicio, buffer, config_memoria.tamanio_pagina);
+		
+		log_info(logger, "Libero buffer marcos.c : 126");
+		free(buffer);
+		
+		// Para testear
+		// >>>>>>>>>>>>>>>>>>>
 		log_info(logger, "Reasigno marco %d. Información recuperada:", marco->nro_real);
 		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
 		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
 		loggear_pagina(logger, pagina_generica);
 		free(pagina_generica);
+		// <<<<<<<<<<<<<<<<<<<
 	}
 
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas

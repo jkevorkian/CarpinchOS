@@ -20,18 +20,19 @@
 #include <commons/collections/list.h>
 #include <stdarg.h>
 
+// Validaciones
+#define S_SEG_FAULT		"%d"		// COD_ERROR
 // Memoria
-#define S_MEM_ALLOC		"%d"
-#define S_MEM_FREE		"%d"
-#define S_MEM_READ		"%d"
-#define S_MEM_WRITE		"%d%s"
+#define S_MEM_ALLOC		"%d"		// TAMANIO
+#define S_MEM_FREE		"%d"		// DIR_LOGICA
+#define S_MEM_READ		"%d"		// DIR_LOGICA
+#define S_MEM_WRITE		"%d%s"		// DIR_LOGICA + CONTENIDO_STRING
 // SWAMP
-#define S_NEW_PAGE		"%d%d"
-#define S_GET_PAGE		"%d%d"
-#define S_SET_PAGE		"%d%d%s"
-#define S_RM_PAGE		"%d"
-// #define S_NEW_C			""
-#define S_EXIT_C		"%d"
+#define S_NEW_PAGE		"%d%d"		// ID + NRO_PAGINAS
+#define S_GET_PAGE		"%d%d"		// ID + NRO_PAGINA
+#define S_SET_PAGE		"%d%d%sd"	// ID + NRO_PAGINA + TAMANIO_PAGINA + CONTENIDO_PAGINA
+#define S_RM_PAGE		"%d"		// ID
+#define S_EXIT_C		"%d"		// ID
 // Semaforos
 #define S_SEM_INIT		"%s%d"
 #define S_SEM_WAIT		"%s"
@@ -39,11 +40,12 @@
 #define S_SEM_DESTROY	"%s"
 // Otros
 #define S_CALL_IO		"%s"
-#define S_DATA_CHAR		"%s"
-#define S_DATA_INT		"%d"
-#define S_SEND_PORT		"%d"
-#define S_SUSPEND		"%d"
-#define S_UNSUSPEND		"%d"
+#define S_DATA_CHAR		"%s"		// CONTENIDO_STRING
+#define S_DATA_INT		"%d"		// CONTENIDO_INT
+#define S_DATA_PAGE		"%sd"		// TAMANIO_PAGINA + CONTENIDO_PAGINA
+#define S_SEND_PORT		"%d"		// NRO_PUERTO
+#define S_SUSPEND		"%d"		// ID
+#define S_UNSUSPEND		"%d"		// ID
 
 typedef enum {
 	// Validaciones
@@ -59,9 +61,15 @@ typedef enum {
 	// Semaforos
 	SEM_INIT,	SEM_WAIT,	SEM_POST,	SEM_DESTROY,
 	// Otros
-	CALL_IO,	DATA_CHAR,	DATA_INT,	SEND_PORT,
-	SUSPEND,	UNSUSPEND,
+	CALL_IO,	DATA_CHAR,	DATA_INT,	DATA_PAGE,
+	SEND_PORT,	SUSPEND,	UNSUSPEND,
 } protocolo_msj;
+
+enum mate_errors {
+    MATE_FREE_FAULT = -5,
+    MATE_READ_FAULT = -6,
+    MATE_WRITE_FAULT = -7
+};
 
 typedef struct {
 	int tamanio;
