@@ -45,7 +45,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(info_carpincho->socket));
 		enviar_mensaje(fd_carpincho, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
-z
+		
 		// Elimino la conexión auxiliar con el carpincho
 		close(fd_carpincho);
 		id++;
