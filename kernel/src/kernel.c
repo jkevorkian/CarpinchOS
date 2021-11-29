@@ -15,8 +15,7 @@ int main() {
 		if(socket_auxiliar_carpincho < 0) {
 			log_error(logger, "Error en el socket recibido del carpincho que se intento conectar");
 			seguir = false;
-		}
-		else {
+		} else {
 			log_warning(logger, "Se ha conectado un carpincho");
 
 			//creo la estructura para el nuevo carpincho
@@ -29,9 +28,14 @@ int main() {
 			nuevo_carpincho->id = id_proximo_carpincho;
 			nuevo_carpincho->esta_suspendido = false;
 			nuevo_carpincho->responder = false;
+			nuevo_carpincho->id_semaforo_bloqueante = -1;
+			nuevo_carpincho->debe_morir = false;
+			nuevo_carpincho->semaforos_asignados = list_create();
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
+
+			//log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
 		}
 	}
 
@@ -48,11 +52,13 @@ int conectar_memoria(int socket_auxiliar_carpincho) {
 			log_error(logger, "Error en el socket generado para la memoria");
 		}
 
-		t_list* mensaje_in = recibir_mensaje(socket_kernel);
+		t_list* mensaje_in = recibir_mensaje(socket_auxiliar_memoria);
 
-		if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-			socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, (char*)list_get(mensaje_in, 1));
-		else
+		if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
+			char puerto[7];
+			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
+			socket_memoria_carpincho = crear_conexion_cliente(ip_memoria, puerto);
+		} else
 			log_error(logger, "Error en la recepcion del puerto de la memoria");
 
 		liberar_mensaje_in(mensaje_in);
