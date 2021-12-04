@@ -1,5 +1,5 @@
-#este makefile no anda y esta incompleto, no logro que compile matelib como .so pq no puedo linkearle las utils.
-#tambien falta implementar la regla de compilacion de los carpinchos (que los linkee con la mateLib) 
+#este make compila pero no ejecuta todos los modulos del tp
+#falta implementar la regla de compilacion de los carpinchos (que los linkee con la mateLib) (no se si hace falta igual)
 CC=gcc
 RUTA_MATELIB="mateLib/src"
 RUTA_UTILS=utils
