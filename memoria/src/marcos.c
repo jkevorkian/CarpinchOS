@@ -24,7 +24,7 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
 		//DUDA: aca tambien asigno a tlb?
-		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro sino porque inmediatamente existiría un tlb_miss,
+		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro si no lo hacemos porque inmediatamente existiría un tlb_miss,
 		// ya que el que pide la página la pide porque la va a usar.
 		// asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
@@ -228,28 +228,42 @@ void suspend(uint32_t id) {
 	uint32_t cant_marcos;
 	t_marco **lista_marcos = obtener_marcos_proceso(id, &cant_marcos);
 
+	pthread_mutex_lock(&mutex_asignacion_marcos);
 	for(int i = 0; i < cant_marcos; i++) {
 		void *buffer = malloc(config_memoria.tamanio_pagina);
 		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
 		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
 
+		t_entrada_tp *pagina = pagina_de_carpincho(id, lista_marcos[i]->pagina_duenio);
+		pthread_mutex_lock(&pagina->mutex);
+		pagina->presencia = false;
+		pthread_mutex_unlock(&pagina->mutex);
+
+		// actualizar tlb
+
 		lista_marcos[i]->libre = true;
-		// actualizar tlb y tabla de paginas
 	}
+	
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
 }
 
 void unsuspend(uint32_t id) {
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL)
 		return;
-	// t_marco **lista_marcos = obtener_marcos_proceso(id);
-	// uint32_t cant_marcos = sizeof(lista_marcos) / sizeof(t_marco *);
-
-	// continuar
-	/*for(int i = 0; i < cant_marcos; i++) {
-		void *buffer = malloc(config_memoria.tamanio_pagina);
-		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
-		crear_movimiento_swap(GET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
-	}*/
+	
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	for(int i = 0; i < config_memoria.cant_marcos_carpincho; i++) {
+		t_marco *marco_nuevo = obtener_marco_libre();
+		marco_nuevo->libre = false;
+		marco_nuevo->duenio = id;
+		marco_nuevo->pagina_duenio = -1;	// Está asignada al proceso pero no es ninguna página especifica
+		marco_nuevo->bit_modificado = false;
+		marco_nuevo->bit_uso = false;
+		// void *buffer = malloc(config_memoria.tamanio_pagina);
+		// memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+		// crear_movimiento_swap(GET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
+	}
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
 }
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {

@@ -230,6 +230,9 @@ void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
 		return;
 	
+	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
+	
+
 	t_list *tabla_de_paginas = ((t_carpincho *)carpincho_de_lista(id_carpincho))->tabla_paginas;
 	t_entrada_tp *entrada;
 	t_marco *marco;
@@ -240,8 +243,10 @@ void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
 	if(posicion_compuesta.rem)
 		paginas_minimas++;
 	
+	pthread_mutex_lock(&carpincho->mutex_tabla);
 	while(config_memoria.tipo_asignacion == FIJA_LOCAL && paginas_minimas < list_size(tabla_de_paginas)) {
 		entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
+		pthread_mutex_unlock(&carpincho->mutex_tabla);
 		// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
 		if(entrada->presencia) {
 			pthread_mutex_lock(&mutex_asignacion_marcos);
@@ -252,12 +257,17 @@ void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
 		}
 		free(entrada);
 		crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
+
+		pthread_mutex_lock(&carpincho->mutex_tabla);
 	}
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
 
 	// Esto se hace para evitar swap out innecesarios
+	pthread_mutex_lock(&carpincho->mutex_tabla);
 	uint32_t nro_paginas_vacias = list_size(tabla_de_paginas) - paginas_minimas;
 	for(int i = paginas_minimas; i < nro_paginas_vacias; i++) {
-		entrada = list_get(tabla_de_paginas, i);
+		entrada = pagina_de_carpincho(id_carpincho, i);
+		pthread_mutex_lock(&entrada->mutex);
 		entrada->esta_vacia = true;
 	}
 }

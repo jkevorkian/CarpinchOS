@@ -239,7 +239,7 @@ t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas) {
 }
 
 t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina) {
-	t_marco** lista_paginas = paginas_reemplazo(id_carpincho);
+	t_marco** marcos_carpincho = paginas_reemplazo(id_carpincho);
 	uint32_t nro_paginas = nro_paginas_reemplazo();
 
 	t_marco* marco_a_reemplazar = NULL;
@@ -248,19 +248,28 @@ t_marco *realizar_algoritmo_reemplazo(uint32_t id_carpincho, uint32_t nro_pagina
 		marco_a_reemplazar = obtener_marco_libre();
 		asignar_marco_libre(marco_a_reemplazar, id_carpincho, nro_pagina);
 	}
+	else {
+		for(int i = 0; i < config_memoria.cant_marcos_carpincho; i++) {
+			if(marcos_carpincho[i]->pagina_duenio == -1) {
+				marco_a_reemplazar = marcos_carpincho[i];
+				marco_a_reemplazar->pagina_duenio = nro_pagina;
+				break;
+			}
+		}
+	}
 		
 	if(!marco_a_reemplazar) {
 		if(config_memoria.algoritmo_reemplazo == LRU)
-			marco_a_reemplazar = buscar_por_lru(lista_paginas, nro_paginas);
+			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
 		if(config_memoria.algoritmo_reemplazo == CLOCK)
-			marco_a_reemplazar = buscar_por_clock(lista_paginas, nro_paginas);
+			marco_a_reemplazar = buscar_por_clock(marcos_carpincho, nro_paginas);
 		reasignar_marco(marco_a_reemplazar, id_carpincho, nro_pagina);
 	}
 	
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
 	
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(lista_paginas);
-	// pthread_mutex_lock(&marco_a_reemplazar->mutex_espera_uso);
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(marcos_carpincho);
+	
 	reservar_marco(marco_a_reemplazar);
 	return marco_a_reemplazar;
 }

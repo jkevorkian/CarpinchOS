@@ -71,13 +71,19 @@ void *rutina_carpincho(void* info_carpincho) {
 			break;
 		case SUSPEND:
 			log_info(logger, "Me llego una orden de suspensión");
-
+			
 			suspend(carpincho->id);
+			
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
 			break;
 		case UNSUSPEND:
 			log_info(logger, "Me llego un permiso para volver a memoria");
 
 			unsuspend(carpincho->id);
+			
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MATE_CLOSE:
 		default:
@@ -287,10 +293,19 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case SUSPEND:
+			log_info(logger, "Me llego una orden de suspensión");
+			
 			suspend(carpincho->id);
+			
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
 			break;
 		case UNSUSPEND:
+			log_info(logger, "Me llego un permiso para volver a memoria");
 			unsuspend(carpincho->id);
+
+			mensaje_out = crear_mensaje(TODOOK);
+			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MATE_CLOSE:
 		default:
@@ -340,4 +355,14 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 	list_destroy(carpincho->tabla_paginas);
 	free(carpincho);
 
+}
+
+//////////////////////////////////////////////////////////
+// No se usa creo
+uint32_t cant_paginas_carpincho(t_carpincho *carpincho) {
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	uint32_t cant_paginas = list_size(carpincho->tabla_paginas);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
+
+	return cant_paginas;
 }
