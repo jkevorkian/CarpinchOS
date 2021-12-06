@@ -11,9 +11,9 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 		return marco;
 	}
 
-	// TLB miss
+	// TLB miss	
 	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
-	
+
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
@@ -171,9 +171,6 @@ uint32_t cant_marcos_necesarios(uint32_t tamanio) {
 }
 
 bool tengo_marcos_suficientes(uint32_t necesarios){
-	// no entiendo si yo aca devuelvo que tengo marcos necesarios pero despues mientras le asigno
-	// me quedo sin marcos porque los uso otro proceso que pasa?
-    // para eso esta el mutex_asignacion_marcos
 	uint32_t contador_necesarios = necesarios;
 
     for(int i = 0; i < config_memoria.cant_marcos; i++) {
@@ -216,6 +213,7 @@ t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
 	return pagina;
 }
 
+
 void suspend(uint32_t id) {
 	uint32_t cant_marcos;
 	t_marco **lista_marcos = obtener_marcos_proceso(id, &cant_marcos);
@@ -243,6 +241,8 @@ void unsuspend(uint32_t id) {
 		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
 		crear_movimiento_swap(GET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
 	}*/
+
+	// TODO: agregar a tlb
 }
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {

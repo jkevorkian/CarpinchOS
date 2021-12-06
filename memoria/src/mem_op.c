@@ -100,7 +100,6 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 					uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
 					if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
 						if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-							// en algun caso puede sobrar espacio negativo? no creo
 							uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
 							nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
 							

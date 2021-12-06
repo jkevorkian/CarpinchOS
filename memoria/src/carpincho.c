@@ -1,5 +1,6 @@
 #include "carpincho.h"
 #include "memoria.h"
+#include "tlb.h"
 
 void *rutina_carpincho(void* info_carpincho) {
 	log_info(logger, "Nace un nuevo carpincho");
@@ -110,20 +111,6 @@ t_carpincho* crear_carpincho(uint32_t id) {
 }
 
 bool asignacion_fija(t_carpincho* carpincho) {
-	uint32_t cant_marcos = config_memoria.cant_marcos_carpincho;
-
-	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)){
-		for(int i = 0; i < cant_marcos; i++){
-			t_marco* marco = obtener_marco_libre();	// busqueda solo en memoria
-			crear_nueva_pagina(marco->nro_real, carpincho);
-		}
-		return true;
-	}
-
-	return false;
-}
-
-bool asignacion_fija2(t_carpincho* carpincho) {
 	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
 	bool resultado = false;
 	pthread_mutex_lock(&mutex_asignacion_marcos);
@@ -153,7 +140,7 @@ bool asignacion_fija2(t_carpincho* carpincho) {
 
 void setear_condicion_inicial(uint32_t id) {
 	t_carpincho * carpincho = carpincho_de_lista(id);
-	asignacion_fija2(carpincho);
+	asignacion_fija(carpincho);
 
 	if(agregar_pagina(id)) {
 		log_info(logger, "Pude pedir una nueva página, grande la swap");
@@ -286,6 +273,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 			
 			enviar_mensaje(socket, mensaje_out);
 			break;
+		
 		case SUSPEND:
 			suspend(carpincho->id);
 			break;
@@ -296,6 +284,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 		default:
 			seguir = false;
 			log_info(logger, "Murio el carpincho, nos vemos.");
+			crear_movimiento_swap(EXIT_C, carpincho->id, 0, NULL);
 			break;
 		}
 	}
@@ -338,6 +327,7 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 		free(entrada);
 	}
 	list_destroy(carpincho->tabla_paginas);
+	flush_proceso_tlb(id_carpincho);
 	free(carpincho);
 
 }
