@@ -163,8 +163,7 @@ void desbloquear(carpincho *carp)
 		agregar_ready(quitar_blocked(carp));
 }
 
-void hacer_post_semaforo(semaforo *sem)
-{
+void hacer_post_semaforo(semaforo *sem){	//TODO: revisar si esta funcion sirve aplicarla cuando hay que matar un carpincho (quita a ESE carpincho en especifico de la cola del semaforo? cuantos post debería hacer?)
 
 	pthread_mutex_lock(&sem->mutex_espera);
 	if (queue_is_empty(sem->cola_espera))
@@ -172,8 +171,7 @@ void hacer_post_semaforo(semaforo *sem)
 	else
 	{
 		carpincho *carp = queue_pop(sem->cola_espera);
-		int index_interno_semaforo = buscar(carp->semaforos_asignados,
-											sem->nombre);
+		int index_interno_semaforo = buscar(carp->semaforos_asignados,sem->nombre);
 		list_remove(carp->semaforos_asignados, index_interno_semaforo);
 		desbloquear(carp);
 		carp->responder = true;
