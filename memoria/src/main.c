@@ -44,7 +44,7 @@ void signal_handler_2(int sig) {
 }
 
 void signal_handler_3(int sig) {
-	// print_hit_miss();
+	print_hit_miss();
 	exit(1);
 }
 

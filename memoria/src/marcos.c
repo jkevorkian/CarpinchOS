@@ -3,15 +3,13 @@
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_marco* marco;
-
-	/*
+	
 	uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
 	if(nro_marco_tlb != -1) {	// TLB hit
 		marco = memoria_ram.mapa_fisico[nro_marco_tlb];
 		reservar_marco(marco);
 		return marco;
 	}
-	*/
 
 	// TLB miss
 	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
@@ -19,14 +17,11 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	if(entrada_tp->presencia) {
 		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
 		reservar_marco(marco);
-		// asignar_entrada_tlb(id_carpincho, nro_pagina);
+		asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	else {	// Page fault
 		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
-		//DUDA: aca tambien asigno a tlb?
-		// Por lo que hablamos, entiendo que sí. De hecho, sería medio raro sino porque inmediatamente existiría un tlb_miss,
-		// ya que el que pide la página la pide porque la va a usar.
-		// asignar_entrada_tlb(id_carpincho, nro_pagina);
+		asignar_entrada_tlb(id_carpincho, nro_pagina);
 	}
 	log_info(logger, "Obtengo marco %d (pag %d, car %d)", marco->nro_real, nro_pagina, id_carpincho);
 	return marco;
@@ -54,8 +49,6 @@ void asignar_marco_libre(t_marco *marco_nuevo, uint32_t id, uint32_t nro_pagina)
 	marco_nuevo->bit_modificado = false;
 	marco_nuevo->bit_uso = false;
 	pthread_mutex_unlock(&marco_nuevo->mutex_espera_uso);
-
-	asignar_entrada_tlb(id, nro_pagina);
 }
 
 void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina) {
@@ -103,6 +96,7 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 		t_entrada_tp *entrada_vieja_tp = pagina_de_carpincho(id_viejo, nro_pagina_vieja);
 		// pthread_mutex_lock(&entrada_vieja_tp->mutex);	-> Se bloquea, no entiendo por que
 		entrada_vieja_tp->presencia = false;
+		// borrar_pagina_carpincho_tlb(id_viejo, nro_pagina_vieja);	// Para mi no va
 		// pthread_mutex_unlock(&entrada_vieja_tp->mutex);
 	}
 	
@@ -139,6 +133,8 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 		free(pagina_generica);
 		// <<<<<<<<<<<<<<<<<<<
 	}
+
+	asignar_entrada_tlb(id_carpincho, nro_pagina);
 
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas
 	marco->pagina_duenio = nro_pagina;	// Util para facilitar futuros reemplazos
@@ -203,25 +199,21 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 
 	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
 	// log_info(logger, "Datos pagina. Marco:%d P:%d M:%d U:%d", pagina->nro_marco,pagina->presencia,pagina->modificado,pagina->uso);
-	asignar_entrada_tlb(carpincho->id, list_size(carpincho->tabla_paginas) - 1);
+	// asignar_entrada_tlb(carpincho->id, list_size(carpincho->tabla_paginas) - 1);
 	return pagina;
 }
 
-bool agregar_pagina(uint32_t id_carpincho) {
+t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
-	if(crear_movimiento_swap(NEW_PAGE, id_carpincho, 1, NULL)) {
-		t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
+	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
 
-		pthread_mutex_lock(&carpincho->mutex_tabla);
-		list_add(carpincho->tabla_paginas, pagina);
-		pthread_mutex_unlock(&carpincho->mutex_tabla);
-		
-		pagina->esta_vacia = true;
-		pagina->presencia = false;
-		return true;
-	}
-	else
-		return false;
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	list_add(carpincho->tabla_paginas, pagina);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
+
+	pagina->presencia = false;
+	pagina->esta_vacia = true;
+	return pagina;
 }
 
 void suspend(uint32_t id) {
@@ -236,6 +228,7 @@ void suspend(uint32_t id) {
 		lista_marcos[i]->libre = true;
 		// actualizar tlb y tabla de paginas
 	}
+	flush_proceso_tlb(id);
 }
 
 void unsuspend(uint32_t id) {

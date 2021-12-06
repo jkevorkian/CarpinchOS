@@ -213,7 +213,7 @@ void *rutina_test_carpincho(void *info_carpincho) {
 	char* marioneta;
 	uint32_t tamanio_mensaje;
 
-	setear_condicion_inicial(carpincho->id);
+	//setear_condicion_inicial(carpincho->id);
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);

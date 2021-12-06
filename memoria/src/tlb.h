@@ -22,7 +22,7 @@ typedef struct {
 	uint32_t id_car;
 	uint32_t pagina;
 	uint32_t marco;
-    time_t tiempo_lru;
+    char* tiempo_lru;
 } t_entrada_tlb;
 
 typedef struct {
@@ -49,6 +49,7 @@ t_tlb 				tlb;
 void 				iniciar_tlb(t_config* config);
 t_entrada_tlb*		solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+void                borrar_pagina_carpincho_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void 				borrar_entrada_tlb(uint32_t nro_entrada);
 t_entrada_tlb*		es_entrada(uint32_t, uint32_t, uint32_t);
 void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
@@ -58,10 +59,13 @@ void 				obtener_control_tlb();
 void 				liberar_control_tlb();
 
 t_tlb_por_proceso* 	get_hit_miss_proceso(uint32_t id_carpincho);
-void                resetear_entradas_proceso(uint32_t id_carpincho);
+void                flush_proceso_tlb(uint32_t id_carpincho);
 
 //LRU
-void                print_tiempo(t_entrada_tlb* entrada);
+bool                es_mas_vieja(t_entrada_tlb* entrada1, t_entrada_tlb* entrada2);
+uint32_t            tiempo_a_milisegundos(t_entrada_tlb* entrada);
+uint32_t            obtener_tiempo_lru(char tipo, t_entrada_tlb* entrada);
+//void                print_tiempo(t_entrada_tlb* entrada);
 
 // SEÑALES
 void 				print_tlb(void);

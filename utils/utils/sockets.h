@@ -44,8 +44,8 @@
 #define S_DATA_INT		"%d"		// CONTENIDO_INT
 #define S_DATA_PAGE		"%sd"		// TAMANIO_PAGINA + CONTENIDO_PAGINA
 #define S_SEND_PORT		"%d"		// NRO_PUERTO
-#define S_SUSPEND		"%d"		// ID
-#define S_UNSUSPEND		"%d"		// ID
+// #define S_SUSPEND		"%d"		// ID
+// #define S_UNSUSPEND		"%d"		// ID
 
 typedef enum {
 	// Validaciones
