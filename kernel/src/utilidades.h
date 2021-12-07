@@ -10,11 +10,12 @@ void liberar_split(char** split);
 void iniciar_semaforo(char* nombre, int valor);
 float calcular_HRRN(carpincho* carp, char* tiempo_actual);
 void hacer_post_semaforo(semaforo* sem);
+void liberar_lista(t_list* lista);
 
 int buscar_semaforo(char* nombre);
 int buscar_io(char* nombre);
 int encontrar_carpincho(t_list *lista, carpincho *carp_quitar);
-int buscar(t_list *lista, char* nombre);
+int buscar_sem_en_lista(t_list *lista, char* nombre);
 semaforo* buscar_sem_por_id(t_list *lista, int id);
 
 void desbloquear(carpincho* carp);

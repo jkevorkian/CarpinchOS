@@ -20,6 +20,7 @@
 
 #define LOGUEAR_MENSAJES_INICIALIZADOR 0
 #define LOGUEAR_MENSAJES_COLAS 1
+#define LOGUEAR_MENSAJES_DEADLOCK 1
 
 //carpincho
 typedef struct {

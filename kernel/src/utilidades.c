@@ -113,7 +113,7 @@ void desbloquear(carpincho* carp) {
 		agregar_ready(quitar_blocked(carp));
 }
 
-int buscar(t_list *lista, char *nombre) {
+int buscar_sem_en_lista(t_list *lista, char *nombre) {
 	int index = list_size(lista) - 1;
 
 	while (index >= 0) {
@@ -150,11 +150,21 @@ void hacer_post_semaforo(semaforo *sem) {	//TODO: revisar si esta funcion sirve 
 		sem->instancias_iniciadas++;
 	else {
 		carpincho *carp = queue_pop(sem->cola_espera);
-		int index_interno_semaforo = buscar(carp->semaforos_asignados,sem->nombre);
-		list_remove(carp->semaforos_asignados, index_interno_semaforo);
+		list_remove(carp->semaforos_asignados, buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre));
 		desbloquear(carp);
 		carp->responder = true;
 	}
 	pthread_mutex_unlock(&sem->mutex_espera);
+}
+
+void liberar_lista(t_list* lista) {
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		list_remove(lista, index);
+		index--;
+	}
+
+	list_destroy(lista);
 }
 
