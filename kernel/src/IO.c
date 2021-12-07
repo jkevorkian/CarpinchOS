@@ -8,7 +8,7 @@ void inicializar_io() {
 
 	int i = 0;
 
-	while (nombres[i] != NULL) {
+	while(nombres[i] != NULL) {
 		IO *disp = malloc(sizeof(IO));
 
 		disp->nombre = string_duplicate(nombres[i]);
@@ -28,17 +28,17 @@ void inicializar_io() {
 	liberar_split(duraciones);
 }
 
-void *manejador_io(void *d) {
-	IO *disp = (IO *)d;
+void* manejador_io(void* d) {
+	IO *disp = (IO*) d;
 
-	if (LOGUEAR_MENSAJES_INICIALIZADOR)
+	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tIniciado el hilo de io: %s - duracion: %d ", disp->nombre, disp->duracion);
 
-	while (1) {
+	while(1) {
 		sem_wait(&disp->carpinchos_esperando);
 
 		pthread_mutex_lock(&disp->mutex_espera);
-		carpincho *carp = (carpincho *)queue_pop(disp->cola_espera);
+		carpincho *carp = (carpincho*)queue_pop(disp->cola_espera);
 		pthread_mutex_unlock(&disp->mutex_espera);
 
 		sleep(disp->duracion);
