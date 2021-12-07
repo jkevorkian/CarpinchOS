@@ -61,16 +61,17 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
 
-	uint32_t nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP);
+	uint32_t offset_final;
+	uint32_t nro_frames_necesarios = 0;
 	uint32_t dir_logica = 0;
+
 	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
 	bool crear_footer = true;
 
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(list_size(carpincho->tabla_paginas) == 0) {
-			if(!asignacion_fija(carpincho)) return 0;
-		}
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL && list_size(carpincho->tabla_paginas) == 0) {
+		if(!asignacion_fija(carpincho)) return 0;
 	}
+	/*
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		// lo hago solo la primera vez, despues asigno solo cuando me quedo sin paginas
 		if(list_size(carpincho->tabla_paginas) == 0) {
@@ -81,10 +82,12 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 			}
 			else return 0;
 		}
-	}
+	}*/
 
 	if(carpincho->offset == 0) {
-		// carpincho->heap_metadata = dir_fisica_proceso(carpincho->tabla_paginas);
+		offset_final = tamanio + 2 * TAMANIO_HEAP;
+		nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
+		
 		/////////////////////////////// Temporal
 		t_marco *marco_auxiliar = obtener_marco(id_carpincho, 0);
 		memset(inicio_memoria(marco_auxiliar->nro_real, 0), 0, config_memoria.tamanio_pagina);
@@ -105,24 +108,33 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 			is_free = get_isFree(carpincho->id, desplazamiento);
 
 			if(alloc_sig == HEAP_NULL){
-				if(is_free) {
-					uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
-					if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
-						if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-							uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
-							nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
-							
-							for(int i = 0; i < nro_frames_necesarios; i++){
-								agregar_pagina(carpincho->id);
-							}
+				/* uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
+				if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
+					if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
+						uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
+						nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
+						
+						for(int i = 0; i < nro_frames_necesarios; i++){
+							agregar_pagina(carpincho->id);
 						}
-						else return 0;
 					}
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
-					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
-					break;
-				};
-				// siempre voy a tener un metadata free al final de todo o no?
+					else return 0;
+				}*/
+				offset_final = desplazamiento + 2*TAMANIO_HEAP + tamanio;
+				nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
+
+				if(nro_frames_necesarios) {
+					if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)) {
+						for(int i = 0; i < nro_frames_necesarios; i++) {
+							agregar_pagina(carpincho->id);
+						}
+					}
+					else return 0;
+				}
+				carpincho->offset = offset_final;
+				dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
+				heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
+				break;
 			}
 			else {
 				if(is_free) {
@@ -150,7 +162,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 
 	////////////////////////////////////////////////////////////
 	// Corregir, sirve solo para nuevos allocs al final
-	carpincho->offset = dir_logica + tamanio + TAMANIO_HEAP;
+	// carpincho->offset = dir_logica + tamanio + TAMANIO_HEAP;
 	////////////////////////////////////////////////////////////
 	return dir_logica; 
 }

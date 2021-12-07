@@ -14,7 +14,7 @@ void iniciar_tlb(t_config* config){
 	tlb.cant_hit = 0;
 	tlb.cant_miss = 0;
 	tlb.puntero_fifo = 0;
-	tlb.mapa = calloc(tlb.cant_entradas, sizeof(t_entrada_tlb));
+	tlb.mapa = calloc(tlb.cant_entradas, sizeof(t_entrada_tlb *)); // Tiene que ser puntero
 	tlb.hit_miss_proceso = list_create();
 
 	for(int i = 0; i < tlb.cant_entradas; i++) {
@@ -201,9 +201,15 @@ t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pa
 }
 
 void print_tlb() {
+	// char path_base[] = "/home/utnso/dumps";
+	log_info(logger, "Imprimo valores de tlb");
 	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
     char* filename = string_from_format("%s/Dump_<%s>.dmp", tlb.path_dump, temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
     FILE* dump_file = fopen(filename, "w");
+	if(!dump_file) {
+		log_warning(logger, "El archivo no pudo ser creado");
+		return;
+	}
 
 	fprintf(dump_file, "-------------------------------------------------------------------------- \n");
 	fprintf(dump_file, "Dump: %s \n", timestamp);

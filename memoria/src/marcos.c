@@ -129,11 +129,15 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	// Actualizo la tabla de paginas del carpincho
 	t_entrada_tp *entrada_nueva_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
 	log_info(logger, "Hago mutex entrada_nueva_tp en reasignación");
-	pthread_mutex_lock(&entrada_nueva_tp->mutex);	//	-> Se bloquea, no entiendo por qué
-	hago_swap_in = !entrada_nueva_tp->esta_vacia;
-	entrada_nueva_tp->nro_marco = marco->nro_real;
-	entrada_nueva_tp->presencia = true;
-	pthread_mutex_unlock(&entrada_nueva_tp->mutex);
+
+	if(entrada_nueva_tp) {
+		log_info(logger, "Pagina %d, duenio %d, marco %d", nro_pagina, id_carpincho, entrada_nueva_tp->nro_marco);
+		pthread_mutex_lock(&entrada_nueva_tp->mutex);	//	-> Se bloquea, no entiendo por qué
+		hago_swap_in = !entrada_nueva_tp->esta_vacia;
+		entrada_nueva_tp->nro_marco = marco->nro_real;
+		entrada_nueva_tp->presencia = true;
+		pthread_mutex_unlock(&entrada_nueva_tp->mutex);
+	}
 
 	if(hago_swap_in) {			// SWAP IN
 		log_info(logger, "Hago swap in");
@@ -166,9 +170,13 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 		
 		log_info(logger, "Hago mutex entrada_vieja_tp en reasignación");
 		
-		pthread_mutex_lock(&entrada_vieja_tp->mutex);	// -> Se bloquea, no entiendo por que
-		entrada_vieja_tp->presencia = false;
-		pthread_mutex_unlock(&entrada_vieja_tp->mutex);
+		if(entrada_vieja_tp) {
+			log_info(logger, "Pagina %d, duenio %d, marco %d", nro_pagina_vieja, id_viejo, entrada_vieja_tp->nro_marco);
+			pthread_mutex_lock(&entrada_vieja_tp->mutex);	// -> Se bloquea, no entiendo por que
+			entrada_vieja_tp->presencia = false;
+			pthread_mutex_unlock(&entrada_vieja_tp->mutex);
+		}
+		
 	}
 
 	// Actualizo la entrada de la tlb
@@ -218,6 +226,21 @@ uint32_t cant_marcos_necesarios(uint32_t tamanio) {
 	return nro_marcos_q;
 }
 
+uint32_t cant_marcos_faltantes(uint32_t id, uint32_t tamanio) {
+	t_carpincho *carpincho = carpincho_de_lista(id);
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	uint32_t paginas_asignadas = list_size(carpincho->tabla_paginas);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
+
+	div_t nro_marcos = div(carpincho->offset + tamanio, config_memoria.tamanio_pagina);
+	uint32_t nro_marcos_necesarios = nro_marcos.quot;
+
+	if(nro_marcos.rem > 0) nro_marcos_necesarios++;
+	uint32_t nro_marcos_faltantes = nro_marcos_necesarios > paginas_asignadas ? nro_marcos_necesarios - paginas_asignadas : 0;
+	
+	return nro_marcos_faltantes;
+}
+
 bool tengo_marcos_suficientes(uint32_t necesarios){
 	uint32_t contador_necesarios = necesarios;
 
@@ -248,25 +271,6 @@ t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
 	return pagina;
 }
 
-///////////////////////////////
-// Revisar
-// bool agregar_pagina(uint32_t id_carpincho) {
-// 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
-// 	if(crear_movimiento_swap(NEW_PAGE, id_carpincho, 1, NULL)) {
-// 		t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-
-// 		pthread_mutex_lock(&carpincho->mutex_tabla);
-// 		list_add(carpincho->tabla_paginas, pagina);
-// 		pthread_mutex_unlock(&carpincho->mutex_tabla);
-		
-// 		pagina->esta_vacia = true;
-// 		pagina->presencia = false;
-// 		return true;
-// 	}
-// 	else
-// 		return false;
-// }
-
 t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
 	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
@@ -277,9 +281,9 @@ t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
 
 	pagina->presencia = false;
 	pagina->esta_vacia = true;
+	pthread_mutex_init(&pagina->mutex, NULL);
 	return pagina;
 }
-////////////////////////////////////
 
 void suspend(uint32_t id) {
 	uint32_t cant_marcos;

@@ -20,4 +20,3 @@ void eliminar_carpincho(uint32_t);
 uint32_t cant_paginas_carpincho(t_carpincho *);
 
 #endif /* _CARPINCHO_H_ */
-

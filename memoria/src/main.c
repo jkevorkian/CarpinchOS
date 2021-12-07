@@ -35,15 +35,15 @@ int main(void) {
 	return 0;
 }
 
-void signal_handler_1(int sig) {
+void signal_handler_1(int sig) {	// SIGUSR1
 	print_tlb();
 }
 
-void signal_handler_2(int sig) {
+void signal_handler_2(int sig) {	// SIGUSR2
 	resetear_tlb();
 }
 
-void signal_handler_3(int sig) {
+void signal_handler_3(int sig) {	// SIGINT
 	// print_hit_miss();
 	exit(1);
 }

@@ -18,6 +18,7 @@ t_marco* obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina);
 t_marco* obtener_marco_mp(uint32_t id_carpincho, uint32_t nro_pagina);
 
 uint32_t cant_marcos_necesarios(uint32_t);
+uint32_t cant_marcos_faltantes(uint32_t id, uint32_t tamanio);
 
 void asignar_marco_libre(t_marco *, uint32_t, uint32_t);
 void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina);
