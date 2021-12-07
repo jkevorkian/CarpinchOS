@@ -47,6 +47,9 @@ void* cpu() {
 
 				int parametro = (int)list_get(mensaje_in, 0);
 
+				//if (carp->debe_morir)
+				//	parametro = MATE_CLOSE;
+
 				switch(parametro) { // protocolo del mensaje
 					case MEM_ALLOC:
 					case MEM_FREE:
@@ -111,6 +114,7 @@ void* cpu() {
 							if(sem->instancias_iniciadas > 0) { //si hay instancias disponibles no se bloquea
 								log_info(logger, "Habian %d instancias disponibles del semaforo %s, el carpincho %d no se bloquea", sem->instancias_iniciadas, (char *)list_get(mensaje_in, 1), carp->id);
 								sem->instancias_iniciadas--;
+								//list_add(carp->semaforos_asignados, sem);
 								mensaje_out = crear_mensaje(TODOOK);
 								enviar_mensaje(carp->socket_mateLib, mensaje_out);
 								liberar_mensaje_out(mensaje_out);
@@ -120,6 +124,7 @@ void* cpu() {
 								pthread_mutex_lock(&sem->mutex_espera);
 								queue_push(sem->cola_espera, carp);
 								pthread_mutex_unlock(&sem->mutex_espera);
+								//carp->id_semaforo_bloqueante = sem->id;
 								agregar_blocked(carp);
 								seguir = false;
 							}
@@ -142,6 +147,8 @@ void* cpu() {
 									sem->instancias_iniciadas++;
 								else {
 									carpincho *carp = queue_pop(sem->cola_espera);
+									//int index_interno_semaforo = buscar(carp->semaforos_asignados, sem->nombre);
+									//list_remove(carp->semaforos_asignados, index_interno_semaforo);
 									desbloquear(carp);
 									carp->responder = true;
 								}

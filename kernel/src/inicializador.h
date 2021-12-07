@@ -6,6 +6,7 @@
 #include "hilos_cpu.h"
 #include "IO.h"
 #include "utilidades.h"
+#include "deadlock.h"
 
 int inicializar_kernel();
 

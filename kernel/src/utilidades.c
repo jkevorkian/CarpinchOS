@@ -39,8 +39,10 @@ void iniciar_semaforo(char* nombre, int valor) {
 		pthread_mutex_init(&sem->mutex_espera, NULL);
 
 		pthread_mutex_lock(&mutex_lista_semaforos);
-		list_add(lista_semaforos, sem);
-		pthread_mutex_unlock(&mutex_lista_semaforos);
+			sem->id = id_proximo_semaforo;
+			id_proximo_semaforo++;
+			list_add(lista_semaforos, sem);
+			pthread_mutex_unlock(&mutex_lista_semaforos);
 		log_info(logger, "Iniciado exitosamente el semaforo: %s - Valor inicial %d", sem->nombre, sem->instancias_iniciadas);
 	} else
 		log_info(logger, "El semaforo ya estaba inicializado");
@@ -109,5 +111,50 @@ void desbloquear(carpincho* carp) {
 		agregar_suspendidosReady(quitar_suspendidosBlocked(carp));
 	else
 		agregar_ready(quitar_blocked(carp));
+}
+
+int buscar(t_list *lista, char *nombre) {
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		semaforo *sem = (semaforo *)list_get(lista, index);
+
+		if (!strcmp(nombre, sem->nombre))
+			return index;
+
+		index--;
+	}
+
+	return index;
+}
+
+semaforo *buscar_sem_por_id(t_list *lista, int id) {
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		semaforo *sem = (semaforo *)list_get(lista, index);
+
+		if (id == sem->id)
+			return sem;
+
+		index--;
+	}
+
+	return NULL; //retorna NULL si falla al encontrar un semaforo con el id dado
+}
+
+void hacer_post_semaforo(semaforo *sem) {	//TODO: revisar si esta funcion sirve aplicarla cuando hay que matar un carpincho (quita a ESE carpincho en especifico de la cola del semaforo? cuantos post debería hacer?)
+
+	pthread_mutex_lock(&sem->mutex_espera);
+	if (queue_is_empty(sem->cola_espera))
+		sem->instancias_iniciadas++;
+	else {
+		carpincho *carp = queue_pop(sem->cola_espera);
+		int index_interno_semaforo = buscar(carp->semaforos_asignados,sem->nombre);
+		list_remove(carp->semaforos_asignados, index_interno_semaforo);
+		desbloquear(carp);
+		carp->responder = true;
+	}
+	pthread_mutex_unlock(&sem->mutex_espera);
 }
 
