@@ -1,4 +1,3 @@
-#ESTO DEJA A LA MATELIB COMO LIBRERIA ESTATICA (.a), PARA PROPOSITOS DE PRUEBA
 # Include libraries here
 LIBRARIES=utils commons readline pthread
 # Include custom library paths here
@@ -14,8 +13,11 @@ CC=gcc
 CFLAGS=-Wall -DDEBUG -g
 INCLUDES=$(LIBRARY_PATHS:%=-I"%")
 
+# Linker
+LINKS=$(LIBRARY_PATHS:%=-L"%/bin") $(LIBRARIES:%=-l%)
+
 # Main subirectories
-SRCDIR=$(PROJECT)
+SRCDIR=src
 OBJDIR=obj
 BINDIR=bin
 
@@ -23,8 +25,11 @@ BINDIR=bin
 DIRECTORIES=$(BINDIR) $(OBJDIR) $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(shell find $(SRCDIR) -type d | tr '\n' ' '))
 
 # Objects
-BINARY=$(BINDIR)/lib$(PROJECT).a
+BINARY=$(BINDIR)/$(PROJECT)
 OBJECTS=$(patsubst ./$(SRCDIR)/%.c, $(OBJDIR)/%.o, $(shell find . -iname "*.c" | tr '\n' ' '))
+
+# Dependencies
+DEPENDENCIES=$(foreach THERE, $(LIBRARY_PATHS), $(patsubst ./%,$(THERE)/%,$(shell make --no-print-directory -C $(THERE) dependencies)))
 
 # ==============================================================================================================
 
@@ -37,24 +42,27 @@ release: CFLAGS = -Wall -DNDEBUG
 release: clean
 release: all
 
-dependencies:
-	@echo $(shell find . -iname "*.c" | tr '\n' ' ') $(shell find . -iname "*.h" | tr '\n' ' ')
+memcheck: all
+	valgrind --leak-check=full --log-file="$@_$(PROJECT).log" $(BINARY)
+
+helgrind: all
+	valgrind --tool=helgrind --log-file="$@_$(PROJECT).log" $(BINARY)
 
 # ==============================================================================================================
 
 # Build project
 $(BINARY): $(DIRECTORIES) $(OBJECTS)
-	ar rcs -o "$@" $(OBJECTS)
+	$(CC) $(CFLAGS) -o "$@" $(OBJECTS) $(LINKS)
 
 # Create directories for objects
 $(DIRECTORIES):
 	mkdir -p $@
 
 # Build objects
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/%.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/%.h $(DEPENDENCIES)
 	$(CC) $(INCLUDES) $(CFLAGS) -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPENDENCIES)
 	$(CC) $(INCLUDES) $(CFLAGS) -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 
-.PHONY: all clean debug release dependencies
+.PHONY: all clean debug release memcheck helgrind

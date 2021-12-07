@@ -15,7 +15,8 @@ int main() {
 		if(socket_auxiliar_carpincho < 0) {
 			log_error(logger, "Error en el socket recibido del carpincho que se intento conectar");
 			seguir = false;
-		} else {
+		}
+		else {
 			log_warning(logger, "Se ha conectado un carpincho");
 
 			//creo la estructura para el nuevo carpincho
@@ -28,14 +29,9 @@ int main() {
 			nuevo_carpincho->id = id_proximo_carpincho;
 			nuevo_carpincho->esta_suspendido = false;
 			nuevo_carpincho->responder = false;
-			nuevo_carpincho->id_semaforo_bloqueante = -1;
-			nuevo_carpincho->debe_morir = false;
-			nuevo_carpincho->semaforos_asignados = list_create();
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
-
-			//log_info(logger, "Carpincho agregado a new - carpinchos en new %d", queue_size(cola_new));
 		}
 	}
 
