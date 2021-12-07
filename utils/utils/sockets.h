@@ -34,18 +34,17 @@
 #define S_RM_PAGE		"%d"		// ID
 #define S_EXIT_C		"%d"		// ID
 // Semaforos
-#define S_SEM_INIT		"%s%d"
-#define S_SEM_WAIT		"%s"
-#define S_SEM_POST		"%s"
-#define S_SEM_DESTROY	"%s"
+#define S_SEM_INIT		"%s%d"		// NOMBRE_SEMAFORO + VALOR_INICIALIZACION
+#define S_SEM_WAIT		"%s"		// NOMBRE_SEMAFORO
+#define S_SEM_POST		"%s"		// NOMBRE_SEMAFORO
+#define S_SEM_DESTROY	"%s"		// NOMBRE_SEMAFORO
 // Otros
-#define S_CALL_IO		"%s"
+
+#define S_CALL_IO		"%s"		// NOMBRE_DISPOSITIVO
 #define S_DATA_CHAR		"%s"		// CONTENIDO_STRING
 #define S_DATA_INT		"%d"		// CONTENIDO_INT
 #define S_DATA_PAGE		"%sd"		// TAMANIO_PAGINA + CONTENIDO_PAGINA
 #define S_SEND_PORT		"%d"		// NRO_PUERTO
-// #define S_SUSPEND		"%d"		// ID
-// #define S_UNSUSPEND		"%d"		// ID
 
 typedef enum {
 	// Validaciones

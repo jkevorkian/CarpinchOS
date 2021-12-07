@@ -56,10 +56,6 @@ typedef struct {
 } IO;
 
 //deadlock
-typedef struct{
-        int milisegundos_entre_detecciones;
-        void* semaforosMaybe;
-} t_deadlock;
 
 t_log *logger, *logger_colas;
 t_config *config;

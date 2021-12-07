@@ -70,16 +70,19 @@ void *cpu() {
 
 						log_info(logger, "Carpincho %d esperando respuesta", carp->id);
 						t_list *mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+						int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 
 						mensaje_out = crear_mensaje((int)list_get(mensaje_mateLib, 0)); //tal cual llega genero el mismo mensaje para enviarselo a mateLib
-						if ((int)list_get(mensaje_mateLib, 0) == DATA_CHAR)					//si es un MEM_READ la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
+						if (codigo_respuesta == DATA_CHAR)					//si es un MEM_READ la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
 							agregar_a_mensaje(mensaje_out, "%s", (char *)list_get(mensaje_mateLib, 1));
+						if (codigo_respuesta == DATA_INT || codigo_respuesta == SEG_FAULT)					//si es un MEM_ALLOC la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
+							agregar_a_mensaje(mensaje_out, "%d", (char *)list_get(mensaje_mateLib, 1));
+
 						enviar_mensaje(carp->socket_mateLib, mensaje_out);
 						liberar_mensaje_out(mensaje_out);
 
 						liberar_mensaje_in(mensaje_mateLib);
-					}
-					else {
+					}else {
 						if ((int)list_get(mensaje_in, 0) == MEM_READ) {
 							mensaje_out = crear_mensaje(DATA_CHAR);
 							agregar_a_mensaje(mensaje_out, "%s", "Memoria desactivada, respondo datos de prueba");

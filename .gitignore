@@ -54,3 +54,10 @@ dkms.conf
 .vscode
 .swp
 .swo
+
+.settings
+bin
+obj
+.cproject
+.project
+*.log
