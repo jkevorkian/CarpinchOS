@@ -226,13 +226,13 @@ uint32_t cant_marcos_necesarios(uint32_t tamanio) {
 	return nro_marcos_q;
 }
 
-uint32_t cant_marcos_faltantes(uint32_t id, uint32_t tamanio) {
+uint32_t cant_marcos_faltantes(uint32_t id, uint32_t offset) {
 	t_carpincho *carpincho = carpincho_de_lista(id);
 	pthread_mutex_lock(&carpincho->mutex_tabla);
 	uint32_t paginas_asignadas = list_size(carpincho->tabla_paginas);
 	pthread_mutex_unlock(&carpincho->mutex_tabla);
 
-	div_t nro_marcos = div(carpincho->offset + tamanio, config_memoria.tamanio_pagina);
+	div_t nro_marcos = div(offset, config_memoria.tamanio_pagina);
 	uint32_t nro_marcos_necesarios = nro_marcos.quot;
 
 	if(nro_marcos.rem > 0) nro_marcos_necesarios++;

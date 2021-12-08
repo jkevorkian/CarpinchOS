@@ -61,150 +61,82 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
 
-	uint32_t offset_final;
-	uint32_t nro_frames_necesarios = 0;
-	uint32_t dir_logica = 0;
+	bool encontre_alloc = false;
+	
+	uint32_t main_heap = 0, foot_heap = 0;
+	uint32_t next_heap = HEAP_NULL, alloc_sig = HEAP_NULL;
 
 	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
-	bool crear_footer = true;
 
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL && list_size(carpincho->tabla_paginas) == 0) {
 		if(!asignacion_fija(carpincho)) return 0;
 	}
-	/*
-	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-		// lo hago solo la primera vez, despues asigno solo cuando me quedo sin paginas
-		if(list_size(carpincho->tabla_paginas) == 0) {
-			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-				for(int i = 0; i < nro_frames_necesarios; i++){
-					agregar_pagina(carpincho->id);
+
+	if(carpincho->offset == 0) {
+		foot_heap = main_heap + TAMANIO_HEAP + tamanio;
+		// carpincho->offset = foot_heap + TAMANIO_HEAP;	// La variable solo la usa el carpincho, no hace falta mutex
+		encontre_alloc = true;
+	}	
+
+	while(!encontre_alloc) {
+		alloc_sig = get_nextAlloc(id_carpincho, main_heap);
+		bool is_free = get_isFree(id_carpincho, main_heap);
+		
+		if(!is_free) {
+			main_heap = alloc_sig;
+			continue;
+		}
+
+		if(alloc_sig == HEAP_NULL) {
+			encontre_alloc = true;
+			foot_heap = main_heap + TAMANIO_HEAP + tamanio;
+			continue;
+		}
+
+		uint32_t bytes_disponibles_alloc = alloc_sig - (main_heap + TAMANIO_HEAP);
+		if(bytes_disponibles_alloc == tamanio) {
+			// Entra sin footer intermedio
+			encontre_alloc = true;
+			continue;
+		}
+		if(bytes_disponibles_alloc >= tamanio + TAMANIO_HEAP) {
+			// Entra con footer intermedio
+			encontre_alloc = true;
+			foot_heap = main_heap + tamanio + TAMANIO_HEAP;
+			next_heap = alloc_sig;
+			continue;
+		}
+		main_heap = alloc_sig;
+	}
+
+	if(alloc_sig == HEAP_NULL) {
+		uint32_t offset_final = main_heap + tamanio + 2*TAMANIO_HEAP;
+		uint32_t nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
+		if(nro_frames_necesarios) {
+			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)) {
+				for(int i = 0; i < nro_frames_necesarios; i++) {
+					agregar_pagina(id_carpincho);
 				}
 			}
 			else return 0;
 		}
-	}*/
-
-	if(carpincho->offset == 0) {
-		offset_final = tamanio + 2 * TAMANIO_HEAP;
-		nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
-		
-		/////////////////////////////// Temporal
-		t_marco *marco_auxiliar = obtener_marco(id_carpincho, 0);
-		memset(inicio_memoria(marco_auxiliar->nro_real, 0), 0, config_memoria.tamanio_pagina);
-		soltar_marco(marco_auxiliar);
-		set_prevAlloc(id_carpincho, 0, HEAP_NULL);
-		///////////////////////////////
-		
-		dir_logica = heap_header(carpincho, tamanio, 0, &crear_footer);
-		heap_footer(carpincho, tamanio, dir_logica + tamanio, HEAP_NULL);
+		carpincho->offset = offset_final;	// La variable solo la usa el carpincho, no hace falta mutex
 	}
-	else {
-		uint32_t desplazamiento = 0;
-		uint32_t alloc_sig;
-		uint8_t is_free;		
+	
+	reset_isFree(id_carpincho, main_heap);
+	if(!main_heap)	set_prevAlloc(id_carpincho, main_heap, HEAP_NULL);	
 
-		while(true){
-			alloc_sig = get_nextAlloc(carpincho->id, desplazamiento);
-			is_free = get_isFree(carpincho->id, desplazamiento);
+	if(foot_heap) {
+		set_nextAlloc(id_carpincho, main_heap, foot_heap);
+		set_prevAlloc(id_carpincho, foot_heap, main_heap);
+		set_nextAlloc(id_carpincho, foot_heap, next_heap);
+		set_isFree(id_carpincho, foot_heap);
 
-			if(alloc_sig == HEAP_NULL){
-				/* uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
-				if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
-					if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-						uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
-						nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
-						
-						for(int i = 0; i < nro_frames_necesarios; i++){
-							agregar_pagina(carpincho->id);
-						}
-					}
-					else return 0;
-				}*/
-				offset_final = desplazamiento + 2*TAMANIO_HEAP + tamanio;
-				nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
-
-				if(nro_frames_necesarios) {
-					if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)) {
-						for(int i = 0; i < nro_frames_necesarios; i++) {
-							agregar_pagina(carpincho->id);
-						}
-					}
-					else return 0;
-				}
-				carpincho->offset = offset_final;
-				dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
-				heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
-				break;
-			}
-			else {
-				if(is_free) {
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
-
-					// no entra en ese espacio alocado, buscar otro
-					if(dir_logica == 0) {
-						desplazamiento = alloc_sig;
-						continue;
-					};
-
-					// no necesito el footer porque entra justo
-					if(!crear_footer) break;
-					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
-					break;
-				};
-
-			desplazamiento = alloc_sig;
-
-			}
-		}
-	}	
-
-	log_info(logger, "Direccion logica asignada al carpincho #%d: %d", id_carpincho, dir_logica);
-
-	////////////////////////////////////////////////////////////
-	// Corregir, sirve solo para nuevos allocs al final
-	// carpincho->offset = dir_logica + tamanio + TAMANIO_HEAP;
-	////////////////////////////////////////////////////////////
-	return dir_logica; 
-}
-
-uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, bool* crear_footer){
-	bool tiene_footer = get_nextAlloc(carpincho->id, desplazamiento) != 0 || get_nextAlloc(carpincho->id, desplazamiento) != HEAP_NULL;
-	uint32_t bytes_allocados = get_nextAlloc(carpincho->id, desplazamiento) - desplazamiento - TAMANIO_HEAP;
-
-	// tiene que entrar justo en el tamaño de aloc libre o tiene que sobrar espacio para un nuevo heap footer
-	if(tiene_footer){
-		if(bytes_allocados == tam){
-			//printf("Entra entero pero sin footer intermedio");
-			*crear_footer = false;
-			return desplazamiento + TAMANIO_HEAP;
-		}
-		else if(bytes_allocados >= tam + TAMANIO_HEAP){
-			//printf("Entra con footer intermedio");
-		}
-		else {
-			//printf("No entra, buscar otro libre.");
-			return 0;
-		}
+		if(next_heap != HEAP_NULL)	set_prevAlloc(id_carpincho, next_heap, foot_heap);
 	}
-
-	reset_isFree(carpincho->id, desplazamiento);
-	set_nextAlloc(carpincho->id, desplazamiento, TAMANIO_HEAP + tam + desplazamiento);
-
-	log_info(logger, "Heap header creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
-
-	return desplazamiento + TAMANIO_HEAP;
-}
-
-uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig){
-	set_isFree(carpincho->id, desplazamiento);
-	set_nextAlloc(carpincho->id, desplazamiento, alloc_sig);
-	set_prevAlloc(carpincho->id, desplazamiento, desplazamiento - tam - TAMANIO_HEAP);
-
-	log_info(logger, "Heap footer creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
-
-	return desplazamiento + TAMANIO_HEAP;
+	
+	log_info(logger, "Direccion logica asignada al carpincho #%d: %d", id_carpincho, main_heap + TAMANIO_HEAP);
+	return main_heap + TAMANIO_HEAP; 
 }
 
 void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
