@@ -142,11 +142,37 @@ semaforo *buscar_sem_por_id(t_list *lista, int id) {
 	return NULL; //retorna NULL si falla al encontrar un semaforo con el id dado
 }
 
-void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) { //TODO: si un carpincho que muere por deadlock quedo dando vueltas en la cola de espera de algun otro semaforo cuando se lo intente popear no van a encontrarlo
+void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) {
 
 	semaforo* sem = semaforo_asignado->sem;
 
 	pthread_mutex_lock(&sem->mutex_espera);
+		if(queue_is_empty(sem->cola_espera)) {
+			log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
+			sem->instancias_iniciadas++;
+		} else {
+			carpincho *carp_desbloquear;
+
+			while(semaforo_asignado->cantidad_asignada > 0) {
+				carp_desbloquear = queue_pop(sem->cola_espera);
+
+				if(carp_desbloquear->id == -1) {
+					free(carp_desbloquear);
+
+					if(queue_is_empty(sem->cola_espera))
+						sem->instancias_iniciadas++;
+				} else {
+					desbloquear(carp_desbloquear);
+					carp_desbloquear->responder = true;
+					carp_desbloquear->id_semaforo_bloqueante = -1;
+				}//
+
+				semaforo_asignado->cantidad_asignada--;
+			}
+		}
+	pthread_mutex_unlock(&sem->mutex_espera);
+
+	/*pthread_mutex_lock(&sem->mutex_espera);
 	if (queue_is_empty(sem->cola_espera)){
 		log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
 		sem->instancias_iniciadas++;
@@ -161,7 +187,7 @@ void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) { //
 		}
 
 	}
-	pthread_mutex_unlock(&sem->mutex_espera);
+	pthread_mutex_unlock(&sem->mutex_espera);*/
 }
 
 void liberar_lista(t_list* lista) {

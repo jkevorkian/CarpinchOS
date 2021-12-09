@@ -47,9 +47,6 @@ void* cpu() {
 
 				int parametro = (int)list_get(mensaje_in, 0);
 
-				//if (carp->debe_morir)
-				//	parametro = MATE_CLOSE;
-
 				switch(parametro) { // protocolo del mensaje
 					case MEM_ALLOC:
 					case MEM_FREE:
@@ -174,10 +171,37 @@ void* cpu() {
 											list_remove(carp->semaforos_asignados, pos_sem);
 									}
 								} else {
-									carpincho *carp_desbloquear = queue_pop(sem->cola_espera);
-									desbloquear(carp_desbloquear);
-									carp_desbloquear->responder = true;
-									carp_desbloquear->id_semaforo_bloqueante = -1;
+									carpincho *carp_desbloquear;
+									bool continuar_buscando = true;
+
+									while(continuar_buscando) {
+										carp_desbloquear = queue_pop(sem->cola_espera);
+
+										if(carp_desbloquear->id == -1) {
+											log_error(logger, "El carpincho ya no existe, intentando con el siguiente");
+											free(carp_desbloquear);
+
+											if(queue_is_empty(sem->cola_espera)) {
+												sem->instancias_iniciadas++;
+
+												int pos_sem = buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre);
+												if(pos_sem != -1) {
+													sem_deadlock* aux = list_get(carp->semaforos_asignados, pos_sem);
+													aux->cantidad_asignada--;
+
+													if(aux->cantidad_asignada <= 0)
+														list_remove(carp->semaforos_asignados, pos_sem);
+												}
+												continuar_buscando = false;
+												log_info(logger, "No habia mas carpinchos esperando, agregando una instancia disponible");
+											}
+										} else {
+											continuar_buscando = false;
+											desbloquear(carp_desbloquear);
+											carp_desbloquear->responder = true;
+											carp_desbloquear->id_semaforo_bloqueante = -1;
+										}
+									}
 								}
 							pthread_mutex_unlock(&sem->mutex_espera);
 

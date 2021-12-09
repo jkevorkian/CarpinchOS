@@ -88,7 +88,7 @@ bool esta_en_deadlock(carpincho *carp, t_list* cadena_de_deadlock) {
 	t_list* lista_auxiliar = list_create();
 
 	carpincho* carp_n = carp;
-	int i = 0;
+
 	do {
 		list_add(lista_auxiliar, carp_n);
 		carp_n = carpincho_con_sem_bloq_asignado(carp_n);
@@ -138,24 +138,48 @@ bool *ordenador_carpinchos(carpincho* carp1, carpincho* carp2) {
 }
 
 int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
-	//list_sort(carpinchos_deadlock, (void*)ordenador_carpinchos); //TODO: ordenar la lista de carpinchos en deadlock de menor a mayor ID
-	carpincho *carp = list_get(carpinchos_deadlock, 1);
+	int index = list_size(carpinchos_deadlock)-1;
+	carpincho* carp_matar = (carpincho*)list_get(carpinchos_deadlock, index);
+	int indice_carp_matar = index;
+	index--;
 
-	if(LOGUEAR_MENSAJES_DEADLOCK)
-		log_info(logger, "matando a carpincho %d", carp->id);
+	while(index >= 0) {
+		carpincho* posible_carp_matar = (carpincho*)list_get(carpinchos_deadlock, index);
 
-	carp->debe_morir = true;
-	list_remove(carpinchos_deadlock, 1);
+		if(posible_carp_matar->id > carp_matar->id) {
+			carp_matar = posible_carp_matar;
+			indice_carp_matar = index;
+		}
 
-	int index = list_size(carp->semaforos_asignados) - 1;
-
-	while (index >= 0) {
-		sem_deadlock *semAux = (sem_deadlock *) list_get(carp->semaforos_asignados,index);
-		hacer_posts_semaforo(semAux, carp);
 		index--;
 	}
 
-	//TODO: liberar los otros recursos que tenga asignados el carpincho (I/O?)
+	if(LOGUEAR_MENSAJES_DEADLOCK)
+		log_info(logger, "matando a carpincho %d", carp_matar->id);
+
+	list_remove(carpinchos_deadlock, indice_carp_matar);
+	list_remove(lista_blocked, encontrar_carpincho(lista_blocked, carp_matar));
+
+	index = list_size(carp_matar->semaforos_asignados) - 1;
+
+	while (index >= 0) {
+		sem_deadlock *semAux = (sem_deadlock *) list_get(carp_matar->semaforos_asignados,index);
+		hacer_posts_semaforo(semAux, carp_matar);
+		index--;
+	}
+
+	if(MEMORIA_ACTIVADA) {
+		t_mensaje* mensaje_out = crear_mensaje(MATE_CLOSE);
+		enviar_mensaje(carp_matar->socket_memoria, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
+	}
+
+	close(carp_matar->socket_mateLib);
+	close(carp_matar->socket_memoria);
+	free(carp_matar->tiempo_llegada);
+	//free(carp_matar);
+	carp_matar->id = -1;;
+
 	return 0;
 }
 
