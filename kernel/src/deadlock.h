@@ -21,5 +21,5 @@ t_list *carpinchos_bloqueados_sem();
 
 t_list *carps_en_deadlock();
 bool esta_en_deadlock(carpincho *carp, t_list* cadena_de_deadlock);
-carpincho* carpincho_de_lista_con_sem_bloq_asignado(t_list* lista_carpinchos, carpincho* carp);
+carpincho* carpincho_con_sem_bloq_asignado(carpincho* carp);
 #endif /* DEADLOCK_H_ */

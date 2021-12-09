@@ -17,11 +17,11 @@ void *detectar_deadlock(void* d) {
 		sleep(tiempo_deadlock / 1000);
 		log_warning(logger, "Corriendo algoritmo de deteccion de DeadLock");
 		algoritmo_deteccion();
-
+/*
 		while (list_size(carpinchos_en_deadlock)) {
 			matar_proximo_carpincho(carpinchos_en_deadlock);
 			algoritmo_deteccion();
-		}
+		}*/
 	}
 }
 
@@ -63,14 +63,10 @@ t_list *carps_en_deadlock() {
 		t_list *lista_auxiliar = list_create();
 
 		while (index >= 0) {
-			log_warning(logger, "carps_en_deadlock, para index= %d", index);
 			carpincho *carp = (carpincho *) list_get(lista_a_evaluar, index);
-			log_info(logger, "evaluando a carpincho %d", carp->id);
-			if(esta_en_deadlock(carp, lista_auxiliar)){
-				puts("corte y fuera");
-				index = 0; //si se encuentra deadlock se corta el while, se imprimen los carpinchos que estan en la lista auxiliar y se la retorna
 
-			}
+			if(esta_en_deadlock(carp, lista_auxiliar))
+				index = 0; //si se encuentra deadlock se corta el while, se imprimen los carpinchos que estan en la lista auxiliar y se la retorna
 			else if (LOGUEAR_MENSAJES_DEADLOCK)
 				log_info(logger, "El carpincho %d no esta en deadlock", carp->id);
 
@@ -85,29 +81,45 @@ t_list *carps_en_deadlock() {
 				log_warning(logger, "El carpincho %d esta en deadlock", carp->id);
 			index--;
 		}
-		puts("retornando");
 		return lista_auxiliar;
 }
 
 bool esta_en_deadlock(carpincho *carp, t_list* cadena_de_deadlock) {
 	t_list* lista_auxiliar = list_create();
-	carpincho* carpincho_n = carpincho_de_lista_con_sem_bloq_asignado(lista_a_evaluar, carp);
 
-	if(carpincho_n == NULL) return false;
+	carpincho* carp_n = carp;
+	int i = 0;
+	do {
+		log_info(logger, "%d",i);i++;
+		list_add(lista_auxiliar, carp_n);
+		carp_n = carpincho_con_sem_bloq_asignado(carp_n);
 
-	while(!tiene_asignado(carp, carpincho_n->id_semaforo_bloqueante)){
-		list_add(lista_auxiliar, carpincho_n);
-		carpincho_n = carpincho_de_lista_con_sem_bloq_asignado(lista_a_evaluar, carpincho_n);
-
-		if(carpincho_n == NULL) {
+		if(carp_n == NULL) {
 			liberar_lista(lista_auxiliar);
 			return false;
 		}
-	}
+
+	} while(!tiene_asignado(carp, carp_n->id_semaforo_bloqueante));
+
+	list_add(lista_auxiliar, carp_n);
 
 	list_add_all(cadena_de_deadlock, lista_auxiliar);
 	liberar_lista(lista_auxiliar);
 	return true;
+}
+
+carpincho* carpincho_con_sem_bloq_asignado(carpincho* carp){
+	int index = list_size(lista_a_evaluar) - 1;
+
+	while (index >= 0) {
+		carpincho *carp_l = (carpincho *) list_get(lista_a_evaluar, index);
+
+		if(carp_l->id != carp->id && tiene_asignado(carp_l, carp->id_semaforo_bloqueante))
+			return carp_l;
+
+		index--;
+	}
+	return NULL;
 }
 
 bool tiene_asignado(carpincho *carp, int id_semaforo) {
@@ -120,20 +132,6 @@ bool tiene_asignado(carpincho *carp, int id_semaforo) {
 		index--;
 	}
 	return false;
-}
-
-carpincho* carpincho_de_lista_con_sem_bloq_asignado(t_list* lista_carpinchos, carpincho* carp){
-	int index = list_size(lista_carpinchos) - 1;
-
-	while (index >= 0) {
-		carpincho *carpincho_lista = (carpincho *) list_get(lista_carpinchos, index);
-
-		if(carpincho_lista->id != carp->id && tiene_asignado(carpincho_lista, carp->id_semaforo_bloqueante))
-			return carpincho_lista;
-
-		index--;
-	}
-	return NULL;
 }
 
 bool *ordenador_carpinchos(carpincho* carp1, carpincho* carp2) {
