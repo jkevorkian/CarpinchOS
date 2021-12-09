@@ -8,9 +8,7 @@
 #include <arpa/inet.h>
 #include <commons/string.h>
 
-#include "memoria.h"
 #include "reemplazos.h"
-#include "marcos.h"
 
 typedef struct {
 	uint32_t id_car;

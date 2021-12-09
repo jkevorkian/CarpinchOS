@@ -1,10 +1,8 @@
 #ifndef _MARCOS_H_
 #define _MARCOS_H_
 
-#include "memoria.h"
 #include "swap.h"
 #include "tlb.h"
-#include "reemplazos.h"
 
 bool tengo_marcos_suficientes(uint32_t);
 
@@ -26,7 +24,7 @@ void liberar_marco(t_marco *marco);
 
 t_entrada_tp* agregar_pagina(uint32_t id_carpincho);
 
-t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);
+bool asignacion_fija(t_carpincho*);
 
 void suspend(uint32_t id);
 void unsuspend(uint32_t id);

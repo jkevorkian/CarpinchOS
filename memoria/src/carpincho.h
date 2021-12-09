@@ -13,6 +13,4 @@ void* rutina_carpincho(void* info_carpincho);
 t_carpincho* crear_carpincho(uint32_t);
 void eliminar_carpincho(uint32_t);
 
-bool asignacion_fija(t_carpincho*);
-
 #endif /* _CARPINCHO_H_ */

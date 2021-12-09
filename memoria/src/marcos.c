@@ -267,6 +267,32 @@ t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
 	return pagina;
 }
 
+bool asignacion_fija(t_carpincho* carpincho) {
+	uint32_t cant_marcos = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
+	bool resultado = false;
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	if(tengo_marcos_suficientes(cant_marcos) && crear_movimiento_swap(NEW_PAGE, carpincho->id, cant_marcos, NULL)) {
+		for(int i = 0; i < cant_marcos; i++){
+			t_marco* marco = obtener_marco_libre();
+			marco->duenio = carpincho->id;
+			marco->pagina_duenio = i;
+			
+			t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));			
+			pthread_mutex_init(&pagina->mutex, NULL);
+			pagina->nro_marco = marco->nro_real;
+			pagina->presencia = true;
+
+			pthread_mutex_lock(&carpincho->mutex_tabla);
+			list_add(carpincho->tabla_paginas, pagina);
+			pthread_mutex_unlock(&carpincho->mutex_tabla);
+		}
+		resultado = true;
+	}
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
+
+	return resultado;
+}
+
 void suspend(uint32_t id) {
 	uint32_t cant_marcos;
 	t_marco **lista_marcos = obtener_marcos_proceso(id, &cant_marcos);
@@ -312,15 +338,6 @@ void unsuspend(uint32_t id) {
 		marco_nuevo->bit_uso = false;
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
-}
-
-t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {
-	t_carpincho *carpincho = carpincho_de_lista(id);
-	t_entrada_tp *entrada;
-	pthread_mutex_lock(&carpincho->mutex_tabla);
-	entrada = (t_entrada_tp *)list_get(carpincho->tabla_paginas, nro_pagina);
-	pthread_mutex_unlock(&carpincho->mutex_tabla);
-	return entrada;
 }
 
 void liberar_marco(t_marco *marco) {

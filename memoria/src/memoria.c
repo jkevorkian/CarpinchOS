@@ -126,9 +126,18 @@ t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_enc
 	return marcos_proceso;
 }
 
-uint32_t nro_paginas_reemplazo() {
+uint32_t nro_paginas_reemplazo() {		// Mmm, no debería ir aca esto. O sí, no sé, qué se yo.
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
 		return config_memoria.cant_marcos_carpincho;
 	else
 		return config_memoria.cant_marcos;
+}
+
+t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {
+	t_carpincho *carpincho = carpincho_de_lista(id);
+	t_entrada_tp *entrada;
+	pthread_mutex_lock(&carpincho->mutex_tabla);
+	entrada = (t_entrada_tp *)list_get(carpincho->tabla_paginas, nro_pagina);
+	pthread_mutex_unlock(&carpincho->mutex_tabla);
+	return entrada;
 }

@@ -9,7 +9,6 @@
 #define MEM_OP_H_
 
 #include "read_write_op.h"
-#include "carpincho.h"
 
 uint32_t mem_alloc(uint32_t carpincho, uint32_t tamanio);
 bool mem_free(uint32_t id_carpincho, uint32_t dir_logica);

@@ -94,4 +94,6 @@ void loggear_pagina(t_log *logger, void *pagina);
 t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados);
 uint32_t nro_paginas_reemplazo();
 
+t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);
+
 #endif /* _MEMORIA_H_ */
