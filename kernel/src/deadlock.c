@@ -19,7 +19,7 @@ void *detectar_deadlock(void* d) {
 		algoritmo_deteccion();
 
 		while (list_size(carpinchos_en_deadlock)) {
-			//matar_proximo_carpincho(carpinchos_en_deadlock);
+			matar_proximo_carpincho(carpinchos_en_deadlock);
 			algoritmo_deteccion();
 		}
 	}
@@ -63,10 +63,14 @@ t_list *carps_en_deadlock() {
 		t_list *lista_auxiliar = list_create();
 
 		while (index >= 0) {
+			log_warning(logger, "carps_en_deadlock, para index= %d", index);
 			carpincho *carp = (carpincho *) list_get(lista_a_evaluar, index);
+			log_info(logger, "evaluando a carpincho %d", carp->id);
+			if(esta_en_deadlock(carp, lista_auxiliar)){
+				puts("corte y fuera");
+				index = 0; //si se encuentra deadlock se corta el while, se imprimen los carpinchos que estan en la lista auxiliar y se la retorna
 
-			if(esta_en_deadlock(carp, lista_auxiliar))
-				index = 0;
+			}
 			else if (LOGUEAR_MENSAJES_DEADLOCK)
 				log_info(logger, "El carpincho %d no esta en deadlock", carp->id);
 
@@ -76,12 +80,12 @@ t_list *carps_en_deadlock() {
 		index = list_size(lista_auxiliar) - 1;
 
 		while (index >= 0) {
-			carpincho *carp = (carpincho *) list_get(lista_a_evaluar, index);
+			carpincho *carp = (carpincho *) list_get(lista_auxiliar, index);
 			if (LOGUEAR_MENSAJES_DEADLOCK)
 				log_warning(logger, "El carpincho %d esta en deadlock", carp->id);
 			index--;
 		}
-
+		puts("retornando");
 		return lista_auxiliar;
 }
 
