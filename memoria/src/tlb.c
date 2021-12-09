@@ -1,13 +1,19 @@
 #include "tlb.h"
 
-void iniciar_tlb(t_config* config){
+t_entrada_tlb* es_entrada(uint32_t, uint32_t, uint32_t);
+t_entrada_tlb* solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+
+void iniciar_tlb(t_config* config) {
 	char * algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
 	if(!strcmp(algoritmo_reemplazo, "FIFO")) {
 		tlb.algoritmo_reemplazo = FIFO;
-		tlb.puntero_fifo = 0;
+		pthread_mutex_init(&mutex_fifo_tlb, NULL);
+		cola_fifo_tlb = list_create();
 	}
 	if(!strcmp(algoritmo_reemplazo, "LRU"))
 		tlb.algoritmo_reemplazo = LRU;
+	
+	pthread_mutex_init(&asignacion_entradas_tlb, NULL);
 
 	tlb.cant_entradas = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
 	tlb.path_dump = config_get_string_value(config, "PATH_DUMP_TLB");
@@ -15,7 +21,9 @@ void iniciar_tlb(t_config* config){
 	tlb.cant_miss = 0;
 	tlb.puntero_fifo = 0;
 	tlb.mapa = calloc(tlb.cant_entradas, sizeof(t_entrada_tlb *)); // Tiene que ser puntero
-	tlb.hit_miss_proceso = list_create();
+
+	historico_hit_miss = list_create();
+	pthread_mutex_init(&mutex_historico_hit_miss, NULL);
 
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		t_entrada_tlb* entrada = malloc(sizeof(t_entrada_tlb));
@@ -23,58 +31,37 @@ void iniciar_tlb(t_config* config){
 		entrada->pagina = -1;
 		entrada->marco = -1;
 		tlb.mapa[i] = entrada;
-	} 
+		pthread_mutex_init(&entrada->mutex, NULL);
+
+		if(tlb.algoritmo_reemplazo == FIFO) {
+			list_add(cola_fifo_tlb, entrada);
+		}
+	}
 
 	log_info(logger,"TLB inicializada. Nro de entradas: %d", tlb.cant_entradas);
-} 
-
-uint32_t leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina){
-	t_entrada_tlb* entrada = solicitar_entrada_tlb(id_carpincho, nro_pagina);
-	t_tlb_por_proceso* hit_miss = get_hit_miss_proceso(id_carpincho);
-
- 	if(entrada == NULL){
-		usleep(tlb.retardo_fallo * 1000);
-		hit_miss->cant_miss += 1;
-		tlb.cant_miss += 1;
-		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
-		return -1;
-	}
-	else {
-		usleep(tlb.retardo_acierto * 1000);
-		hit_miss->cant_hit += 1;
-		tlb.cant_hit += 1;
-		entrada->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
-		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);		
-		return entrada->marco;
-	}
 }
 
-t_entrada_tlb *leer_tlb2(uint32_t id_carpincho, uint32_t nro_pagina){
+t_entrada_tlb *leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {	
+	t_entrada_tlb* entrada = solicitar_entrada_tlb(id_carpincho, nro_pagina);
 
-	t_entrada_tlb* solicitar_entrada_tlb2(uint32_t id_carpincho, uint32_t nro_pagina) {
-		t_entrada_tlb* entrada;
-		for(int i = 0; i < tlb.cant_entradas; i++) {
-			if((entrada = es_entrada(i, id_carpincho, nro_pagina)))
-				break;
-		}
-		return entrada;
-	}
-	
-	t_entrada_tlb* entrada = solicitar_entrada_tlb2(id_carpincho, nro_pagina);
-	t_tlb_por_proceso* hit_miss = get_hit_miss_proceso(id_carpincho);
+	pthread_mutex_lock(&mutex_historico_hit_miss);
+	t_hit_miss_tlb *historico_carpincho = list_get(historico_hit_miss, id_carpincho - 1);
+	pthread_mutex_unlock(&mutex_historico_hit_miss);
 
  	if(entrada == NULL){
 		usleep(tlb.retardo_fallo * 1000);
-		hit_miss->cant_miss += 1;
-		tlb.cant_miss += 1;
+		historico_carpincho->cant_miss++;
+		tlb.cant_miss++;
 		log_info(logger, "TLB Miss - Carpincho #%d, Número de página: %d", id_carpincho, nro_pagina);
 		return NULL;
 	}
 	else {
 		usleep(tlb.retardo_acierto * 1000);
-		hit_miss->cant_hit += 1;
-		tlb.cant_hit += 1;
-		entrada->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
+		historico_carpincho->cant_hit++;
+		tlb.cant_hit++;
+		if(tlb.algoritmo_reemplazo == LRU) {
+			entrada->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
+		}
 		log_info(logger, "TLB Hit - Carpincho #%d, Número de página: %d, Número de marco: %d", id_carpincho, nro_pagina, entrada->marco);
 		return entrada;
 	}
@@ -89,73 +76,133 @@ t_entrada_tlb* solicitar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina)
 	return entrada;
 }
 
-t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
-	// mutex de asignación tlb
-	//t_entrada_tlb* entrada = obtener_entrada_libre()
-	// mutex de asignación tlb
-	// if(entrada)
-		//	return  entrada;
-	obtener_control_tlb();
-	t_entrada_tlb* entrada;
+t_entrada_tlb *obtener_entrada_tlb(uint32_t id, uint32_t nro_pagina) {
+	bool es_mi_entrada(void *una_entrada) {
+		t_entrada_tlb *ent = (t_entrada_tlb *)una_entrada;
+		pthread_mutex_lock(&ent->mutex);
+		bool es_entrada = ent->id_car == id && ent->pagina == nro_pagina;
+		if((!es_entrada))
+			pthread_mutex_unlock(&((t_entrada_tlb *)una_entrada)->mutex);
+		return es_entrada;
+	}
 
+	t_entrada_tlb* entrada = NULL;
 	for(int i = 0; i < tlb.cant_entradas; i++) {
-		entrada = tlb.mapa[i];
-		if(entrada->id_car == 0){
-			entrada_nueva(id_carpincho, nro_pagina, entrada);
-			liberar_control_tlb();
-			return entrada;
-		}
-	}
-
-	if(tlb.algoritmo_reemplazo == FIFO){
-		entrada = tlb.mapa[tlb.puntero_fifo]; 
-		entrada_nueva(id_carpincho, nro_pagina, entrada);
-
-		if(tlb.puntero_fifo + 1 == tlb.cant_entradas) tlb.puntero_fifo = 0;
-		else tlb.puntero_fifo = tlb.puntero_fifo + 1;
-	}
-	else if(tlb.algoritmo_reemplazo == LRU){
-		bool result;
-		t_entrada_tlb* entrada_menor = tlb.mapa[0];
-
-		for(int i = 0; i < tlb.cant_entradas; i++) {
+		if(es_mi_entrada(tlb.mapa[i])) {
 			entrada = tlb.mapa[i];
-			if(entrada->tiempo_lru){
-				result = es_mas_vieja(entrada, entrada_menor);
-				if(result) entrada_menor = entrada;
-				//printf("menor: %d", entrada_menor->pagina);
-			}
+			break;
 		}
-
-		entrada_nueva(id_carpincho, nro_pagina, entrada_menor);
 	}
 
-	liberar_control_tlb();
+	if(entrada == NULL)
+		return NULL;
+
+	if(tlb.algoritmo_reemplazo == FIFO) {
+		pthread_mutex_lock(&mutex_fifo_tlb);
+		list_remove_by_condition(cola_fifo_tlb, es_mi_entrada);
+		list_add(cola_fifo_tlb, entrada);
+		pthread_mutex_unlock(&mutex_fifo_tlb);
+	}
+	else {
+		entrada->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
+	}
+	// pthread_mutex_unlock(&entrada_tlb->mutex);
+	return entrada;
+}
+
+t_entrada_tlb *quitar_entrada_tlb_fifo(uint32_t id, uint32_t nro_pagina) {
+	bool es_mi_entrada(void *una_entrada) {
+		bool salida;
+		pthread_mutex_lock(&((t_entrada_tlb *)una_entrada)->mutex);
+		salida = ((t_entrada_tlb *)una_entrada)->id_car == id && ((t_entrada_tlb *)una_entrada)->pagina == nro_pagina;
+		pthread_mutex_unlock(&((t_entrada_tlb *)una_entrada)->mutex);
+		return salida;
+	}
+
+	pthread_mutex_lock(&mutex_fifo_tlb);
+	t_entrada_tlb *entrada = list_remove_by_condition(cola_fifo_tlb, (es_mi_entrada));
+	list_add(cola_fifo_tlb, entrada);
+	pthread_mutex_unlock(&mutex_fifo_tlb);
 	return entrada;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Pato
-void actualizar_entrada_tlb(t_entrada_tlb* entrada_tlb, uint32_t id_carpincho, uint32_t nro_pagina) {
-	// t_entrada_tlb* entrada_tlb = solicitar_entrada_tlb(id_viejo, nro_pagina/*_vieja*/);
-	// pthread_mutex_lock(&entrada_tlb->mutex);
-	// entrada_vieja->tiempo_lru = ...;
-	// entrada_vieja_tlb->id_car = id_carpincho;
-	// entrada_vieja_tlb->pagina = nro_pagina;
-	// entrada_vieja->marco = marco->nro_real;		// Debería ser igual
-	// pthread_mutex_lock(&entrada_tlb->mutex);
+void actualizar_entrada_fifo_tlb(t_entrada_tlb * entrada) {
+	// pthread_mutex_lock(&mutex_fifo_tlb);
+	// list_remove_by_condition(cola_fifo_tlb, es_mi_entrada);
+	// list_add(cola_fifo_tlb, entrada);
+	// pthread_mutex_unlock(&mutex_fifo_tlb);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 
-void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada){
-	// t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
-	// t_entrada_tp* pagina = (t_entrada_tp*) list_get(carpincho->tabla_paginas, nro_pagina);
+t_entrada_tlb* asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
+	bool asigne_entrada = false;
+	pthread_mutex_lock(&asignacion_entradas_tlb);
+	t_entrada_tlb* entrada;
+
+
+	for(int i = 0; i < tlb.cant_entradas && !asigne_entrada; i++) {
+		entrada = tlb.mapa[i];
+		pthread_mutex_lock(&entrada->mutex);
+		if(entrada->id_car == 0) {
+			entrada_nueva(id_carpincho, nro_pagina, entrada);
+			asigne_entrada = true;
+		}
+		pthread_mutex_unlock(&entrada->mutex);
+	}
+	pthread_mutex_unlock(&asignacion_entradas_tlb);
+	if(asigne_entrada)
+		return entrada;
+
+	if(tlb.algoritmo_reemplazo == FIFO) {
+		pthread_mutex_lock(&mutex_fifo_tlb);
+		entrada = list_remove(cola_fifo_tlb, 0);
+		list_add(cola_fifo_tlb, entrada);
+		pthread_mutex_unlock(&mutex_fifo_tlb);
+	}
+	else {
+		bool primero_mas_viejo;
+		t_entrada_tlb* entrada_siguiente;
+		entrada = tlb.mapa[0];
+
+		for(int i = 1; i < tlb.cant_entradas; i++) {
+			entrada_siguiente = tlb.mapa[i];
+			pthread_mutex_lock(&entrada->mutex);
+			pthread_mutex_lock(&entrada_siguiente->mutex);
+			primero_mas_viejo = primer_tiempo_mas_chico(entrada->tiempo_lru, entrada_siguiente->tiempo_lru);
+			pthread_mutex_unlock(&entrada->mutex);
+			pthread_mutex_unlock(&entrada_siguiente->mutex);
+			
+			if(!primero_mas_viejo) entrada = entrada_siguiente;
+		}
+	}
+	pthread_mutex_lock(&asignacion_entradas_tlb);
+	// entrada_nueva(id_carpincho, nro_pagina, entrada);
+	
+	return entrada;
+}
+
+void entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada_a_asignar){
 	t_entrada_tp* pagina = pagina_de_carpincho(id_carpincho, nro_pagina);
 
-	entrada->id_car = id_carpincho;
-	entrada->pagina = nro_pagina;
-	entrada->marco = pagina->nro_marco;
-	entrada->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
+	entrada_a_asignar->id_car = id_carpincho;
+	entrada_a_asignar->pagina = nro_pagina;
+	entrada_a_asignar->marco = pagina->nro_marco;
+	
+	bool es_mi_entrada(void *una_entrada) {
+		return una_entrada == entrada_a_asignar;
+	}
+
+	if(tlb.algoritmo_reemplazo == FIFO) {
+		pthread_mutex_lock(&mutex_fifo_tlb);
+		list_remove_by_condition(cola_fifo_tlb, es_mi_entrada);
+		list_add(cola_fifo_tlb, entrada_a_asignar);
+		pthread_mutex_unlock(&mutex_fifo_tlb);
+	}
+	else {
+		entrada_a_asignar->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
+	}
 }
 
 void borrar_pagina_carpincho_tlb(uint32_t id_carpincho, uint32_t nro_pagina) {
@@ -173,26 +220,6 @@ void borrar_entrada_tlb(uint32_t nro_entrada) {
 	t_entrada_tlb* entrada = tlb.mapa[nro_entrada];
 	entrada->id_car = 0;
 	liberar_control_tlb();
-}
-
-t_tlb_por_proceso* get_hit_miss_proceso(uint32_t id_carpincho){
-	bool encontrar_carpincho(void* item){
-		t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
-		return entrada->id_proceso == id_carpincho;
-	}
-
-	t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) list_find(tlb.hit_miss_proceso, encontrar_carpincho);
-	
-	if(entrada == NULL){
-		t_tlb_por_proceso* hit_miss = malloc(sizeof(t_tlb_por_proceso));
-		hit_miss->id_proceso = id_carpincho;
-		hit_miss->cant_hit = 0;
-		hit_miss->cant_miss = 0;
-		list_add(tlb.hit_miss_proceso, hit_miss);
-		return hit_miss;
-	}
-	
-	return entrada;
 }
 
 t_entrada_tlb* es_entrada(uint32_t nro_entrada, uint32_t id_car, uint32_t nro_pagina) {
@@ -231,22 +258,6 @@ void print_tlb() {
 	free(filename);
 }
 
-void flush_proceso_tlb(uint32_t id_carpincho) {
-	bool encontrar_carpincho(void* item){
-		t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
-		return entrada->id_proceso == id_carpincho;
-	}
-
-	for(int i = 0; i < tlb.cant_entradas; i++) {
-		t_entrada_tlb* entrada = tlb.mapa[i];
-		if(entrada->id_car == id_carpincho){
-			borrar_entrada_tlb(i);
-		}
-	}
-
-	list_remove_by_condition(tlb.hit_miss_proceso, encontrar_carpincho);
-}
-
 void resetear_tlb() {
 	tlb.cant_hit = 0;
 	tlb.cant_miss = 0;
@@ -258,20 +269,27 @@ void resetear_tlb() {
 }
 
 void print_hit_miss(){
+	void mostrar_hit(void *historico_carpincho) {
+		log_info(logger, "Cantidad de TLB Hit carpincho %d: %d",
+			((t_hit_miss_tlb *)historico_carpincho)->id_carpincho, ((t_hit_miss_tlb *)historico_carpincho)->cant_hit);
+	}
+	
+	void mostrar_miss(void *historico_carpincho) {
+		log_info(logger, "Cantidad de TLB Hit carpincho %d: %d",
+			((t_hit_miss_tlb *)historico_carpincho)->id_carpincho, ((t_hit_miss_tlb *)historico_carpincho)->cant_miss);
+	}
+
 	log_info(logger, "Cantidad de TLB Hit totales: %d", tlb.cant_hit);
-	list_iterate(tlb.hit_miss_proceso, cant_hit_carpincho);
+	
+	pthread_mutex_lock(&mutex_historico_hit_miss);
+	
+	list_iterate(historico_hit_miss, mostrar_hit);
+	
 	log_info(logger, "Cantidad de TLB Miss totales: %d", tlb.cant_miss);
-	list_iterate(tlb.hit_miss_proceso, cant_miss_carpincho);
-}
-
-void cant_hit_carpincho(void* item){
-	t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
-	log_info(logger, "Cantidad de TLB Hit de carpincho #%d: %d", entrada->id_proceso, entrada->cant_hit);
-}
-
-void cant_miss_carpincho(void* item){
-	t_tlb_por_proceso* entrada = (t_tlb_por_proceso*) item;
-	log_info(logger, "Cantidad de TLB Miss de carpincho #%d: %d", entrada->id_proceso, entrada->cant_miss);
+	
+	list_iterate(historico_hit_miss, mostrar_miss);
+	
+	pthread_mutex_unlock(&mutex_historico_hit_miss);
 }
 
 void obtener_control_tlb() {
@@ -288,43 +306,4 @@ void liberar_control_tlb() {
 		aux = list_get(lista_carpinchos, i);
 		sem_post(aux->sem_tlb);
 	}
-}
-
-// para time_t
-/* void print_tiempo(t_entrada_tlb* entrada){
-	struct tm *ts;
-	char buf[80];
-	ts = localtime(&entrada->tiempo_lru);
-	strftime(buf, sizeof(buf), "%H:%M:%S", ts);
-	printf("Pagina: %d Tiempo: %s\n", entrada->pagina, buf);
-} */
-
-bool es_mas_vieja(t_entrada_tlb* entrada1, t_entrada_tlb* entrada2) {
-	return tiempo_a_milisegundos(entrada1) < tiempo_a_milisegundos(entrada2);
-}
-
-uint32_t tiempo_a_milisegundos(t_entrada_tlb* entrada) {
-	return obtener_tiempo_lru('H', entrada) * 3600000 + obtener_tiempo_lru('M', entrada) * 60000 + obtener_tiempo_lru('S', entrada) * 1000 + obtener_tiempo_lru('m', entrada);
-}
-
-uint32_t obtener_tiempo_lru(char tipo, t_entrada_tlb* entrada){
-	// Formato temporal para LRU de tlb: HH:MM:SS:mmm
-	char tiempo[2];
-	char tiempo_ms[3] = {0,0,0};
-	switch(tipo) {
-	case 'H':
-		memcpy(tiempo, entrada->tiempo_lru, 2);
-		break;
-	case 'M':
-		memcpy(tiempo, entrada->tiempo_lru + 3, 2);
-		break;
-	case 'S':
-		memcpy(tiempo, entrada->tiempo_lru + 6, 2);
-		break;
-	case 'm':
-		memcpy(tiempo_ms, entrada->tiempo_lru + 9, 3);
-		return atoi(tiempo_ms);
-	}
-
-	return atoi(tiempo);
 }

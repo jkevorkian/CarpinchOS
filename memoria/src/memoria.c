@@ -69,16 +69,6 @@ uint32_t cant_frames_necesarios(uint32_t tamanio) {
 	return nro_frames_q;
 }
 
-uint32_t pagina_segun_posicion(uint32_t posicion) {
-	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
-	return div_posicion.quot;
-}
-
-uint32_t offset_segun_posicion(uint32_t posicion) {
-	div_t div_posicion = div(posicion, config_memoria.tamanio_pagina);
-	return div_posicion.rem;
-}
-
 t_carpincho *carpincho_de_lista(uint32_t id_carpincho) {
 	t_carpincho *carpincho;
 	
@@ -116,4 +106,29 @@ void loggear_pagina(t_log *logger, void *pagina) {
 		if(i > 0 && !barra_n.rem)
 			printf("\n");
 	}
+}
+
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados) {
+	uint32_t nro_marcos_proceso = nro_paginas_reemplazo();
+	t_marco **marcos_proceso = calloc(nro_marcos_proceso, sizeof(t_marco *));
+
+	uint32_t nro_marcos = 0;
+	for(int i = 0; i < nro_marcos_proceso; i++) {
+		if(memoria_ram.mapa_fisico[i]->duenio == id_carpincho) {
+			marcos_proceso[nro_marcos] = memoria_ram.mapa_fisico[i];
+			nro_marcos++;
+		}
+	}
+	if(nro_marcos < nro_marcos_proceso)
+		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos);
+	if(nro_marcos_encontrados)
+		*nro_marcos_encontrados = nro_marcos;
+	return marcos_proceso;
+}
+
+uint32_t nro_paginas_reemplazo() {
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		return config_memoria.cant_marcos_carpincho;
+	else
+		return config_memoria.cant_marcos;
 }

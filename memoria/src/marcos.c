@@ -1,42 +1,16 @@
 #include "marcos.h"
 #include "tlb.h"
 
+t_marco** paginas_reemplazo(uint32_t id_carpincho);
+
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_marco* marco;
-
-	// Verifico entrada de TLB
-	/*
-	uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
-	if(nro_marco_tlb != -1) {	// TLB hit
-		marco = memoria_ram.mapa_fisico[nro_marco_tlb];
-		reservar_marco(marco);
-		return marco;
-	}
-	*/
-
-	/*
-	// TLB miss
-	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
-	
-	if(entrada_tp->presencia) {
-		marco = memoria_ram.mapa_fisico[entrada_tp->nro_marco];
-		// reservar_marco(marco);
-		
-		// asignar_entrada_tlb(id_carpincho, nro_pagina);
-		// pthread_mutex_lock(&marco->mutex);
-		// pthread_mutex_unlock(&entrada_tlb->mutex);
-	}
-	else {	// Page fault
-		marco = realizar_algoritmo_reemplazo(id_carpincho, nro_pagina);
-	}
-	*/
-
 	t_entrada_tp *entrada_tp;
 
 	// uint32_t nro_marco_tlb = leer_tlb(id_carpincho, nro_pagina);
 	// if((nro_marco_tlb != -1){
 	t_entrada_tlb *entrada_tlb;
-	if((entrada_tlb = leer_tlb2(id_carpincho, nro_pagina))) {
+	if((entrada_tlb = leer_tlb(id_carpincho, nro_pagina))) {
 		// TLB hit
 		marco = memoria_ram.mapa_fisico[entrada_tlb->marco];
 		// pthread_mutex_lock(&marco->mutex);
@@ -66,18 +40,43 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	return marco;
 }
 
-void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
-	pthread_mutex_lock(&marco_auxiliar->mutex_info_algoritmo);
-	if(modificado)
-		marco_auxiliar->bit_modificado = true;
+t_marco *incorporar_pagina(uint32_t id_carpincho, uint32_t nro_pagina) {
+	t_marco** marcos_carpincho = paginas_reemplazo(id_carpincho);
+	uint32_t nro_paginas = nro_paginas_reemplazo();
 
-	if(config_memoria.algoritmo_reemplazo == LRU) {
-		if(marco_auxiliar->temporal)	free(marco_auxiliar->temporal);
-		marco_auxiliar->temporal = temporal_get_string_time("%H:%M:%S:%MS");
+	t_marco* marco_a_reemplazar = NULL;
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
+		// Obtengo un marco libre de la memoria
+		marco_a_reemplazar = obtener_marco_libre();
+		asignar_marco_libre(marco_a_reemplazar, id_carpincho, nro_pagina);
 	}
-	else
-		marco_auxiliar->bit_uso = true;
-	pthread_mutex_unlock(&marco_auxiliar->mutex_info_algoritmo);
+
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
+		// Si una de las paginas asignadas del carpincho está libre, la uso.
+		for(int i = 0; i < config_memoria.cant_marcos_carpincho; i++) {
+			if(marcos_carpincho[i]->pagina_duenio == -1) {
+				marco_a_reemplazar = marcos_carpincho[i];
+				marco_a_reemplazar->pagina_duenio = nro_pagina;
+				asignar_marco_libre(marco_a_reemplazar, id_carpincho, nro_pagina);
+				break;
+			}
+		}
+	}
+		
+	if(!marco_a_reemplazar) {
+		if(config_memoria.algoritmo_reemplazo == LRU)
+			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
+		if(config_memoria.algoritmo_reemplazo == CLOCK)
+			marco_a_reemplazar = buscar_por_clock(marcos_carpincho, nro_paginas);
+		reasignar_marco(marco_a_reemplazar, id_carpincho, nro_pagina);
+		// actualizar_entrada_tlb(marco->nro_real, id_carpincho, nro_pagina);
+	}
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
+	
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(marcos_carpincho);
+	
+	return marco_a_reemplazar;
 }
 
 void asignar_marco_libre(t_marco *marco_nuevo, uint32_t id, uint32_t nro_pagina) {
@@ -180,13 +179,20 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 	}
 
 	// Actualizo la entrada de la tlb
-	t_entrada_tlb* entrada_vieja_tlb = solicitar_entrada_tlb(id_viejo, nro_pagina_vieja);
-	// pthread_mutex_lock(&entrada_tlb->mutex);
-	// entrada_vieja->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
-	entrada_vieja_tlb->id_car = id_carpincho;
-	entrada_vieja_tlb->pagina = nro_pagina;
-	entrada_vieja_tlb->marco = marco->nro_real;		// Debería ser igual
-	// pthread_mutex_lock(&entrada_tlb->mutex);
+	t_entrada_tlb* entrada_tlb = obtener_entrada_tlb(id_viejo, nro_pagina_vieja);
+	if(entrada_tlb) {
+		entrada_tlb->id_car = id_carpincho;
+		entrada_tlb->pagina = nro_pagina;
+		entrada_tlb->marco = marco->nro_real;		// Debería ser igual
+	}
+	else {
+		entrada_tlb = asignar_entrada_tlb(id_viejo, nro_pagina_vieja);
+		entrada_tlb->id_car = id_carpincho;
+		entrada_tlb->pagina = nro_pagina;
+		entrada_tlb->marco = marco->nro_real;		// No debería ser igual
+	}
+	pthread_mutex_unlock(&entrada_tlb->mutex);
+	
 
 	// Actualizo valor del marco
 	marco->duenio = id_carpincho;		// Útil (Necesario?) para identificar cambios de tabla de paginas
@@ -218,14 +224,6 @@ t_marco* obtener_marco_libre() {
 	return NULL;
 }
 
-uint32_t cant_marcos_necesarios(uint32_t tamanio) {
-	div_t nro_marcos = div(tamanio, config_memoria.tamanio_pagina);
-	uint32_t nro_marcos_q = nro_marcos.quot;
-
-	if(nro_marcos.rem > 0) nro_marcos_q++;
-	return nro_marcos_q;
-}
-
 uint32_t cant_marcos_faltantes(uint32_t id, uint32_t offset) {
 	t_carpincho *carpincho = carpincho_de_lista(id);
 	pthread_mutex_lock(&carpincho->mutex_tabla);
@@ -253,22 +251,6 @@ bool tengo_marcos_suficientes(uint32_t necesarios){
     }
 	
 	return false;
-}
-
-t_entrada_tp* crear_nueva_pagina(uint32_t nro_marco, t_carpincho* carpincho){
-	t_entrada_tp* pagina = malloc(sizeof(t_entrada_tp));
-	pagina->nro_marco = nro_marco;
-	pagina->presencia = true;
-	pagina->esta_vacia = true;
-
-	pthread_mutex_lock(&carpincho->mutex_tabla);
-	list_add(carpincho->tabla_paginas, pagina);
-	pthread_mutex_unlock(&carpincho->mutex_tabla);
-
-	log_info(logger, "Asigno frame. Cant marcos del carpincho #%d: %d", carpincho->id, list_size(carpincho->tabla_paginas));
-	
-	asignar_entrada_tlb(carpincho->id, list_size(carpincho->tabla_paginas) - 1);
-	return pagina;
 }
 
 t_entrada_tp* agregar_pagina(uint32_t id_carpincho) {
@@ -305,7 +287,13 @@ void suspend(uint32_t id) {
 
 		lista_marcos[i]->libre = true;
 	}
-	flush_proceso_tlb(id);
+
+	for(int i = 0; i < tlb.cant_entradas; i++) {
+		t_entrada_tlb* entrada = tlb.mapa[i];
+		if(entrada->id_car == id){
+			borrar_entrada_tlb(i);
+		}
+	}
 	
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
 }
@@ -340,4 +328,11 @@ void liberar_marco(t_marco *marco) {
 	marco->duenio = 0;
 	marco->libre = true;
 	pthread_mutex_unlock(&marco->mutex_espera_uso);
+}
+
+t_marco** paginas_reemplazo(uint32_t id_carpincho) {
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		return obtener_marcos_proceso(id_carpincho, NULL);
+	else
+		return memoria_ram.mapa_fisico;
 }

@@ -1,17 +1,13 @@
 #ifndef _MEMORIA_H_
 #define _MEMORIA_H_
 
+#include <stdlib.h>
 #include <utils/sockets.h>
 #include <semaphore.h>
-#include <signal.h>
+#include <pthread.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
-#include <math.h>
-#include <stdbool.h>
-
-#define IP_RAM "127.0.0.1"
-#define CONSOLA_ACTIVA  1
 
 // ALGORITMOS REEMPLAZO 
 #define LRU 0
@@ -32,7 +28,6 @@ typedef struct {
     uint32_t tipo_asignacion;
     uint32_t cant_marcos;
     uint32_t cant_marcos_carpincho;
-
 } t_config_memoria;
 
 typedef struct{
@@ -64,10 +59,14 @@ typedef struct {
 
 typedef struct {
     uint32_t id;
-	sem_t* sem_tlb;
 	t_list* tabla_paginas;
     pthread_mutex_t mutex_tabla;
+    
     uint32_t offset;
+    // TLB
+    sem_t* sem_tlb; // Revisar
+    uint32_t cant_hit;
+    uint32_t cant_miss;
 } t_carpincho;
 
 pthread_mutex_t mutex_asignacion_marcos;
@@ -86,12 +85,13 @@ void*			inicio_memoria(uint32_t nro_marco, uint32_t offset);
 bool			iniciar_memoria(t_config*);
 void		    iniciar_marcos(uint32_t);
 
-uint32_t		pagina_segun_posicion(uint32_t posicion);
-uint32_t		offset_segun_posicion(uint32_t posicion);
 t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
 
 void*           dir_fisica_proceso(t_list* tabla_paginas);
 
 void loggear_pagina(t_log *logger, void *pagina);
+
+t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados);
+uint32_t nro_paginas_reemplazo();
 
 #endif /* _MEMORIA_H_ */

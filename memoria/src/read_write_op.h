@@ -1,7 +1,7 @@
 #ifndef _READ_WRITE_OP_H_
 #define _READ_WRITE_OP_H_
 
-#include "swap.h"
+#include "marcos.h"
 
 void* obtener_bloque_paginacion(uint32_t id, uint32_t desplazamiento, uint32_t tamanio);
 void actualizar_bloque_paginacion(uint32_t id, uint32_t desplazamiento, void* data, uint32_t tamanio);

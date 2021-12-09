@@ -45,7 +45,6 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 		if(last_heap == HEAP_NULL) {
 			bytes_ocupados = first_heap > 0 ? first_heap + TAMANIO_HEAP : 0;
 			liberar_paginas_carpincho(id_carpincho, bytes_ocupados);
-
 		}
 		else {
 			set_prevAlloc(id_carpincho, last_heap, first_heap);
@@ -74,7 +73,6 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 
 	if(carpincho->offset == 0) {
 		foot_heap = main_heap + TAMANIO_HEAP + tamanio;
-		// carpincho->offset = foot_heap + TAMANIO_HEAP;	// La variable solo la usa el carpincho, no hace falta mutex
 		encontre_alloc = true;
 	}	
 
@@ -94,19 +92,17 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		}
 
 		uint32_t bytes_disponibles_alloc = alloc_sig - (main_heap + TAMANIO_HEAP);
-		if(bytes_disponibles_alloc == tamanio) {
-			// Entra sin footer intermedio
+		if(bytes_disponibles_alloc == tamanio) {				// Entra sin footer intermedio
 			encontre_alloc = true;
 			continue;
 		}
-		if(bytes_disponibles_alloc >= tamanio + TAMANIO_HEAP) {
-			// Entra con footer intermedio
+		if(bytes_disponibles_alloc >= tamanio + TAMANIO_HEAP) {	// Entra con footer intermedio
 			encontre_alloc = true;
 			foot_heap = main_heap + tamanio + TAMANIO_HEAP;
 			next_heap = alloc_sig;
 			continue;
 		}
-		main_heap = alloc_sig;
+		main_heap = alloc_sig;	// No entra
 	}
 
 	if(alloc_sig == HEAP_NULL) {
