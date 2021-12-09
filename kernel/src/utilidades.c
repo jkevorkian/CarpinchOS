@@ -148,14 +148,15 @@ void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) { //
 
 	pthread_mutex_lock(&sem->mutex_espera);
 	if (queue_is_empty(sem->cola_espera)){
-		log_error(logger, "nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
+		log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
 		sem->instancias_iniciadas++;
 	}
 	else {
 		while(semaforo_asignado->cantidad_asignada > 0){
-			carpincho *carp = queue_pop(sem->cola_espera);
-			desbloquear(carp);
-			carp->responder = true;
+			carpincho *carp_a_desbloquear = queue_pop(sem->cola_espera);
+			desbloquear(carp_a_desbloquear);
+			carp_a_desbloquear->responder = true;
+			carp_a_desbloquear->id_semaforo_bloqueante = -1;
 			semaforo_asignado->cantidad_asignada--;
 		}
 

@@ -17,11 +17,11 @@ void *detectar_deadlock(void* d) {
 		sleep(tiempo_deadlock / 1000);
 		log_warning(logger, "Corriendo algoritmo de deteccion de DeadLock");
 		algoritmo_deteccion();
-/*
+
 		while (list_size(carpinchos_en_deadlock)) {
 			matar_proximo_carpincho(carpinchos_en_deadlock);
 			algoritmo_deteccion();
-		}*/
+		}
 	}
 }
 
@@ -90,7 +90,6 @@ bool esta_en_deadlock(carpincho *carp, t_list* cadena_de_deadlock) {
 	carpincho* carp_n = carp;
 	int i = 0;
 	do {
-		log_info(logger, "%d",i);i++;
 		list_add(lista_auxiliar, carp_n);
 		carp_n = carpincho_con_sem_bloq_asignado(carp_n);
 
@@ -138,8 +137,8 @@ bool *ordenador_carpinchos(carpincho* carp1, carpincho* carp2) {
 	return (bool*)(carp1->id < carp1->id);
 }
 
-int matar_proximo_carpincho(t_list *carpinchos_deadlock) {  //TODO: que pasa si un semaforo que debe morir por deadlock estaba en la lista de espera de un semaforo?
-	//list_sort(carpinchos_deadlock, (void*)ordenador_carpinchos); //ordena la lista de carpinchos en deadlock de menor a mayor ID
+int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
+	//list_sort(carpinchos_deadlock, (void*)ordenador_carpinchos); //TODO: ordenar la lista de carpinchos en deadlock de menor a mayor ID
 	carpincho *carp = list_get(carpinchos_deadlock, 1);
 
 	if(LOGUEAR_MENSAJES_DEADLOCK)
@@ -156,7 +155,7 @@ int matar_proximo_carpincho(t_list *carpinchos_deadlock) {  //TODO: que pasa si 
 		index--;
 	}
 
-	//TODO: liberar los otros recursos que tenga asignados el carpincho y revisar el todo de hacer_post_semaforo
+	//TODO: liberar los otros recursos que tenga asignados el carpincho (I/O?)
 	return 0;
 }
 
