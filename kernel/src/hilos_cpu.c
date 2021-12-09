@@ -115,17 +115,23 @@ void* cpu() {
 								log_info(logger, "Habian %d instancias disponibles del semaforo %s, el carpincho %d no se bloquea", sem->instancias_iniciadas, (char *)list_get(mensaje_in, 1), carp->id);
 								sem->instancias_iniciadas--;
 
+								int pos_s = buscar_sem_en_lista(carp->semaforos_asignados,sem->nombre);
 								//deadlock
-								if(no_tiene_asignado_este_semaforo(carp, sem)){
-									semaforo_asignado* semaforo_asignado = malloc(sizeof(semaforo_asignado));
-									semaforo_asignado->cantidad_asignada = 1;
-									semaforo_asignado->sem = sem;
-									list_add(carp->semaforos_asignados, semaforo_asignado);
-								}else {
-									semaforo_asignado* aux = list_get(carp->semaforos_asignados, buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre));
+								if(pos_s == -1) {
+									if(LOGUEAR_MENSAJES_DEADLOCK)
+										log_info(logger, "Se le agrega el sem a los asignados del carpincho %d", carp->id);
+
+									sem_deadlock* sem_d = malloc(sizeof(sem_deadlock));
+									sem_d->sem = sem;
+									sem_d->cantidad_asignada = 1;
+									list_add(carp->semaforos_asignados, sem_d);
+								} else {
+									if(LOGUEAR_MENSAJES_DEADLOCK)
+										log_info(logger, "El carpincho %d ya habia tenia asignado el sem, no se le agrega", carp->id);
+
+									sem_deadlock* aux = list_get(carp->semaforos_asignados, pos_s);
 									aux->cantidad_asignada++;
 								}
-								//---------
 
 								mensaje_out = crear_mensaje(TODOOK);
 								enviar_mensaje(carp->socket_mateLib, mensaje_out);
@@ -153,15 +159,25 @@ void* cpu() {
 
 						if(posicion != -1) {
 							semaforo *sem = (semaforo*)list_get(lista_semaforos, posicion);
+							log_info(logger, "Cantidad de carpinchos esperando en el semaforo %s: %d", (char *)list_get(mensaje_in, 1), queue_size(sem->cola_espera), carp->id);
 
 							pthread_mutex_lock(&sem->mutex_espera);
-								if(queue_is_empty(sem->cola_espera))
+								if(queue_is_empty(sem->cola_espera)) {
 									sem->instancias_iniciadas++;
-								else {
-									carpincho *carp = queue_pop(sem->cola_espera);
-									list_remove(carp->semaforos_asignados, buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre));
-									desbloquear(carp);
-									carp->responder = true;
+
+									int pos_sem = buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre);
+									if(pos_sem != -1) {
+										sem_deadlock* aux = list_get(carp->semaforos_asignados, pos_sem);
+										aux->cantidad_asignada--;
+
+										if(aux->cantidad_asignada <= 0)
+											list_remove(carp->semaforos_asignados, pos_sem);
+									}
+								} else {
+									carpincho *carp_desbloquear = queue_pop(sem->cola_espera);
+									desbloquear(carp_desbloquear);
+									carp_desbloquear->responder = true;
+									carp_desbloquear->id_semaforo_bloqueante = -1;
 								}
 							pthread_mutex_unlock(&sem->mutex_espera);
 

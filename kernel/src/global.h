@@ -52,7 +52,7 @@ typedef struct {
 typedef struct {
 	semaforo* sem;
 	int cantidad_asignada;
-}semaforo_asignado;
+}sem_deadlock;
 
 //IO
 typedef struct {

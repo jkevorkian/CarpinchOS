@@ -9,7 +9,7 @@ double obtener_estimacion_proxima_rafaga(int rafaga_real, int estimacion);
 void liberar_split(char** split);
 void iniciar_semaforo(char* nombre, int valor);
 float calcular_HRRN(carpincho* carp, char* tiempo_actual);
-void hacer_posts_semaforo(semaforo_asignado *semaforo_asignado, carpincho* carp);
+void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp);
 void liberar_lista(t_list* lista);
 
 int buscar_semaforo(char* nombre);

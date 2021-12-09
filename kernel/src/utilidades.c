@@ -117,7 +117,7 @@ int buscar_sem_en_lista(t_list *lista, char *nombre) { //la lista debe estar con
 	int index = list_size(lista) - 1;
 
 	while (index >= 0) {
-		semaforo_asignado *sem_asignado = (semaforo_asignado *)list_get(lista, index);
+		sem_deadlock *sem_asignado = (sem_deadlock *)list_get(lista, index);
 
 		if (!strcmp(nombre, sem_asignado->sem->nombre))
 			return index;
@@ -142,7 +142,7 @@ semaforo *buscar_sem_por_id(t_list *lista, int id) {
 	return NULL; //retorna NULL si falla al encontrar un semaforo con el id dado
 }
 
-void hacer_posts_semaforo(semaforo_asignado *semaforo_asignado, carpincho* carp) { //TODO: si un carpincho que muere por deadlock quedo dando vueltas en la cola de espera de algun otro semaforo cuando se lo intente popear no van a encontrarlo
+void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) { //TODO: si un carpincho que muere por deadlock quedo dando vueltas en la cola de espera de algun otro semaforo cuando se lo intente popear no van a encontrarlo
 
 	semaforo* sem = semaforo_asignado->sem;
 
