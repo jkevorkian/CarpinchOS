@@ -38,6 +38,7 @@ typedef struct {
 	bool debe_morir;
 }carpincho;
 
+
 //semaforo
 typedef struct {
 	char *nombre;
@@ -46,6 +47,12 @@ typedef struct {
 	t_queue *cola_espera;
 	pthread_mutex_t mutex_espera;
 }semaforo;
+
+//DEADLOCK: struct que contiene un semaforo y la cantidad de veces que se lo asignó a un mismo carpincho
+typedef struct {
+	semaforo* sem;
+	int cantidad_asignada;
+}semaforo_asignado;
 
 //IO
 typedef struct {

@@ -114,7 +114,19 @@ void* cpu() {
 							if(sem->instancias_iniciadas > 0) { //si hay instancias disponibles no se bloquea
 								log_info(logger, "Habian %d instancias disponibles del semaforo %s, el carpincho %d no se bloquea", sem->instancias_iniciadas, (char *)list_get(mensaje_in, 1), carp->id);
 								sem->instancias_iniciadas--;
-								list_add(carp->semaforos_asignados, sem);
+
+								//deadlock
+								if(no_tiene_asignado_este_semaforo(carp, sem)){
+									semaforo_asignado* semaforo_asignado = malloc(sizeof(semaforo_asignado));
+									semaforo_asignado->cantidad_asignada = 1;
+									semaforo_asignado->sem = sem;
+									list_add(carp->semaforos_asignados, semaforo_asignado);
+								}else {
+									semaforo_asignado* aux = list_get(carp->semaforos_asignados, buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre));
+									aux->cantidad_asignada++;
+								}
+								//---------
+
 								mensaje_out = crear_mensaje(TODOOK);
 								enviar_mensaje(carp->socket_mateLib, mensaje_out);
 								liberar_mensaje_out(mensaje_out);

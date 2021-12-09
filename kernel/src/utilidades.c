@@ -113,19 +113,18 @@ void desbloquear(carpincho* carp) {
 		agregar_ready(quitar_blocked(carp));
 }
 
-int buscar_sem_en_lista(t_list *lista, char *nombre) {
+int buscar_sem_en_lista(t_list *lista, char *nombre) { //la lista debe estar conformada por nodos de semaforo_asignado, no del semaforo* pelado
 	int index = list_size(lista) - 1;
 
 	while (index >= 0) {
-		semaforo *sem = (semaforo *)list_get(lista, index);
+		semaforo_asignado *sem_asignado = (semaforo_asignado *)list_get(lista, index);
 
-		if (!strcmp(nombre, sem->nombre))
+		if (!strcmp(nombre, sem_asignado->sem->nombre))
 			return index;
 
 		index--;
 	}
-
-	return index;
+	return -1;
 }
 
 semaforo *buscar_sem_por_id(t_list *lista, int id) {
@@ -143,16 +142,23 @@ semaforo *buscar_sem_por_id(t_list *lista, int id) {
 	return NULL; //retorna NULL si falla al encontrar un semaforo con el id dado
 }
 
-void hacer_post_semaforo(semaforo *sem) {	//TODO: revisar si esta funcion sirve aplicarla cuando hay que matar un carpincho (quita a ESE carpincho en especifico de la cola del semaforo? cuantos post debería hacer?)
+void hacer_posts_semaforo(semaforo_asignado *semaforo_asignado, carpincho* carp) { //TODO: si un carpincho que muere por deadlock quedo dando vueltas en la cola de espera de algun otro semaforo cuando se lo intente popear no van a encontrarlo
+
+	semaforo* sem = semaforo_asignado->sem;
 
 	pthread_mutex_lock(&sem->mutex_espera);
-	if (queue_is_empty(sem->cola_espera))
+	if (queue_is_empty(sem->cola_espera)){
+		log_error(logger, "nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
 		sem->instancias_iniciadas++;
+	}
 	else {
-		carpincho *carp = queue_pop(sem->cola_espera);
-		list_remove(carp->semaforos_asignados, buscar_sem_en_lista(carp->semaforos_asignados, sem->nombre));
-		desbloquear(carp);
-		carp->responder = true;
+		while(semaforo_asignado->cantidad_asignada > 0){
+			carpincho *carp = queue_pop(sem->cola_espera);
+			desbloquear(carp);
+			carp->responder = true;
+			semaforo_asignado->cantidad_asignada--;
+		}
+
 	}
 	pthread_mutex_unlock(&sem->mutex_espera);
 }
@@ -166,5 +172,9 @@ void liberar_lista(t_list* lista) {
 	}
 
 	list_destroy(lista);
+}
+
+bool no_tiene_asignado_este_semaforo(carpincho* carp,semaforo* sem){
+	return buscar_sem_en_lista(carp->semaforos_asignados,sem->nombre)==-1;
 }
 
