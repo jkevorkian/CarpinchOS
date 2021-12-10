@@ -1,18 +1,17 @@
 #include "mem_op.h"
 
-bool remover_pagina(uint32_t, t_entrada_tp *);
 bool dir_logica_es_valida(uint32_t id_carpincho, uint32_t dir_logica);
 
 bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
+	// Verifico que el free es valido
 	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
-		log_warning(logger, "El puntero es inválido");
+		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
 
-	// Coloco el bit esFree del heap en 1 (ahora está libre)
+	// Coloco el bit esFree del heap en 1 (ahora esta libre)
 	set_isFree(id_carpincho, dir_logica_heap);
 
 	// UNIFICO EL NUEVO FREE CON LOS ADYACENTES
@@ -138,9 +137,9 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
+	// Verifico que el free es valido
 	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
-		log_warning(logger, "El puntero es inválido");
+		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
 	
@@ -152,18 +151,20 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
+	// Verifico que el free es valido
 	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
-		log_warning(logger, "El puntero es inválido");
+		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 	uint32_t tamanio_data = strlen(contenido);
-	int32_t diferencia_tamanios = tamanio_alocado - strlen(contenido);
 
-	if(diferencia_tamanios < 0)
+	if(tamanio_alocado < tamanio_data) {
+		log_warning(logger, "El contenido es mayor al tamanio asignado. %d >> %d", tamanio_data, tamanio_alocado);
 		return false;
+	}
+	uint32_t diferencia_tamanios = tamanio_alocado - tamanio_data;
 
 	void *data = malloc(tamanio_alocado);
 	memcpy(data, contenido, tamanio_data);
@@ -179,55 +180,8 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	return true;
 }
 
-void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
-	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
-	carpincho->offset = desplazamiento;
-
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return;	
-
-	t_list *tabla_de_paginas = carpincho->tabla_paginas;
-	t_entrada_tp *entrada;
-	t_marco *marco;
-
-	div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
-	
-	uint32_t paginas_minimas = posicion_compuesta.quot;
-	if(posicion_compuesta.rem)
-		paginas_minimas++;
-	
-	pthread_mutex_lock(&carpincho->mutex_tabla);
-	while(config_memoria.tipo_asignacion == FIJA_LOCAL && paginas_minimas < list_size(tabla_de_paginas)) {
-		entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
-		pthread_mutex_unlock(&carpincho->mutex_tabla);
-		// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
-		if(entrada->presencia) {
-			marco = memoria_ram.mapa_fisico[entrada->nro_marco];
-			pthread_mutex_lock(&mutex_asignacion_marcos);
-			marco->libre = true;
-			marco->duenio = 0;
-			memset(inicio_memoria(marco->nro_real, 0), 0, config_memoria.tamanio_pagina);
-			pthread_mutex_unlock(&mutex_asignacion_marcos);
-		}
-		free(entrada);
-		crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
-
-		pthread_mutex_lock(&carpincho->mutex_tabla);
-	}
-
-	uint32_t nro_paginas_vacias = list_size(tabla_de_paginas) - paginas_minimas;
-	pthread_mutex_unlock(&carpincho->mutex_tabla);
-
-	// Esto se hace para evitar swap out innecesarios	
-	for(int i = paginas_minimas; i < nro_paginas_vacias; i++) {
-		entrada = pagina_de_carpincho(id_carpincho, i);
-		pthread_mutex_lock(&entrada->mutex);
-		entrada->esta_vacia = true;
-		pthread_mutex_unlock(&entrada->mutex);
-	}
-}
-
 bool dir_logica_es_valida(uint32_t id_carpincho, uint32_t dir_logica) {
 	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
+	log_info(logger, "Offset: %d", carpincho->offset);
 	return carpincho->offset > dir_logica;
 }

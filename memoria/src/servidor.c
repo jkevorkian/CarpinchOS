@@ -1,19 +1,17 @@
 #include "servidor.h"
 
 void iniciar_servidor(char *ip, int puerto) {
-	log_info(logger, "Creo socket de escucha para recibir los carpinchos");
 	// Creo socket de escucha para recibir los carpinchos
 	int server_fd = crear_conexion_servidor(ip,	puerto, SOMAXCONN);
 	if(server_fd < 0) {
 		return;
 	}
-	log_info(logger, "Servidor listo");
+	log_info(logger, "Servidor swap listo");
 	bool seguir = true;
 
 	int id = 1;
 	int fd_carpincho;
 	while(seguir) {
-		log_info(logger, "Espero a que llegue un nuevo carpincho");
 		fd_carpincho = esperar_cliente(server_fd);
 		if(fd_carpincho < 0) {
 			log_info(logger, "Muero esperando cliente");
@@ -21,20 +19,18 @@ void iniciar_servidor(char *ip, int puerto) {
 			continue;
 		}
 
-		log_info(logger, "Creo un nuevo carpincho");
+		log_info(logger, "Ingreso el carpincho #%d", id);
 		crear_carpincho(id);
 
 		// Creo un hilo para que el carpincho se comunique de forma particular
 		pthread_t nuevo_carpincho;
 		data_carpincho *info_carpincho = malloc(sizeof(data_carpincho));
 
-		// Para la comunicación, creo un nuevo servidor en un puerto libre que asigne el SO
+		// Para la comunicacion, creo un nuevo servidor en un puerto libre que asigne el SO
 		info_carpincho->socket = crear_conexion_servidor(ip, 0, 1);
-		data_socket(info_carpincho->socket, logger);
+		
 		info_carpincho->id = id;
 		pthread_create(&nuevo_carpincho, NULL, rutina_carpincho, (void *)info_carpincho);
-		// Test
-		// pthread_create(&nuevo_carpincho, NULL, rutina_creador_movimientos, (void *)info_carpincho);
 
 		// Comunico al caprincho el nuevo puerto con el cual se debe comunicar
 		t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
@@ -42,7 +38,7 @@ void iniciar_servidor(char *ip, int puerto) {
 		enviar_mensaje(fd_carpincho, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
 
-		// Elimino la conexión auxiliar con el carpincho
+		// Elimino la conexion auxiliar con el carpincho
 		close(fd_carpincho);
 		id++;
 
@@ -51,13 +47,9 @@ void iniciar_servidor(char *ip, int puerto) {
 }
 
 bool iniciar_swap(char *ip_swap, char *puerto_swap) {
-	// Obtengo un socket para comunicarme con la swap
 	int socket_swap = crear_conexion_cliente(ip_swap, puerto_swap);
 	// Creo un hilo para reslover las solicitudes de swap de los carpinchos
 	pthread_t cliente_swap;
 	pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
-
-	// Para debuggear swap
-	// manejar_swap((void *)socket_swap);
 	return true;
 }

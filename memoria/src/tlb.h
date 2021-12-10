@@ -11,6 +11,7 @@
 #include "reemplazos.h"
 
 typedef struct {
+    uint32_t nro_entrada;
 	uint32_t id_car;
 	uint32_t pagina;
 	uint32_t marco;
@@ -48,7 +49,7 @@ pthread_mutex_t mutex_historico_hit_miss;
 void 				iniciar_tlb(t_config* config);
 t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void                borrar_pagina_carpincho_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
-void 				borrar_entrada_tlb(uint32_t nro_entrada);
+
 void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
 
 t_entrada_tlb*		leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
@@ -56,16 +57,13 @@ t_entrada_tlb*		leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void 				obtener_control_tlb();
 void 				liberar_control_tlb();
 
-// SEÑALES
+// SENIALES
 void 				print_tlb(void);
 void 				resetear_tlb(void);
 void 				print_hit_miss(void);
 void 				cant_hit_carpincho(void* item);
 void 				cant_miss_carpincho(void* item);
 
-t_entrada_tlb *obtener_entrada_tlb(uint32_t id, uint32_t nro_pagina);
-
-// Pato
-void actualizar_entrada_tlb(t_entrada_tlb* entrada_tlb, uint32_t id_carpincho, uint32_t nro_pagina);
+t_entrada_tlb *obtener_entrada_intercambio_tlb(uint32_t id, uint32_t nro_pagina);
 
 #endif /* _TLB_H_ */

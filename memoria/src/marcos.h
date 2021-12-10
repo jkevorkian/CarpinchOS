@@ -20,7 +20,6 @@ void reasignar_marco(t_marco* marco, uint32_t id_carpincho, uint32_t nro_pagina)
 
 void soltar_marco(t_marco *);
 void reservar_marco(t_marco *);
-void liberar_marco(t_marco *marco);
 
 t_entrada_tp* agregar_pagina(uint32_t id_carpincho);
 
@@ -28,5 +27,8 @@ bool asignacion_fija(t_carpincho*);
 
 void suspend(uint32_t id);
 void unsuspend(uint32_t id);
+
+void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento);
+void eliminar_pagina(uint32_t id, uint32_t nro_pagina);
 
 #endif /* _MARCOS_H_ */

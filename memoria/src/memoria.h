@@ -28,6 +28,11 @@ typedef struct {
     uint32_t tipo_asignacion;
     uint32_t cant_marcos;
     uint32_t cant_marcos_carpincho;
+    // Conexiones
+    char *ip;
+    int puerto;
+    char *ip_swap;
+    char *puerto_swap;
 } t_config_memoria;
 
 typedef struct{
@@ -51,7 +56,7 @@ typedef struct {
 } t_memoria_ram;
 
 typedef struct {
-	bool presencia;		// demuestra que está actualizada la entrada
+	bool presencia;		// demuestra que esta actualizada la entrada
 	bool esta_vacia;
     uint32_t nro_marco;
     pthread_mutex_t mutex;
@@ -64,7 +69,7 @@ typedef struct {
     
     uint32_t offset;
     // TLB
-    sem_t* sem_tlb; // Revisar
+    pthread_mutex_t mutex_tlb; // Revisar
     uint32_t cant_hit;
     uint32_t cant_miss;
 } t_carpincho;
@@ -74,26 +79,23 @@ pthread_mutex_t mutex_asignacion_marcos;
 t_memoria_ram memoria_ram;
 t_config_memoria config_memoria;
 
-t_config *config;
 t_log* logger;
 
 pthread_mutex_t mutex_lista_carpinchos;
 t_list* lista_carpinchos;
 
+bool            iniciar_memoria(t_config *);
+
 void*			inicio_memoria(uint32_t nro_marco, uint32_t offset);
 
-bool			iniciar_memoria(t_config*);
-void		    iniciar_marcos(uint32_t);
-
-t_carpincho*	carpincho_de_lista(uint32_t id_carpincho);
-
-void*           dir_fisica_proceso(t_list* tabla_paginas);
-
-void loggear_pagina(t_log *logger, void *pagina);
+t_carpincho* carpincho_de_lista(uint32_t id_carpincho);
 
 t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_encontrados);
 uint32_t nro_paginas_reemplazo();
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);
+
+// Para testear
+void loggear_pagina(t_log *logger, void *pagina);
 
 #endif /* _MEMORIA_H_ */
