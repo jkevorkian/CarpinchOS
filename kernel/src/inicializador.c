@@ -25,11 +25,13 @@ int inicializar_kernel() {
 	iniciar_planificadores();
 	iniciar_hilos_cpu();
 	inicializar_io();
+	iniciar_deteccion_deadlock(tiempo_deadlock);
 
 	lista_semaforos = list_create();
 	pthread_mutex_init(&mutex_lista_semaforos, NULL);
 
 	id_proximo_carpincho = 0;
+	id_proximo_semaforo = 0;
 
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tKernel listo");
@@ -47,6 +49,7 @@ void leer_configuraciones() {
 	grado_multiprocesamiento 	= config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
 	alfa 						= config_get_double_value(config, "ALFA");
 	estimacion_inicial 			= config_get_int_value(config, "ESTIMACION_INICIAL");
+	tiempo_deadlock = config_get_int_value(config, "TIEMPO_DEADLOCK");
 
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tConfiguracion leida correctamente");

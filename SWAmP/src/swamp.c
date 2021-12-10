@@ -16,9 +16,11 @@ int main(){
 	cantidad_total_paginas = (swamp_size / pagina_size);
 	paginas_por_particion = (particion_size / pagina_size);
 
-
-	remove("/home/utnso/SWAmP_files/swap2.bin");
 	remove("/home/utnso/SWAmP_files/swap1.bin");
+	remove("/home/utnso/SWAmP_files/swap2.bin");
+	rmdir("/home/utnso/SWAmP_files");
+	char* punto_montaje = "/home/utnso/SWAmP_files/";
+	mkdir(punto_montaje,0755);
 
 	int file_amount = cantidad_archivos;
 	void** particiones = malloc(cantidad_archivos * sizeof(void*));

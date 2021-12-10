@@ -39,8 +39,10 @@ void iniciar_semaforo(char* nombre, int valor) {
 		pthread_mutex_init(&sem->mutex_espera, NULL);
 
 		pthread_mutex_lock(&mutex_lista_semaforos);
-		list_add(lista_semaforos, sem);
-		pthread_mutex_unlock(&mutex_lista_semaforos);
+			sem->id = id_proximo_semaforo;
+			id_proximo_semaforo++;
+			list_add(lista_semaforos, sem);
+			pthread_mutex_unlock(&mutex_lista_semaforos);
 		log_info(logger, "Iniciado exitosamente el semaforo: %s - Valor inicial %d", sem->nombre, sem->instancias_iniciadas);
 	} else
 		log_info(logger, "El semaforo ya estaba inicializado");
@@ -109,5 +111,97 @@ void desbloquear(carpincho* carp) {
 		agregar_suspendidosReady(quitar_suspendidosBlocked(carp));
 	else
 		agregar_ready(quitar_blocked(carp));
+}
+
+int buscar_sem_en_lista(t_list *lista, char *nombre) { //la lista debe estar conformada por nodos de semaforo_asignado, no del semaforo* pelado
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		sem_deadlock *sem_asignado = (sem_deadlock *)list_get(lista, index);
+
+		if (!strcmp(nombre, sem_asignado->sem->nombre))
+			return index;
+
+		index--;
+	}
+	return -1;
+}
+
+semaforo *buscar_sem_por_id(t_list *lista, int id) {
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		semaforo *sem = (semaforo *)list_get(lista, index);
+
+		if (id == sem->id)
+			return sem;
+
+		index--;
+	}
+
+	return NULL; //retorna NULL si falla al encontrar un semaforo con el id dado
+}
+
+void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) {
+
+	semaforo* sem = semaforo_asignado->sem;
+
+	pthread_mutex_lock(&sem->mutex_espera);
+		if(queue_is_empty(sem->cola_espera)) {
+			log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
+			sem->instancias_iniciadas++;
+		} else {
+			carpincho *carp_desbloquear;
+
+			while(semaforo_asignado->cantidad_asignada > 0) {
+				carp_desbloquear = queue_pop(sem->cola_espera);
+
+				if(carp_desbloquear->id == -1) {
+					free(carp_desbloquear);
+
+					if(queue_is_empty(sem->cola_espera))
+						sem->instancias_iniciadas++;
+				} else {
+					desbloquear(carp_desbloquear);
+					carp_desbloquear->responder = true;
+					carp_desbloquear->id_semaforo_bloqueante = -1;
+				}//
+
+				semaforo_asignado->cantidad_asignada--;
+			}
+		}
+	pthread_mutex_unlock(&sem->mutex_espera);
+
+	/*pthread_mutex_lock(&sem->mutex_espera);
+	if (queue_is_empty(sem->cola_espera)){
+		log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
+		sem->instancias_iniciadas++;
+	}
+	else {
+		while(semaforo_asignado->cantidad_asignada > 0){
+			carpincho *carp_a_desbloquear = queue_pop(sem->cola_espera);
+			desbloquear(carp_a_desbloquear);
+			carp_a_desbloquear->responder = true;
+			carp_a_desbloquear->id_semaforo_bloqueante = -1;
+			semaforo_asignado->cantidad_asignada--;
+		}
+
+	}
+	pthread_mutex_unlock(&sem->mutex_espera);*/
+}
+
+void liberar_lista(t_list* lista) {
+	int index = list_size(lista) - 1;
+
+	while (index >= 0) {
+		list_remove(lista, index);
+		index--;
+	}
+
+	list_destroy(lista);
+}
+
+bool no_tiene_asignado_este_semaforo(carpincho* carp,semaforo* sem){
+	return buscar_sem_en_lista(carp->semaforos_asignados,sem->nombre)==-1;
 }
 
