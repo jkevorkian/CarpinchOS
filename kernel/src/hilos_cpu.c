@@ -78,6 +78,7 @@ void* cpu() {
 								agregar_a_mensaje(mensaje_out, "%d", (char *)list_get(mensaje_mateLib, 1));
 
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
+							log_info(logger, "Carpincho %d devolvio la respuesta proporcionada por la ram", carp->id);
 							liberar_mensaje_out(mensaje_out);
 
 							liberar_mensaje_in(mensaje_mateLib);

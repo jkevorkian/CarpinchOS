@@ -44,25 +44,19 @@ void* manejar_swap(void* socket_swap) {
 				mov->respuesta = true;
 			break;
         case SET_PAGE:
-        	log_info(logger, "1.1");
 			mensaje_out = crear_mensaje(mov->accion);
 			agregar_a_mensaje(mensaje_out, "%d%d%sd", mov->id_carpincho, mov->nro_pagina, config_memoria.tamanio_pagina, mov->buffer);
 			enviar_mensaje(socket, mensaje_out);
 			free(mov->buffer);
-			log_info(logger, "2.1");
 			mensaje_in = recibir_mensaje(socket);
-			log_info(logger, "%d", (uint32_t)list_get(mensaje_in, 0));
 			if((uint32_t)list_get(mensaje_in, 0) == TODOOK)
 				mov->respuesta = true;
         	break;
         case GET_PAGE:
-        	log_info(logger, "1.2");
 			mensaje_out = crear_mensaje(GET_PAGE);
 			agregar_a_mensaje(mensaje_out, "%d%d", mov->id_carpincho, mov->nro_pagina);
 			enviar_mensaje(socket, mensaje_out);
-			log_info(logger, "2.2");
 			mensaje_in = recibir_mensaje(socket);
-			log_info(logger, "%d", (uint32_t)list_get(mensaje_in, 0));
 			if((uint32_t)list_get(mensaje_in, 0) == DATA_PAGE) {
 				mov->respuesta = true;
 				mov->buffer = malloc(config_memoria.tamanio_pagina);
