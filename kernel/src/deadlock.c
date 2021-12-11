@@ -8,6 +8,7 @@ int iniciar_deteccion_deadlock(int tiempo_deadlock) {
 	carpinchos_en_deadlock = list_create();
 	return 0;
 }
+
 void *detectar_deadlock(void* d) {
 	if (LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tDetector de deadLock iniciado exitosamente");
