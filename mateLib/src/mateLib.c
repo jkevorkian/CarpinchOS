@@ -1,15 +1,31 @@
 #include "mateLib.h"
 
+t_log *logger;
 //---------------------------FUNCIONES GENERALES----------------------
 
 int mate_init(mate_instance *lib_ref, char *config)
 {
 
-	//Asigno un espacio de memoria a la referencia a un mate_instance que me pasa por parametro el carpincho
-	lib_ref = malloc(sizeof(mate_instance));
+	printf("Entrando al mate_init, leyendo config de la ruta %s\n", config);
 
-	t_config *mateConfig = config_create(config);
+	//Asigno un espacio de memoria a la referencia a un mate_instance que me pasa por parametro el carpincho
+
+	//t_config *mateConfig = config_create("mateLib.config");
+	printf("Creado el config\n");
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
+
+
+	char* ip_kernel = "127.0.0.1";
+	char* ip_memoria = "127.0.0.1";
+	char* puerto_kernel = "10216";
+	char* puerto_memoria = "9090";
+/*
+	ip_kernel 					= config_get_string_value(mateConfig, "IP_KERNEL");
+	ip_memoria 					= config_get_string_value(mateConfig, "IP_MEMORIA");
+	puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
+	puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
+*/
+	printf("Leido del config %s:%s - %s:%s\n", ip_kernel, puerto_kernel, ip_memoria, puerto_memoria);
 
 	//intento conectar al socket público por default del kernel
 	int socket_auxiliar = crear_conexion_cliente(ip_kernel, puerto_kernel); //todavia son un define en el mateLib.h
@@ -24,17 +40,19 @@ int mate_init(mate_instance *lib_ref, char *config)
 		//espera el mensaje de handshake entre el kernel y la lib, en el que el kernel tiene que enviar el nuevo puerto de conexión para que el carpincho se comunique
 		t_list *mensaje_in = recibir_mensaje(socket_auxiliar);
 
+		printf("recibido un %d", (int)list_get(mensaje_in, 0));
+
 		//si el mensaje del handshake es el adecuado, se conecta al kernel ahora por el puerto recibido
 		if ((int)list_get(mensaje_in, 0) == SEND_PORT)
 		{
 			fallo_kernel = false;
-			log_info(logger, "Puerto recibido");
 
 			//las siguientes 2 lineas están para castear el puerto que llega como string a un int
 			char puerto[7];
 			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
-
+			log_info(logger, "Puerto recibido %s", puerto);
 			lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
+			data_socket(lib_ref->socket, logger);
 		}
 		else
 		{
@@ -84,7 +102,7 @@ int mate_close(mate_instance *lib_ref)
 	t_mensaje *mensaje_out = crear_mensaje(MATE_CLOSE);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
-	free(lib_ref);
+	//free(lib_ref);
 	return 0;
 }
 
@@ -106,8 +124,7 @@ int mate_call_io(mate_instance *lib_ref, char *io, void *msg)
 int mate_sem_init(mate_instance *lib_ref, char *sem, unsigned int value)
 {
 	t_mensaje *mensaje_out = crear_mensaje(SEM_INIT);
-	agregar_a_mensaje(mensaje_out, "%s", sem);
-	agregar_a_mensaje(mensaje_out, "%d", value);
+	agregar_a_mensaje(mensaje_out, "%s%d", sem, value);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 
@@ -138,13 +155,13 @@ int mate_sem_wait(mate_instance *lib_ref, char *sem)
 
 	if ((int)list_get(mensaje_in, 0) == TODOOK)
 	{
-		log_info(logger, "La inicializacion del semaforo fue exitosa");
+		log_info(logger, "El wait del semaforo fue exitoso");
 		liberar_mensaje_in(mensaje_in);
 		return 0;
 	}
 	else
 	{
-		log_error(logger, "Error en la inicializacion del semaforo");
+		log_error(logger, "Error en el wait del semaforo");
 		liberar_mensaje_in(mensaje_in);
 		return 1;
 	}
@@ -200,7 +217,6 @@ int mate_sem_destroy(mate_instance *lib_ref, char *sem)
 
 mate_pointer mate_memalloc(mate_instance *lib_ref, int size)
 {
-
 	t_mensaje *mensaje_out = crear_mensaje(MEM_ALLOC);
 	agregar_a_mensaje(mensaje_out, "%d", size);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
@@ -214,36 +230,38 @@ mate_pointer mate_memalloc(mate_instance *lib_ref, int size)
 		liberar_mensaje_in(mensaje_in);
 		return 1;
 	}
-	else
-	{
+	else if ((int)list_get(mensaje_in, 0) == DATA_INT){
 		log_info(logger, "La memoria fue alocada correctamente");
-		mate_pointer puntero_auxiliar = (mate_pointer)list_get(mensaje_in, 1); //TODO: no se si está bien casteado el puntero que se retornó adentro del mensaje ni si es la posición correcta dentro de la lista.
+		int puntero_auxiliar = (int)list_get(mensaje_in, 1); //TODO: no se si está bien casteado el puntero que se retornó adentro del mensaje ni si es la posición correcta dentro de la lista.
 		liberar_mensaje_in(mensaje_in);
 		return puntero_auxiliar;
+	} else {
+		log_error(logger, "Ocurrió un fallo en la comunicacion (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		liberar_mensaje_in(mensaje_in);
+		return 1;
 	}
 }
 
 int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
 {
 	t_mensaje *mensaje_out = crear_mensaje(MEM_FREE);
-	agregar_a_mensaje(mensaje_out, "%s", addr);
+	agregar_a_mensaje(mensaje_out, "%d", addr);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 
 	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{
-		log_error(logger,
-				  "Ocurrió un fallo al intentar liberar la memoria (SEG_FAULT)");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
-	else
+	if ((int)list_get(mensaje_in, 0) == TODOOK)
 	{
 		log_info(logger, "La memoria fue liberada correctamente");
 		liberar_mensaje_in(mensaje_in);
 		return 0;
+	}
+	else
+	{
+		log_error(logger, "Ocurrió un fallo al intentar liberar la memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		liberar_mensaje_in(mensaje_in);
+		return 1;
 	}
 }
 
@@ -251,26 +269,27 @@ int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
 int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size)
 {
 	t_mensaje *mensaje_out = crear_mensaje(MEM_READ);
-	agregar_a_mensaje(mensaje_out, "%s", origin);
+	agregar_a_mensaje(mensaje_out, "%d", origin);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 
 	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{ //TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
-		log_error(logger,
-				  "Ocurrió un fallo al intentar leer en la direccion enviada memoria");
+	if ((int)list_get(mensaje_in, 0) == DATA_CHAR)
+	{
+		log_info(logger, "La memoria fue leida correctamente (%s)", list_get(mensaje_in, 1));
+
+		dest = list_get(mensaje_in, 1);
 		liberar_mensaje_in(mensaje_in);
-		return 1;
+		return 0;
 	}
 	else
 	{
-		log_info(logger, "La memoria fue leida correctamente");
-		void *lectura_auxiliar = list_get(mensaje_in, 1);
+		//TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
+		log_error(logger,
+				  "Ocurrió un fallo al intentar leer en la direccion enviada memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
 		liberar_mensaje_in(mensaje_in);
-		dest = lectura_auxiliar;
-		return 0;
+		return 1;
 	}
 }
 
@@ -278,24 +297,22 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size)
 {
 	t_mensaje *mensaje_out = crear_mensaje(MEM_WRITE);
-	agregar_a_mensaje(mensaje_out, "%s", dest);
-	agregar_a_mensaje(mensaje_out, "%s", origin);
+	agregar_a_mensaje(mensaje_out, "%d%s", dest, origin);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 
 	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{ //TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
-		log_error(logger,
-				  "Ocurrió un fallo al intentar escribir en la memoria");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
-	else
-	{
+	if ((int)list_get(mensaje_in, 0) == TODOOK) {
 		log_info(logger, "La memoria fue escrita correctamente");
 		liberar_mensaje_in(mensaje_in);
 		return 0;
+	}
+	else
+	{//TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
+		log_error(logger,
+				  "Ocurrió un fallo al intentar escribir en la memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		liberar_mensaje_in(mensaje_in);
+		return 1;
 	}
 }

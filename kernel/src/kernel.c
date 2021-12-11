@@ -78,6 +78,7 @@ int crear_socket_carpincho(int socket_auxiliar_carpincho) {
 		log_error(logger, "Error al crear un socket para comunicacion exclusiva con el carpincho");
 	} else {
 		//comunico al carpincho el puerto por el cual me tiene que hablar
+		log_info(logger, "Devolviendo el puerto para el carpincho");
 		t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(socket_aux_carpincho));
 		enviar_mensaje(socket_auxiliar_carpincho, mensaje_out);

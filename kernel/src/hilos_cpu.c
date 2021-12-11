@@ -43,9 +43,8 @@ void* cpu() {
 				log_error(logger, "Carpincho %d desconectado :p", carp->id);
 				seguir = false;
 			} else {
-				log_warning(logger, "Carpincho %d envio un %s", carp->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
-
 				int parametro = (int)list_get(mensaje_in, 0);
+				log_warning(logger, "Carpincho %d envio un %s", carp->id, string_desde_mensaje(parametro));
 
 				switch(parametro) { // protocolo del mensaje
 					case MEM_ALLOC:
@@ -68,30 +67,46 @@ void* cpu() {
 							liberar_mensaje_out(mensaje_out);
 
 							log_info(logger, "Carpincho %d esperando respuesta", carp->id);
-							t_list *mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+
+							t_list *mensaje_mateLib;
+/*
+							if (parametro == MEM_READ){
+								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
+								if((int)list_get(mensaje_mateLib, 0) == TODOOK)
+									mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
+
+								log_info(logger, "Carpincho %d recibio de la memoria (%s)", carp->id, (int)list_get(mensaje_mateLib, 0));
+							}
+*/
+							mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+
 							int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 
-							mensaje_out = crear_mensaje((int)list_get(mensaje_mateLib, 0)); //tal cual llega genero el mismo mensaje para enviarselo a mateLib
+							mensaje_out = crear_mensaje(codigo_respuesta); //tal cual llega genero el mismo mensaje para enviarselo a mateLib
 							if (codigo_respuesta == DATA_CHAR)					//si es un MEM_READ la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
 								agregar_a_mensaje(mensaje_out, "%s", (char *)list_get(mensaje_mateLib, 1));
 							if (codigo_respuesta == DATA_INT || codigo_respuesta == SEG_FAULT)					//si es un MEM_ALLOC la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
 								agregar_a_mensaje(mensaje_out, "%d", (char *)list_get(mensaje_mateLib, 1));
 
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
-							log_info(logger, "Carpincho %d devolvio la respuesta proporcionada por la ram", carp->id);
+							log_info(logger, "Carpincho %d devolvio la respuesta proporcionada por la ram (%s)", carp->id, string_desde_mensaje(codigo_respuesta));
 							liberar_mensaje_out(mensaje_out);
 
 							liberar_mensaje_in(mensaje_mateLib);
 						}else {
-							if ((int)list_get(mensaje_in, 0) == MEM_READ) {
+							if (parametro == MEM_READ) {
 								mensaje_out = crear_mensaje(DATA_CHAR);
 								agregar_a_mensaje(mensaje_out, "%s", "Memoria desactivada, respondo datos de prueba");
+							} else if (parametro == MEM_ALLOC) {
+								mensaje_out = crear_mensaje(DATA_INT);
+								agregar_a_mensaje(mensaje_out, "%d", 9);
 							} else {
-								if ((int)list_get(mensaje_in, 0) == MEM_WRITE)
+								if (parametro == MEM_WRITE)
 									log_info(logger, "Se recibio para escribir: %s", (char *)list_get(mensaje_in, 2));
 								mensaje_out = crear_mensaje(TODOOK);
 							}
 
+							log_info(logger, "Carpincho %d devolvio %s", carp->id, string_desde_mensaje(mensaje_out->op_code));
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
 							liberar_mensaje_out(mensaje_out);
 						}

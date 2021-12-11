@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <matelib.h>
+#include <mateLib.h>
 #include <string.h>
 
 #define SEMAFORO_SALUDO "SEM_HELLO"
@@ -39,6 +39,8 @@ int main(int argc, char *argv[]) {
     printf(saludo);
 
     mate_sem_post(&instance, SEMAFORO_SALUDO);
+
+    mate_close(&instance);
 
 	return EXIT_SUCCESS;
 }

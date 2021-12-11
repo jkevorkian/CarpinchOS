@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <matelib.h>
+#include <mateLib.h>
 #include <string.h>
 
 #define SEMAFORO_SALUDO "SEM_HELLO"
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
 	mate_instance instance;
 
-	mate_init(&instance, (char*)config);
+	int i = mate_init(&instance, (char*)config);
 
     char saludo[] = "No, ¡hola humedal!\n";
 
@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
     mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
     printf(saludo);
+
+    mate_close(&instance);
 
 	return EXIT_SUCCESS;
 }
