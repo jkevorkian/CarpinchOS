@@ -1,54 +1,6 @@
 #include "manejo_carpinchos.h"
 
-/*
-void recibir_carpincho(int id_carpincho, int n_pagina, char* mensaje_pagina, char tabla_paginas[][cantidad_total_paginas], void** particiones){//revisar nombre
-	int desplazamiento;
-	int marcos_disponibles;
-	int n_particion;
-	void* particion;
 
-	log_info(logger, "Recibi una pagina del Carpincho %d",id_carpincho);
-
-	desplazamiento = carpincho_existente(tabla_paginas, id_carpincho);
-	if(desplazamiento == -1){ //si no existe el carpincho en ninguna particion
-		particion = algoritmo_de_particiones(particiones, espacio_disponible);
-		n_particion = obtener_n_particion(particiones, particion);
-		log_info(logger, "Guardando al Carpincho %d en la Particion %d",id_carpincho, n_particion);
-		desplazamiento = proximo_marco_libre(tabla_paginas, n_particion);
-		reservar_marcos(id_carpincho, n_particion, 4, tabla_paginas); //SACAR, SOLO PARA PRUEBAS
-		desplazamiento = desplazamiento - (n_particion * pagina_size);
-		guardar_pagina_en_memoria(mensaje_pagina, desplazamiento , particion);
-		cargar_pagina_en_tabla(tabla_paginas, n_particion, id_carpincho, n_pagina);
-		log_info(logger, "Pagina cargada con exito");
-	}
-	else{
-		n_particion = (int)(desplazamiento / paginas_por_particion);
-		printf("El Carpincho ya se encontraba en la Particion %d\n",n_particion);
-		desplazamiento = existe_pagina(id_carpincho, n_pagina, n_particion, tabla_paginas);//Reviso si ya existia esa pagina
-		if(desplazamiento == -1){
-			log_info(logger, "Pagina no encontrada");
-			marcos_disponibles = carpincho_tiene_marcos_disponibles(tabla_paginas, id_carpincho);
-			if(marcos_disponibles > 0){
-				desplazamiento = prox_marco_carpincho(tabla_paginas, id_carpincho);
-				desplazamiento = desplazamiento - (n_particion * pagina_size);
-				log_info(logger,"El desplazamiento es %d",desplazamiento);
-				cargar_pagina_en_tabla(tabla_paginas, n_particion, id_carpincho, n_pagina);
-			}
-			else{
-				log_info(logger, "El carpincho no tiene mas marcos disponibles");
-				return; //no puede escribir mas paginas
-			}
-		}
-		else{
-			log_info(logger, "La Pagina ya existia, sobre-escribiendola...");
-		}
-		log_info(logger,"El desplazamiento es %d",desplazamiento);
-		guardar_pagina_en_memoria(mensaje_pagina, desplazamiento , particiones[n_particion]);
-
-		log_info(logger, "Pagina cargada con exito");
-	}
-}
-*/
 int recibir_carpincho(int id_carpincho, int n_pagina, char* mensaje_pagina, char tabla_paginas[][cantidad_total_paginas], void** particiones){//revisar nombre
 	int desplazamiento;
 	int marcos_disponibles;
@@ -63,7 +15,7 @@ int recibir_carpincho(int id_carpincho, int n_pagina, char* mensaje_pagina, char
 			marcos_disponibles = carpincho_tiene_marcos_disponibles(tabla_paginas, id_carpincho);
 			if(marcos_disponibles > 0){
 				desplazamiento = prox_marco_carpincho(tabla_paginas, id_carpincho);
-				desplazamiento = desplazamiento - (n_particion * pagina_size);
+				//desplazamiento = desplazamiento - (n_particion * pagina_size);
 				//log_info(logger,"El desplazamiento es %d",desplazamiento);
 				cargar_pagina_en_tabla(tabla_paginas, n_particion, id_carpincho, n_pagina);
 			}
@@ -76,7 +28,9 @@ int recibir_carpincho(int id_carpincho, int n_pagina, char* mensaje_pagina, char
 		else{
 			log_info(logger, "La Pagina ya existia, sobre-escribiendola...");
 		}
-		log_info(logger,"El desplazamiento es %d",desplazamiento);
+		//log_info(logger,"El desplazamiento es %d",desplazamiento);
+		desplazamiento = desplazamiento - (n_particion * paginas_por_particion);
+		//log_info(logger,"El desplazamiento es %d",desplazamiento);
 		guardar_pagina_en_memoria(mensaje_pagina, desplazamiento , particiones[n_particion]);
 
 		log_info(logger, "Pagina cargada con exito");

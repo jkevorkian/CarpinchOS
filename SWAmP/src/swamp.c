@@ -60,7 +60,8 @@ int main(){
 
 	log_info(logger, "Conexion establecida con la memoria");
 	int i = 0;
-	while(1) {
+	bool conexion = 1;
+	while(conexion) {
 
 			t_list* mensaje_in = recibir_mensaje(socket_memoria);
 			t_mensaje* mensaje_out;
@@ -136,11 +137,12 @@ int main(){
 					case EXIT_C:
 						log_info(logger, "Supongo que el carpincho se murio, envienle flores a la viuda");
 						eliminar_carpincho((int)list_get(mensaje_in, 1), tabla_paginas, particiones);
-						//mensaje_out = crear_mensaje(TODOOK);
-						//enviar_mensaje(socket, mensaje_out);
+						mensaje_out = crear_mensaje(TODOOK);
+						enviar_mensaje(socket_memoria, mensaje_out);
 						break;
 
 					default:
+						conexion = 0;
 						log_warning(logger, "No entendi el mensaje");
 						break;
 				}

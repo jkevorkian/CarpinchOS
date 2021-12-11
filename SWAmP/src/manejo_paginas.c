@@ -96,6 +96,7 @@ char* obtener_pagina(int id_carpincho, int n_pagina,char tabla_paginas[][cantida
 		return "ERROR";
 	}
 	desplazamiento -= (n_particion * paginas_por_particion);
+	//log_info(logger, "El Desplazamiento es %d",desplazamiento);
 		log_info(logger, "Leyendo pagina %d del carpincho %d en la Particion %d",n_pagina,id_carpincho,n_particion);
 			memcpy(mensaje,(particiones[n_particion] + (desplazamiento * pagina_size)),pagina_size);
 		//log_info(logger, "El mensaje es: %s",mensaje);
@@ -107,7 +108,8 @@ int existe_pagina(int id_carpincho, int n_pagina, int n_particion, char tabla_pa
 	log_info(logger, "Buscando si la Pagina %d del Carpincho %d ya existe",n_pagina, id_carpincho);
 	for(int i = 0; i < cantidad_total_paginas; i++){
 		if(tabla_paginas[1][i] == itoc(id_carpincho) && tabla_paginas[2][i] == itoc(n_pagina)){
-			desplazamiento = (i - (n_particion * paginas_por_particion));
+			//desplazamiento = (i - (n_particion * paginas_por_particion));
+			desplazamiento = i;
 		}
 	}
 	return desplazamiento;

@@ -97,6 +97,10 @@ void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
 }
 
 void loggear_pagina(t_log *logger, void *pagina) {
+	if(config_memoria.tamanio_pagina != 32) {
+		log_info(logger, "No puedo loggear paginas de tamanio distinto de 32");
+		return;
+	}
 	uint8_t byte;
 	for(int i = 0; i < 32; i++) {
 		memcpy(&byte, pagina + i, 1);

@@ -54,9 +54,9 @@ bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 		return false;
 	}
 
-	log_info(logger, "Servidor swap listo");
-
 	pthread_t cliente_swap;
 	pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
+	
+	log_info(logger, "Servidor swap listo");
 	return true;
 }
