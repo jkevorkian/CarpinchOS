@@ -68,6 +68,7 @@ void* cpu() {
 
 							log_info(logger, "Carpincho %d esperando respuesta", carp->id);
 
+							//cuando te ande eliminar desde aca
 							t_list *mensaje_mateLib;
 
 							if (parametro == MEM_READ){ //esto es para ver si falla el MEM_READ, si funciona bien es como si no estuviese
@@ -81,7 +82,11 @@ void* cpu() {
 
 								log_info(logger, "Carpincho %d recibio de la memoria (%s)", carp->id, string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
 							} else
-								mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
+
+							//hasta aca y descomentar la linea de abajo
+
+							//t_list *mensaje_mateLib mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
 
 							int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 
