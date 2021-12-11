@@ -16,7 +16,8 @@
 #include <commons/temporal.h>
 #include <utils/sockets.h>
 
-#define MEMORIA_ACTIVADA 0
+#define MEMORIA_ACTIVADA 1
+#define DEADLOCK_ACTIVADO 0
 
 #define LOGUEAR_MENSAJES_INICIALIZADOR 0
 #define LOGUEAR_MENSAJES_COLAS 1

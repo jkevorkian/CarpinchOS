@@ -25,7 +25,9 @@ int inicializar_kernel() {
 	iniciar_planificadores();
 	iniciar_hilos_cpu();
 	inicializar_io();
-	iniciar_deteccion_deadlock(tiempo_deadlock);
+
+	if(DEADLOCK_ACTIVADO)
+		iniciar_deteccion_deadlock(tiempo_deadlock);
 
 	lista_semaforos = list_create();
 	pthread_mutex_init(&mutex_lista_semaforos, NULL);

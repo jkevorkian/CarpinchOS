@@ -253,6 +253,10 @@ void print_tlb() {
 	log_info(logger, "Imprimo valores de tlb");
 	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
     char* filename = string_from_format("%s/Dump_<%s>.dmp", tlb.path_dump, temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
+
+    char* punto_montaje = "/home/utnso/dumps/";
+    mkdir(punto_montaje,0755);
+
     FILE* dump_file = fopen(filename, "w");
 	if(!dump_file) {
 		log_warning(logger, "El archivo no pudo ser creado");

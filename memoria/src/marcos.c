@@ -8,7 +8,7 @@ t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	
 	t_entrada_tlb *entrada_tlb;
 	t_marco* marco;
-	
+
 	if((entrada_tlb = leer_tlb(entrada_tp))) {
 		// TLB hit
 		marco = memoria_ram.mapa_fisico[entrada_tlb->marco];
@@ -52,7 +52,9 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		// Obtengo un marco libre de la memoria
 		marco_a_reemplazar = obtener_marco_libre();
-		soltar_marco(marco_a_reemplazar);
+
+		if(marco_a_reemplazar)
+			soltar_marco(marco_a_reemplazar);
 	}
 	else {
 		// Si una de las paginas asignadas del carpincho est libre, la uso.
@@ -63,13 +65,15 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 			}
 		}
 	}
-	
 	if(!marco_a_reemplazar) {
+		log_info(logger, "No encontre marco libre. Hago reemplazo");
+
 		if(config_memoria.algoritmo_reemplazo == LRU)
 			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
 		if(config_memoria.algoritmo_reemplazo == CLOCK)
 			marco_a_reemplazar = buscar_por_clock(marcos_carpincho, nro_paginas);
 		
+		log_info(logger, "Voy a reasignar marco");
 		reasignar_marco(marco_a_reemplazar, entrada_tp);
 	}
 	

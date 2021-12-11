@@ -161,12 +161,13 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 
 bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
-
+	log_error(logger, "entrando");
 	// Verifico que el free es valido
 	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
 		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
+	log_error(logger, "1");
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 	uint32_t tamanio_data = strlen(contenido);
@@ -187,7 +188,9 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 			diferencia_tamanios--;
 		}
 	}
+	log_error(logger, "9");
 	actualizar_bloque_paginacion(id_carpincho, dir_logica, data, tamanio_alocado);
+	log_error(logger, "saliendo");
 	return true;
 }
 

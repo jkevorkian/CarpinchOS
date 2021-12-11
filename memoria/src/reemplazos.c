@@ -9,6 +9,7 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 		marco_referencia = lista_paginas[puntero_clock];
 
 		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
+
 		switch(ciclo) {
 		case 0:
 			if(!marco_referencia->bit_uso && !marco_referencia->bit_modificado)
