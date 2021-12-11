@@ -1,6 +1,5 @@
 #include "swap.h"
 
-uint32_t nro_paginas_reemplazo();
 bool marco_mas_viejo(t_marco *marco1, t_marco *marco2);
 
 t_movimiento *obtener_movimiento();

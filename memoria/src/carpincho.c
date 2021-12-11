@@ -43,7 +43,6 @@ void *rutina_carpincho(void *info_carpincho) {
 			}
 
 			enviar_mensaje(socket, mensaje_out);
-			// obtener_condicion_final(carpincho->id);
 			break;
 		case MEM_READ:
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -132,6 +131,7 @@ t_carpincho* crear_carpincho(uint32_t id) {
 }
 
 void eliminar_carpincho(uint32_t id_carpincho) {
+	log_info(logger, "Elimino al carpincho %d", id_carpincho);
 	// Limpio entradas de la tlb
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		t_entrada_tlb* entrada = tlb.mapa[i];

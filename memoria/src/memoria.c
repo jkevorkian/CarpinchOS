@@ -113,11 +113,13 @@ t_marco** obtener_marcos_proceso(uint32_t id_carpincho, uint32_t *nro_marcos_enc
 	t_marco **marcos_proceso = calloc(nro_marcos_proceso, sizeof(t_marco *));
 
 	uint32_t nro_marcos = 0;
-	for(int i = 0; i < nro_marcos_proceso; i++) {
+	for(int i = 0; i < config_memoria.cant_marcos; i++) {
 		if(memoria_ram.mapa_fisico[i]->duenio == id_carpincho) {
 			marcos_proceso[nro_marcos] = memoria_ram.mapa_fisico[i];
 			nro_marcos++;
 		}
+		if(nro_marcos == nro_marcos_proceso)
+			break;
 	}
 	if(nro_marcos < nro_marcos_proceso)
 		marcos_proceso = realloc(marcos_proceso, sizeof(t_marco *) * nro_marcos);

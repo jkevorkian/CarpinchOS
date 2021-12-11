@@ -294,13 +294,15 @@ void print_hit_miss(){
 	}
 	
 	void mostrar_miss(void *historico_carpincho) {
-		log_info(logger, "Cantidad de TLB Hit carpincho %d: %d",
+		log_info(logger, "Cantidad de TLB Miss carpincho %d: %d",
 			((t_hit_miss_tlb *)historico_carpincho)->id_carpincho, ((t_hit_miss_tlb *)historico_carpincho)->cant_miss);
 	}
 
 	log_info(logger, "Cantidad de TLB Hit totales: %d", tlb.cant_hit);
 	
 	pthread_mutex_lock(&mutex_historico_hit_miss);
+	
+	log_info(logger, "Cantidad de carpinchos: %d", list_size(historico_hit_miss));
 	
 	list_iterate(historico_hit_miss, mostrar_hit);
 	
