@@ -306,6 +306,7 @@ void* cpu() {
 						grado_multiprogramacion++;
 						carpincho_finalizado = true;
 						seguir = false;
+						log_info(logger, "El carpincho ha sido finalizado");
 						break;
 					default:
 						log_info(logger, "Carpincho %d devolviendo un SEG_FAULT", carp->id);

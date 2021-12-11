@@ -5,27 +5,18 @@ t_log *logger;
 
 int mate_init(mate_instance *lib_ref, char *config)
 {
-
-	printf("Entrando al mate_init, leyendo config de la ruta %s\n", config);
-
 	//Asigno un espacio de memoria a la referencia a un mate_instance que me pasa por parametro el carpincho
 
-	//t_config *mateConfig = config_create("mateLib.config");
-	printf("Creado el config\n");
+	t_config *mateConfig = config_create(config); //"../mateLib/mateLib.config"
+
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
 
+	char *ip_kernel, *ip_memoria, *puerto_kernel, *puerto_memoria;
 
-	char* ip_kernel = "127.0.0.1";
-	char* ip_memoria = "127.0.0.1";
-	char* puerto_kernel = "10216";
-	char* puerto_memoria = "9090";
-/*
 	ip_kernel 					= config_get_string_value(mateConfig, "IP_KERNEL");
 	ip_memoria 					= config_get_string_value(mateConfig, "IP_MEMORIA");
 	puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
 	puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
-*/
-	printf("Leido del config %s:%s - %s:%s\n", ip_kernel, puerto_kernel, ip_memoria, puerto_memoria);
 
 	//intento conectar al socket público por default del kernel
 	int socket_auxiliar = crear_conexion_cliente(ip_kernel, puerto_kernel); //todavia son un define en el mateLib.h
@@ -50,7 +41,7 @@ int mate_init(mate_instance *lib_ref, char *config)
 			//las siguientes 2 lineas están para castear el puerto que llega como string a un int
 			char puerto[7];
 			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
-			log_info(logger, "Puerto recibido %s", puerto);
+
 			lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
 			data_socket(lib_ref->socket, logger);
 		}
@@ -83,6 +74,7 @@ int mate_init(mate_instance *lib_ref, char *config)
 				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
+				data_socket(lib_ref->socket, logger);
 			}
 			else
 			{
