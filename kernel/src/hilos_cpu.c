@@ -25,7 +25,7 @@ void* cpu() {
 		bool seguir = true;
 		bool carpincho_finalizado = false;
 		int posicion;
-		t_mensaje* mensaje_out;
+		t_mensaje* mensaje_out;//
 
 		if(carp->responder) {
 			log_info(logger, "Carpincho %d devolviendo un TODOOK luego de ser bloqueado", carp->id);
@@ -69,16 +69,19 @@ void* cpu() {
 							log_info(logger, "Carpincho %d esperando respuesta", carp->id);
 
 							t_list *mensaje_mateLib;
-/*
-							if (parametro == MEM_READ){
-								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
-								if((int)list_get(mensaje_mateLib, 0) == TODOOK)
-									mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
 
-								log_info(logger, "Carpincho %d recibio de la memoria (%s)", carp->id, (int)list_get(mensaje_mateLib, 0));
-							}
-*/
-							mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+							if (parametro == MEM_READ){ //esto es para ver si falla el MEM_READ, si funciona bien es como si no estuviese
+								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
+								int i = 1;
+								while((int)list_get(mensaje_mateLib, 0) == TODOOK) {
+									log_info(logger, "%d) Carpincho %d recibio de la memoria (%s)", i, carp->id, string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
+									mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
+									i++;
+								}
+
+								log_info(logger, "Carpincho %d recibio de la memoria (%s)", carp->id, string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
+							} else
+								mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
 
 							int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 

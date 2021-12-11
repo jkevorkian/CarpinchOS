@@ -35,7 +35,7 @@ void signal_handler_2(int sig) {	// SIGUSR2
 
 void signal_handler_3(int sig) {	// SIGINT
 	print_hit_miss();
-	// exit(1);
+	exit(1);
 }
 
 void terminar_programa(t_config* config) {

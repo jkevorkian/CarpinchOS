@@ -156,7 +156,18 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 	
-	return obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
+	void *data;
+	char *aux = obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
+
+	if(aux[tamanio_alocado-1] != '\0') {
+		data = malloc(tamanio_alocado+1);
+		memcpy(data, aux, tamanio_alocado);
+		char relleno = '\0';
+		memcpy(data+tamanio_alocado, &relleno, 1);
+	} else
+		data = aux;
+
+	return data;
 }
 
 bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
@@ -181,12 +192,11 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	memcpy(data, contenido, tamanio_data);
 	char relleno = '\0';
 	
-	if(diferencia_tamanios > 0) {
-		while(diferencia_tamanios > 0) {
-			memcpy(data + tamanio_alocado - diferencia_tamanios, &relleno, 1);
-			diferencia_tamanios--;
-		}
+	while(diferencia_tamanios > 0) {
+		memcpy(data + tamanio_alocado - diferencia_tamanios, &relleno, 1);
+		diferencia_tamanios--;
 	}
+
 	actualizar_bloque_paginacion(id_carpincho, dir_logica, data, tamanio_alocado);
 	return true;
 }

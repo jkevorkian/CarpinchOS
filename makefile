@@ -36,7 +36,7 @@ build-kernel: build-memoria
 	cd $(RUTA_KERNEL) && \
 	$(MAKE) clean && $(MAKE) all
 
-compile: build-kernel
+compile: build-lib
 
 #las siguientes reglas corren los respectivos modulos una vez que ya fueron compilados. SOLO ANDA LA DEL SWAMP E IGUALMENTE CREA UN LOG INNECESARIO EN LA CARPETA RAIZ
 
