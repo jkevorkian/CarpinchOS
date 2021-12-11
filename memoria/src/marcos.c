@@ -5,6 +5,9 @@ bool tengo_marcos_suficientes(uint32_t);
 
 t_marco *obtener_marco(uint32_t id_carpincho, uint32_t nro_pagina) {
 	t_entrada_tp *entrada_tp = pagina_de_carpincho(id_carpincho, nro_pagina);
+	if(!entrada_tp) {
+		log_warning(logger, "No existe entrada tp");
+	}
 	
 	t_entrada_tlb *entrada_tlb;
 	t_marco* marco;
@@ -52,7 +55,8 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		// Obtengo un marco libre de la memoria
 		marco_a_reemplazar = obtener_marco_libre();
-		soltar_marco(marco_a_reemplazar);
+		if(marco_a_reemplazar)
+			soltar_marco(marco_a_reemplazar);
 	}
 	else {
 		// Si una de las paginas asignadas del carpincho est libre, la uso.
@@ -65,12 +69,33 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 	}
 	
 	if(!marco_a_reemplazar) {
+		log_info(logger, "No encontre marco libre. Hago reemplazo");
 		if(config_memoria.algoritmo_reemplazo == LRU)
 			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
 		if(config_memoria.algoritmo_reemplazo == CLOCK)
 			marco_a_reemplazar = buscar_por_clock(marcos_carpincho, nro_paginas);
 		
 		reasignar_marco(marco_a_reemplazar, entrada_tp);
+	}
+
+	if(!entrada_tp->esta_vacia) {			// SWAP IN
+		log_info(logger, "Hago swap in de la pagina incorporada");
+		log_info(logger, "Marco a actualizar de swap: %d", marco_a_reemplazar->nro_real);
+		
+		void* buffer = malloc(config_memoria.tamanio_pagina);
+		crear_movimiento_swap(GET_PAGE, entrada_tp->id, entrada_tp->pagina, buffer);
+		memcpy(inicio_memoria(marco_a_reemplazar->nro_real, 0), buffer, config_memoria.tamanio_pagina);
+		free(buffer);
+		
+		// >>>>>>>>>>>>>>>>>>> Para testear
+		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
+		memcpy(pagina_generica, inicio_memoria(marco_a_reemplazar->nro_real, 0), config_memoria.tamanio_pagina);
+		loggear_pagina(logger, pagina_generica);
+		free(pagina_generica);
+		// <<<<<<<<<<<<<<<<<<<
+	}
+	else {
+		memset(inicio_memoria(marco_a_reemplazar->nro_real, 0), 0, config_memoria.tamanio_pagina);
 	}
 	
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL)	free(marcos_carpincho);
@@ -86,7 +111,6 @@ void reasignar_marco(t_marco* marco, t_entrada_tp *entrada_tp) {
 	log_info(logger, "Pagina victima. Id: %d, nro_pagina: %d", id_viejo, nro_pagina_vieja);
 	log_info(logger, "Pagina incorporada. Id: %d, nro_pagina: %d", entrada_tp->id, entrada_tp->pagina);
 
-	bool hago_swap_in = false;
 	bool hago_swap_out;
 
 	pthread_mutex_lock(&marco->mutex_info_algoritmo);	 // no se si hace falta
@@ -94,7 +118,6 @@ void reasignar_marco(t_marco* marco, t_entrada_tp *entrada_tp) {
 	pthread_mutex_unlock(&marco->mutex_info_algoritmo);
 	
 	// Actualizo la tabla de paginas del carpincho
-	hago_swap_in = !entrada_tp->esta_vacia;
 	entrada_tp->marco = marco->nro_real;
 	entrada_tp->presencia = true;
 
@@ -113,26 +136,6 @@ void reasignar_marco(t_marco* marco, t_entrada_tp *entrada_tp) {
 		loggear_pagina(logger, pagina_generica);
 		free(pagina_generica);
 		// <<<<<<<<<<<<<<<<<<<
-	}
-
-	if(hago_swap_in) {			// SWAP IN
-		log_info(logger, "Hago swap in de la pagina incorporada");
-		log_info(logger, "Marco a actualizar de swap: %d", marco->nro_real);
-		
-		void* buffer = malloc(config_memoria.tamanio_pagina);
-		crear_movimiento_swap(GET_PAGE, entrada_tp->id, entrada_tp->pagina, buffer);
-		memcpy(inicio_memoria(marco->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-		free(buffer);
-		
-		// >>>>>>>>>>>>>>>>>>>
-		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
-		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
-		loggear_pagina(logger, pagina_generica);
-		free(pagina_generica);
-		// <<<<<<<<<<<<<<<<<<<
-	}
-	else {
-		memset(inicio_memoria(marco->nro_real, 0), 0, config_memoria.tamanio_pagina);
 	}
 }
 
@@ -262,16 +265,17 @@ void suspend(uint32_t id) {
 
 	pthread_mutex_lock(&mutex_asignacion_marcos);
 	for(int i = 0; i < cant_marcos; i++) {
-		void *buffer = malloc(config_memoria.tamanio_pagina);
-		memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
-		crear_movimiento_swap(SET_PAGE, id, lista_marcos[i]->pagina_duenio, buffer);
-
 		t_entrada_tp *pagina = pagina_de_carpincho(id, lista_marcos[i]->pagina_duenio);
-		pagina->presencia = false;
-		pthread_mutex_unlock(&pagina->mutex);
+		if(pagina) {
+			void *buffer = malloc(config_memoria.tamanio_pagina);
+			memcpy(buffer, inicio_memoria(lista_marcos[i]->nro_real, 0), config_memoria.tamanio_pagina);
+			crear_movimiento_swap(SET_PAGE, id, pagina->pagina, buffer);
+
+			pagina->presencia = false;
+			pthread_mutex_unlock(&pagina->mutex);
+		}
 		lista_marcos[i]->duenio = 0;
 	}
-	
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
 }
 
