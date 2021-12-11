@@ -11,7 +11,7 @@ void iniciar_tlb(t_config* config) {
 		pthread_mutex_init(&mutex_fifo_tlb, NULL);
 		cola_fifo_tlb = list_create();
 	}
-	if(!strcmp(algoritmo_reemplazo, "LRU")) {
+	else {
 		log_info(logger, "Algoritmo de asignacion de entradas TLB: LRU");
 		tlb.algoritmo_reemplazo = LRU;
 	}
@@ -125,8 +125,6 @@ t_entrada_tlb *reemplazar_entrada_tlb(t_entrada_tp *entrada_vieja_tp, t_entrada_
 	entrada_tlb->id = entrada_nueva_tp->id;
 	entrada_tlb->pagina = entrada_nueva_tp->pagina;
 	entrada_tlb->marco = entrada_nueva_tp->marco;
-
-	pthread_mutex_unlock(&entrada_vieja_tp->mutex);
 	
 	return entrada_tlb;
 }
@@ -157,7 +155,6 @@ t_entrada_tlb* asignar_entrada_tlb(t_entrada_tp *entrada_tp) {
 		pthread_mutex_lock(&entrada_tlb->mutex);
 		if(entrada_tlb->id == 0) {
 			asigne_entrada = true;
-			break;
 		}
 		pthread_mutex_unlock(&entrada_tlb->mutex);
 	}

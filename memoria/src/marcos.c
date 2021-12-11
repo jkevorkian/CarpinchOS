@@ -147,6 +147,8 @@ t_entrada_tlb *actualizar_entradas(t_marco *marco, t_entrada_tp *entrada_tp) {
 		entrada_vieja_tp->presencia = false;
 		// Si la pagina saliente tenia entrada tlb, utilizo esa para la nueva pagina
 		entrada_tlb = reemplazar_entrada_tlb(entrada_vieja_tp, entrada_tp);
+		pthread_mutex_unlock(&entrada_vieja_tp->mutex);
+		log_info(logger, "Actualizo pagina anterior");
 	}
 
 	// Actualizo valor del marco
