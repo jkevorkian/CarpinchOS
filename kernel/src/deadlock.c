@@ -1,152 +1,186 @@
 #include "deadlock.h"
 
-void detectar_deadlock(t_deadlock *deadlock) {
+int iniciar_deteccion_deadlock(int tiempo_deadlock) {
+	pthread_t *detector = malloc(sizeof(pthread_t));
+	pthread_create(detector, NULL, detectar_deadlock, NULL);
 
-	float segundos_entre_detecciones =
-			(deadlock->milisegundos_entre_detecciones) / 100;
+	lista_a_evaluar = list_create();
+	carpinchos_en_deadlock = list_create();
+	return 0;
+}
+
+void *detectar_deadlock(void* d) {
+	if (LOGUEAR_MENSAJES_INICIALIZADOR)
+		log_info(logger, "\tDetector de deadLock iniciado exitosamente");
+
 	while (1) {
-		while (algoritmo_deteccion()) {
+		sleep(tiempo_deadlock / 1000);
+		log_warning(logger, "Corriendo algoritmo de deteccion de DeadLock");
+		algoritmo_deteccion();
+
+		while (list_size(carpinchos_en_deadlock)) {
 			matar_proximo_carpincho(carpinchos_en_deadlock);
+			algoritmo_deteccion();
 		}
-
-		sleep(segundos_entre_detecciones);
 	}
 }
 
-bool tiene_asignado(carpincho *carp, int id_semaforo) {
+void algoritmo_deteccion() {
+	liberar_lista(lista_a_evaluar);
+	liberar_lista(carpinchos_en_deadlock);
 
-	int index = list_size(carp->semaforos_asignados) - 1;
+	lista_a_evaluar = carpinchos_bloqueados_sem();
+	carpinchos_en_deadlock = carps_en_deadlock();
+}
+
+t_list *carpinchos_bloqueados_sem() {
+	int index = list_size(lista_blocked) - 1;
+
+	t_list *lista_auxiliar = list_create();
 
 	while (index >= 0) {
-		semaforo *semAux = (semaforo *) list_get(carp->semaforos_asignados,
-				index);
-		if (semAux->id == id_semaforo) {
-			return true;
+		carpincho *carp = (carpincho *) list_get(lista_blocked, index);
+
+		if (carp->id_semaforo_bloqueante != -1) {
+			if(LOGUEAR_MENSAJES_DEADLOCK)
+				log_info(logger, "El carpincho %d podria tener deadLock (esta bloqueado por un semaforo)", carp->id);
+
+			list_add(lista_auxiliar, carp);
 		}
 
 		index--;
 	}
-	return false;
+
+	return lista_auxiliar;
 }
 
-bool es_bloqueado_por_algun_semaforo(carpincho *carp,
-		t_list *lista_de_semaforos) {
-	int index = list_size(lista_de_semaforos);
+t_list *carps_en_deadlock() {
+		int index = list_size(lista_a_evaluar) - 1;
 
-	while (index >= 0) {
-		semaforo *semAux = (semaforo *) list_get(lista_de_semaforos, index);
-		if (carp->id_semaforo_bloqueante == semAux->id) {
-			return true;
+		if (LOGUEAR_MENSAJES_DEADLOCK)
+			log_info(logger, "Cantidad de carpinchos a evaluar %d", index+1);
+
+		t_list *lista_auxiliar = list_create();
+
+		while (index >= 0) {
+			carpincho *carp = (carpincho *) list_get(lista_a_evaluar, index);
+
+			if(esta_en_deadlock(carp, lista_auxiliar))
+				index = 0; //si se encuentra deadlock se corta el while, se imprimen los carpinchos que estan en la lista auxiliar y se la retorna
+			else if (LOGUEAR_MENSAJES_DEADLOCK)
+				log_info(logger, "El carpincho %d no esta en deadlock", carp->id);
+
+			index--;
 		}
-		index--;
-	}
-	return false;
+
+		index = list_size(lista_auxiliar) - 1;
+
+		while (index >= 0) {
+			carpincho *carp = (carpincho *) list_get(lista_auxiliar, index);
+			if (LOGUEAR_MENSAJES_DEADLOCK)
+				log_warning(logger, "El carpincho %d esta en deadlock", carp->id);
+			index--;
+		}
+		return lista_auxiliar;
 }
 
-bool cumple_condiciones_deadlock(carpincho *carp) {
-	int id_bloqueante = carp->id_semaforo_bloqueante;
+bool esta_en_deadlock(carpincho *carp, t_list* cadena_de_deadlock) {
+	t_list* lista_auxiliar = list_create();
 
-	if (id_bloqueante != -1) {
+	carpincho* carp_n = carp;
 
-		semaforo *aux = buscar_sem_por_id(lista_semaforos, id_bloqueante);
+	do {
+		list_add(lista_auxiliar, carp_n);
+		carp_n = carpincho_con_sem_bloq_asignado(carp_n);
 
-		if (aux != NULL) {
-			return true;
-		} else {
-			log_error(logger,
-					"Error en la deteccion del deadlock: id del semaforo bloqueante de un carpincho no encontrado");
+		if(carp_n == NULL) {
+			liberar_lista(lista_auxiliar);
 			return false;
 		}
-	} else {
-		return false; //si sale por aca entonces el carpincho no se bloqueo por un semaforo.
-	}
+
+	} while(!tiene_asignado(carp, carp_n->id_semaforo_bloqueante));
+
+	list_add(lista_auxiliar, carp_n);
+
+	list_add_all(cadena_de_deadlock, lista_auxiliar);
+	liberar_lista(lista_auxiliar);
+	return true;
 }
 
-bool ordenador_carpinchos(carpincho* carp1, carpincho* carp2) {
-	return (carp1->id < carp1->id);
-}
-
-int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
-	list_sort(carpinchos_deadlock, ordenador_carpinchos); //ordena la lista de carpinchos en deadlock de menor a mayor ID
-	carpincho *carp = list_get(carpinchos_deadlock, 1);
-	carp->debe_morir = true;
-	list_remove(carpinchos_deadlock, 1);
-
-	int index = list_size(carp->semaforos_asignados);
-
-	while (index >= 0) {
-		semaforo *semAux = (semaforo *) list_get(carp->semaforos_asignados,index);
-		hacer_post_semaforo(semAux);
-		index--;
-	}
-
-	//TODO: liberar los semaforos y otros recursos que tenga asignados el carpincho
-}
-
-int iniciar_deteccion_deadlock(int tiempo_deadlock) {
-
-	t_deadlock *deadlock;
-	deadlock->milisegundos_entre_detecciones = tiempo_deadlock;
-
-	int retorno = pthread_create(&detector, NULL, detectar_deadlock, deadlock);
-	if (retorno != 1) {
-		/*
-		 if(retorno == EAGAIN){
-		 log_error(logger, "Error al crear hilo de deteccion de deadlock: Insufficient resources to create another thread");
-		 return retorno;
-		 }
-		 if(retorno == EINVAL){
-		 log_error(logger, "Error al crear hilo de deteccion de deadlock: Invalid settings in attr");
-		 return retorno;
-		 }
-		 if(retorno == EPERM){
-		 log_error(logger, "Error al crear hilo de deteccion de deadlock: No permission to set the scheduling policy and parameters specified in attr.");
-		 return retorno;
-		 } */
-		log_error(logger, "error al crear hilo de deteccion de deadlock");
-		return retorno;
-	} else {
-		detectar_deadlock;
-		return 0; //creo que teoricamente nunca se deberia llegar a esta linea, pero yo la dejo pq soy medio jodido
-	}
-}
-
-int finalizar_deteccion_deadlock() { //TODO: implementar esta funcion donde corresponda
-	return pthread_cancel(detector);
-}
-
-bool esta_en_deadlock(carpincho *carp) {
-
+carpincho* carpincho_con_sem_bloq_asignado(carpincho* carp){
 	int index = list_size(lista_a_evaluar) - 1;
 
 	while (index >= 0) {
-		carpincho *carpincho_lista = (carpincho *) list_get(lista_a_evaluar,
-				index);
+		carpincho *carp_l = (carpincho *) list_get(lista_a_evaluar, index);
 
-		if (tiene_asignado(carpincho_lista, carp->id_semaforo_bloqueante)
-				&& es_bloqueado_por_algun_semaforo(carpincho_lista,
-						carp->semaforos_asignados)) {
+		if(carp_l->id != carp->id && tiene_asignado(carp_l, carp->id_semaforo_bloqueante))
+			return carp_l;
+
+		index--;
+	}
+	return NULL;
+}
+
+bool tiene_asignado(carpincho *carp, int id_semaforo) {
+	int index = list_size(carp->semaforos_asignados) - 1;
+	while (index >= 0) {
+		sem_deadlock *semAux = (sem_deadlock*)list_get(carp->semaforos_asignados, index);
+		if (semAux->sem->id == id_semaforo)
 			return true;
+
+		index--;
+	}
+	return false;
+}
+
+bool *ordenador_carpinchos(carpincho* carp1, carpincho* carp2) {
+	return (bool*)(carp1->id < carp1->id);
+}
+
+int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
+	int index = list_size(carpinchos_deadlock)-1;
+	carpincho* carp_matar = (carpincho*)list_get(carpinchos_deadlock, index);
+	int indice_carp_matar = index;
+	index--;
+
+	while(index >= 0) {
+		carpincho* posible_carp_matar = (carpincho*)list_get(carpinchos_deadlock, index);
+
+		if(posible_carp_matar->id > carp_matar->id) {
+			carp_matar = posible_carp_matar;
+			indice_carp_matar = index;
 		}
 
 		index--;
 	}
 
-	return false;
+	if(LOGUEAR_MENSAJES_DEADLOCK)
+		log_info(logger, "matando a carpincho %d", carp_matar->id);
+
+	list_remove(carpinchos_deadlock, indice_carp_matar);
+	list_remove(lista_blocked, encontrar_carpincho(lista_blocked, carp_matar));
+
+	index = list_size(carp_matar->semaforos_asignados) - 1;
+
+	while (index >= 0) {
+		sem_deadlock *semAux = (sem_deadlock *) list_get(carp_matar->semaforos_asignados,index);
+		hacer_posts_semaforo(semAux, carp_matar);
+		index--;
+	}
+
+	if(MEMORIA_ACTIVADA) {
+		t_mensaje* mensaje_out = crear_mensaje(MATE_CLOSE);
+		enviar_mensaje(carp_matar->socket_memoria, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
+	}
+
+	close(carp_matar->socket_mateLib);
+	close(carp_matar->socket_memoria);
+	free(carp_matar->tiempo_llegada);
+	//free(carp_matar);
+	carp_matar->id = -1;;
+
+	return 0;
 }
 
-int algoritmo_deteccion() {
-	int deadlock_detectado = 0;
-	t_list *lista_auxiliar = lista_blocked;
 
-	lista_a_evaluar = list_filter(lista_auxiliar, cumple_condiciones_deadlock);
-
-	carpinchos_en_deadlock = list_filter(lista_a_evaluar, esta_en_deadlock);
-
-	if (list_size(carpinchos_en_deadlock) > 0) {
-		deadlock_detectado = 1;
-	} else
-		deadlock_detectado = 0;
-
-	return deadlock_detectado;
-}

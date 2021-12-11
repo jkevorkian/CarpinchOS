@@ -48,7 +48,6 @@ int mate_init(mate_instance *lib_ref, char *config)
 
 	if (fallo_kernel)
 	{
-		//todo, lo mismo que en el if pero para la memoria
 		int socket_auxiliar = crear_conexion_cliente(ip_memoria,
 													 puerto_memoria); //todavia son un define en el mateLib.h
 
@@ -65,7 +64,7 @@ int mate_init(mate_instance *lib_ref, char *config)
 				char puerto[7];
 				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
-				lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
+				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
 			}
 			else
 			{
@@ -82,7 +81,9 @@ int mate_init(mate_instance *lib_ref, char *config)
 
 int mate_close(mate_instance *lib_ref)
 {
-	//TODO: avisar al backend (kernel o memoria)
+	t_mensaje *mensaje_out = crear_mensaje(MATE_CLOSE);
+	enviar_mensaje(lib_ref->socket, mensaje_out);
+	liberar_mensaje_out(mensaje_out);
 	free(lib_ref);
 	return 0;
 }

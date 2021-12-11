@@ -6,8 +6,9 @@ void* crear_archivo(char* DIR_archivo){
 	if(file == -1){
 		printf("No se pudo generar el archivo\n");
 	}
+	ftruncate(file, particion_size);
 	void* particion = mmap(NULL, particion_size , PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
-	truncate(DIR_archivo, particion_size);
+
 	rellenar_archivo(particion);
 	return particion;
 }

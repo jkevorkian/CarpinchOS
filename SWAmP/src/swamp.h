@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <math.h>
 
 #include "global.h"
-#include "utilidades.h"
 #include "manejo_archivos.h"
 #include "manejo_paginas.h"
 #include "manejo_carpinchos.h"
