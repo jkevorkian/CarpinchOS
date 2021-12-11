@@ -86,8 +86,12 @@ int main(){
 
 					case SET_PAGE:
 						log_info(logger, "Memoria me pidio actualizar la pagina % del carpincho %d", (uint32_t)list_get(mensaje_in, 2), (uint32_t)list_get(mensaje_in, 1));
-						int aux = recibir_carpincho((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), list_get(mensaje_in, 3), tabla_paginas, particiones);
-						printf("El contenido de la pagina es %s \n",(char*)(list_get(mensaje_in,3)));
+						char* buffer;
+						buffer = malloc(pagina_size);
+						memcpy(buffer, (void *)list_get(mensaje_in, 3), pagina_size);
+
+						int aux = recibir_carpincho((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), buffer, tabla_paginas, particiones);
+						printf("El contenido de la pagina es %s \n",buffer);
 						if(aux < 0){
 							mensaje_out = crear_mensaje(NO_MEMORY);
 						}
@@ -95,17 +99,27 @@ int main(){
 							mensaje_out = crear_mensaje(TODOOK);
 						}
 						enviar_mensaje(socket_memoria, mensaje_out);
+						free(buffer);
 						break;
 
 					case GET_PAGE:
 						log_info(logger, "Memoria me pidio obtener la pagina %d del carpincho %d", (uint32_t)list_get(mensaje_in, 2), (uint32_t)list_get(mensaje_in, 1));
-						char* mensaje = string_new();
-						string_append(&mensaje,obtener_pagina((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), tabla_paginas, particiones));
-						printf("El contenido de la pagina es %s \n",mensaje);
-						mensaje_out = crear_mensaje(DATA_CHAR);
-						agregar_a_mensaje(mensaje_out, "%sd",mensaje);
+						//char* mensaje = string_new();
+						//string_append(&mensaje,obtener_pagina((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), tabla_paginas, particiones));
+						//strcpy(mensaje,obtener_pagina((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), tabla_paginas, particiones));
+						char* buffer_aux;
+						buffer_aux = malloc(pagina_size);
+						memcpy(buffer_aux, obtener_pagina((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), tabla_paginas, particiones),pagina_size);
+
+
+						printf("El contenido de la pagina es %s \n",buffer_aux);
+						//mensaje_out = crear_mensaje(DATA_CHAR);
+						mensaje_out = crear_mensaje(21);
+						//agregar_a_mensaje(mensaje_out, "%sd",mensaje);
+						agregar_a_mensaje(mensaje_out, "%s",buffer_aux);
 						enviar_mensaje(socket_memoria, mensaje_out);
-						free(mensaje);
+						//free(mensaje);
+						free(buffer_aux);
 						break;
 
 					case RM_PAGE:	// 14

@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
+#include "utilidades.h"
 
 #include "global.h"
 #include "manejo_archivos.h"
@@ -31,7 +32,8 @@ t_config* config;
 char itoc(int numero);
 int ctoi(char caracter);
 void* algoritmo_de_particiones(void** particiones, int* espacio_disponible);
-
+void copiar_pagina(void* contenido, char* salida);
+void imprimir_pagina(void* contenido);
 #define ERROR_CONEXION -1
 
 
