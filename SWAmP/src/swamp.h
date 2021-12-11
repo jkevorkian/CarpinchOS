@@ -32,8 +32,8 @@ t_config* config;
 char itoc(int numero);
 int ctoi(char caracter);
 void* algoritmo_de_particiones(void** particiones, int* espacio_disponible);
-void copiar_pagina(void* contenido, char* salida);
-void imprimir_pagina(void* contenido);
+void loggear_pagina(t_log *logger, void *pagina);
+
 #define ERROR_CONEXION -1
 
 

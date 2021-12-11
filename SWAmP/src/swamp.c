@@ -89,9 +89,9 @@ int main(){
 						char* buffer;
 						buffer = malloc(pagina_size);
 						memcpy(buffer, (void *)list_get(mensaje_in, 3), pagina_size);
-
+						loggear_pagina(logger, buffer);
 						int aux = recibir_carpincho((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), buffer, tabla_paginas, particiones);
-						printf("El contenido de la pagina es %s \n",buffer);
+						//printf("El contenido de la pagina es %s \n",buffer);
 						if(aux < 0){
 							mensaje_out = crear_mensaje(NO_MEMORY);
 						}
@@ -110,14 +110,16 @@ int main(){
 						char* buffer_aux;
 						buffer_aux = malloc(pagina_size);
 						memcpy(buffer_aux, obtener_pagina((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), tabla_paginas, particiones),pagina_size);
+						loggear_pagina(logger, buffer_aux);
 
-
-						printf("El contenido de la pagina es %s \n",buffer_aux);
+						//printf("El contenido de la pagina es %s \n",buffer_aux);
 						//mensaje_out = crear_mensaje(DATA_CHAR);
-						mensaje_out = crear_mensaje(21);
-						//agregar_a_mensaje(mensaje_out, "%sd",mensaje);
-						agregar_a_mensaje(mensaje_out, "%s",buffer_aux);
+						mensaje_out = crear_mensaje(DATA_PAGE);
+						agregar_a_mensaje(mensaje_out, "%sd",pagina_size,buffer_aux);
+						log_info(logger, "Agregue mensaje");
+						//agregar_a_mensaje(mensaje_out, "%s",buffer_aux);
 						enviar_mensaje(socket_memoria, mensaje_out);
+						log_info(logger, "Envie mensaje");
 						//free(mensaje);
 						free(buffer_aux);
 						break;
@@ -174,4 +176,14 @@ int ctoi(char caracter){
 	return caracter - '0';
 }
 
+void loggear_pagina(t_log *logger, void *pagina) {
+	uint8_t byte;
+	for(int i = 0; i < 32; i++) {
+		memcpy(&byte, pagina + i, 1);
+		printf("%3d|", byte);
 
+		div_t barra_n = div(i + 1, 4);
+		if(i > 0 && !barra_n.rem)
+			printf("\n");
+	}
+}

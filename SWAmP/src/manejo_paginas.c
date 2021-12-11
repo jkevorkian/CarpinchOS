@@ -98,7 +98,7 @@ char* obtener_pagina(int id_carpincho, int n_pagina,char tabla_paginas[][cantida
 	desplazamiento -= (n_particion * paginas_por_particion);
 		log_info(logger, "Leyendo pagina %d del carpincho %d en la Particion %d",n_pagina,id_carpincho,n_particion);
 			memcpy(mensaje,(particiones[n_particion] + (desplazamiento * pagina_size)),pagina_size);
-		log_info(logger, "El mensaje es: %s",mensaje);
+		//log_info(logger, "El mensaje es: %s",mensaje);
 	return mensaje;
 }
 
