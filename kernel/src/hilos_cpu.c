@@ -58,10 +58,12 @@ void* cpu() {
 							mensaje_out = crear_mensaje(parametro);									   //creo el mismo mensaje que recibi
 							agregar_a_mensaje(mensaje_out, "%d", (int)list_get(mensaje_in, 1));		   //le agrego el parametro recibido
 
-							if (parametro == MEM_WRITE)												   //si es un MEM_WRITE mateLib manda un parametro extra,
+							if (parametro == MEM_WRITE){												   //si es un MEM_WRITE mateLib manda un parametro extra,
 								agregar_a_mensaje(mensaje_out, "%s", (char *)list_get(mensaje_in, 2)); //asi que tengo que agregarlo
+								log_info(logger, "Carpincho %d creo el mensaje %s, va a escribir en la direccion %d el texto %s", carp->id,  string_desde_mensaje(parametro),  (int)list_get(mensaje_in, 1), (char*)list_get(mensaje_in, 2));
+							} else
+								log_info(logger, "Carpincho %d creo el mensaje %s, agrega el parametro %d", carp->id,  string_desde_mensaje(parametro),  (int)list_get(mensaje_in, 1));
 
-							log_info(logger, "Carpincho %d creo el mensaje %s, le agrego el parametro %d y lo va a enviar al socket %d", carp->id,  string_desde_mensaje(parametro),  (int)list_get(mensaje_in, 1), carp->socket_memoria);
 							enviar_mensaje(carp->socket_memoria, mensaje_out);
 							liberar_mensaje_out(mensaje_out);
 
@@ -76,6 +78,7 @@ void* cpu() {
 								agregar_a_mensaje(mensaje_out, "%d", (char *)list_get(mensaje_mateLib, 1));
 
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
+							log_info(logger, "Carpincho %d devolvio la respuesta proporcionada por la ram", carp->id);
 							liberar_mensaje_out(mensaje_out);
 
 							liberar_mensaje_in(mensaje_mateLib);
