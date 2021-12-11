@@ -1,17 +1,18 @@
 #include "mem_op.h"
 
-bool remover_pagina(uint32_t, t_entrada_tp *);
+bool dir_logica_es_valida(uint32_t id_carpincho, uint32_t dir_logica);
 
 bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
-	if(get_isFree(id_carpincho, dir_logica_heap)) {
-		log_warning(logger, "El alloc estaba libre");
+	// Verifico que el free es valido
+	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
+		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
 
-	// Coloco el bit esFree del heap en 1 (ahora está libre)
+	// Coloco el bit esFree del heap en 1 (ahora esta libre)
+	log_info(logger, "Seteo heap como libre");
 	set_isFree(id_carpincho, dir_logica_heap);
 
 	// UNIFICO EL NUEVO FREE CON LOS ADYACENTES
@@ -22,6 +23,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t first_heap, last_heap;
 
 	// BUSCO EL ALLOC ANTERIOR y, si corresponde, los integro
+	log_info(logger, "Ananlizo alloc anterior");
 	prev_heap = get_prevAlloc(id_carpincho, main_heap);
 	if(HEAP_NULL == prev_heap || !get_isFree(id_carpincho, prev_heap)) {
 		first_heap = main_heap;
@@ -31,6 +33,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	}
 
 	// BUSCO EL ALLOC SIGUIENTE y, si corresponde, los integro
+	log_info(logger, "Ananlizo alloc siguiente");
 	foot_heap = get_nextAlloc(id_carpincho, main_heap);
 	if(!get_isFree(id_carpincho, foot_heap)) {
 		last_heap = foot_heap;
@@ -43,7 +46,9 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 		uint32_t bytes_ocupados = 1;
 		if(last_heap == HEAP_NULL) {
 			bytes_ocupados = first_heap > 0 ? first_heap + TAMANIO_HEAP : 0;
+			log_info(logger, "Libero paginas de carpicho");
 			liberar_paginas_carpincho(id_carpincho, bytes_ocupados);
+			log_info(logger, "Nuevo offset: %d", bytes_ocupados);
 		}
 		else {
 			set_prevAlloc(id_carpincho, last_heap, first_heap);
@@ -59,135 +64,95 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	log_info(logger, "El proceso #%d solicito %d bytes de memoria.", id_carpincho, tamanio);
 
-	uint32_t nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP);
-	uint32_t dir_logica = 0;
-	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
-	bool crear_footer = true;
+	bool encontre_alloc = false;
+	
+	uint32_t main_heap = 0, foot_heap = 0;
+	uint32_t next_heap = HEAP_NULL, alloc_sig = HEAP_NULL;
 
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL) {
-		if(list_size(carpincho->tabla_paginas) == 0) {
-			if(!asignacion_fija(carpincho)) return 0;
-		}
-		// deberia fijarme que mi cantidad de marcos libres sea mayor a la cant de marcos necesarios?
+	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
+
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL && list_size(carpincho->tabla_paginas) == 0) {
+		log_info(logger, "Inicio paginas carpincho en asignacion fija");
+		if(!asignacion_fija(carpincho)) return 0;
 	}
-	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
-		// lo hago solo la primera vez, despues asigno solo cuando me quedo sin paginas
-		if(list_size(carpincho->tabla_paginas) == 0) {
-			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-				for(int i = 0; i < nro_frames_necesarios; i++){
-					agregar_pagina2(carpincho->id);
+
+	if(carpincho->offset == 0) {
+		foot_heap = main_heap + TAMANIO_HEAP + tamanio;
+		encontre_alloc = true;
+	}	
+
+	while(!encontre_alloc) {
+		alloc_sig = get_nextAlloc(id_carpincho, main_heap);
+		log_info(logger, "Obtuve %d alloc_sig", alloc_sig);
+		bool is_free = get_isFree(id_carpincho, main_heap);
+		log_info(logger, "Obtuve %d is_free", is_free);
+		
+		if(!is_free) {
+			main_heap = alloc_sig;
+			continue;
+		}
+
+		if(alloc_sig == HEAP_NULL) {
+			encontre_alloc = true;
+			foot_heap = main_heap + TAMANIO_HEAP + tamanio;
+			continue;
+		}
+
+		uint32_t bytes_disponibles_alloc = alloc_sig - (main_heap + TAMANIO_HEAP);
+		if(bytes_disponibles_alloc == tamanio) {				// Entra sin footer intermedio
+			encontre_alloc = true;
+			continue;
+		}
+		if(bytes_disponibles_alloc >= tamanio + TAMANIO_HEAP) {	// Entra con footer intermedio
+			encontre_alloc = true;
+			foot_heap = main_heap + tamanio + TAMANIO_HEAP;
+			next_heap = alloc_sig;
+			continue;
+		}
+		main_heap = alloc_sig;	// No entra
+	}
+
+	if(alloc_sig == HEAP_NULL) {
+		uint32_t offset_final = main_heap + tamanio + 2*TAMANIO_HEAP;
+		uint32_t nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
+		if(nro_frames_necesarios) {
+			log_info(logger, "Necesito %d pagina/s mas", nro_frames_necesarios);
+			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)) {
+				for(int i = 0; i < nro_frames_necesarios; i++) {
+					agregar_pagina(id_carpincho);
 				}
 			}
 			else return 0;
 		}
+		carpincho->offset = offset_final;	// La variable solo la usa el carpincho, no hace falta mutex
 	}
+	
+	log_info(logger, "Seteo el bit de libre de main_heap en 0");
+	reset_isFree(id_carpincho, main_heap);
+	if(!main_heap)	set_prevAlloc(id_carpincho, main_heap, HEAP_NULL);	
 
-	if(carpincho->heap_metadata == NULL) {
-		carpincho->heap_metadata = dir_fisica_proceso(carpincho->tabla_paginas);
-		dir_logica = heap_header(carpincho, tamanio, 0, &crear_footer);
-		heap_footer(carpincho, tamanio, dir_logica + tamanio, HEAP_NULL);
+	if(foot_heap) {
+		log_info(logger, "Seteo foot heap en posicion %d", foot_heap);
+		set_nextAlloc(id_carpincho, main_heap, foot_heap);
+		set_prevAlloc(id_carpincho, foot_heap, main_heap);
+		set_nextAlloc(id_carpincho, foot_heap, next_heap);
+		set_isFree(id_carpincho, foot_heap);
+
+		if(next_heap != HEAP_NULL)	set_prevAlloc(id_carpincho, next_heap, foot_heap);
 	}
-	else {
-		uint32_t desplazamiento = 0;
-		uint32_t alloc_sig;
-		uint8_t is_free;		
-
-		while(true){
-			alloc_sig = get_nextAlloc(carpincho->id, desplazamiento);
-			is_free = get_isFree(carpincho->id, desplazamiento);
-
-			if(alloc_sig == HEAP_NULL){
-				if(is_free) {
-					uint32_t ult_dir_logica = list_size(carpincho->tabla_paginas) * config_memoria.tamanio_pagina;
-					if (desplazamiento + 2*TAMANIO_HEAP + tamanio > ult_dir_logica) {
-						if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)){
-							uint32_t espacio_que_sobra = ult_dir_logica - (desplazamiento + TAMANIO_HEAP);
-							nro_frames_necesarios = cant_marcos_necesarios(tamanio + 2*TAMANIO_HEAP - espacio_que_sobra);
-							
-							for(int i = 0; i < nro_frames_necesarios; i++){
-								agregar_pagina2(carpincho->id);
-							}
-						}
-						else return 0;
-					}
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
-					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
-					break;
-				};
-				// siempre voy a tener un metadata free al final de todo o no?
-			}
-			else {
-				if(is_free) {
-					dir_logica = heap_header(carpincho, tamanio, desplazamiento, &crear_footer);
-
-					// no entra en ese espacio alocado, buscar otro
-					if(dir_logica == 0) {
-						desplazamiento = alloc_sig;
-						continue;
-					};
-
-					// no necesito el footer porque entra justo
-					if(!crear_footer) break;
-					heap_footer(carpincho, tamanio, dir_logica + tamanio, alloc_sig);
-					break;
-				};
-
-			desplazamiento = alloc_sig;
-
-			}
-		}
-	}	
-
-	log_info(logger, "Direccion logica asignada al carpincho #%d: %d", id_carpincho, dir_logica);
-	return dir_logica; 
-}
-
-uint32_t heap_header(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, bool* crear_footer){
-	bool tiene_footer = get_nextAlloc(carpincho->id, desplazamiento) != 0 || get_nextAlloc(carpincho->id, desplazamiento) != HEAP_NULL;
-	uint32_t bytes_allocados = get_nextAlloc(carpincho->id, desplazamiento) - desplazamiento - TAMANIO_HEAP;
-
-	// tiene que entrar justo en el tamaño de aloc libre o tiene que sobrar espacio para un nuevo heap footer
-	if(tiene_footer){
-		if(bytes_allocados == tam){
-			//printf("Entra entero pero sin footer intermedio");
-			*crear_footer = false;
-			return desplazamiento + TAMANIO_HEAP;
-		}
-		else if(bytes_allocados >= tam + TAMANIO_HEAP){
-			//printf("Entra con footer intermedio");
-		}
-		else {
-			//printf("No entra, buscar otro libre.");
-			return 0;
-		}
-	}
-
-	reset_isFree(carpincho->id, desplazamiento);
-	set_nextAlloc(carpincho->id, desplazamiento, TAMANIO_HEAP + tam + desplazamiento);
-
-	log_info(logger, "Heap header creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
-
-	return desplazamiento + TAMANIO_HEAP;
-}
-
-uint32_t heap_footer(t_carpincho* carpincho, uint32_t tam, uint32_t desplazamiento, uint32_t alloc_sig){
-	set_isFree(carpincho->id, desplazamiento);
-	set_nextAlloc(carpincho->id, desplazamiento, alloc_sig);
-	set_prevAlloc(carpincho->id, desplazamiento, desplazamiento - tam - TAMANIO_HEAP);
-
-	log_info(logger, "Heap footer creado en direccion logica: %d.", desplazamiento);
-	log_info(logger, "%d %d %d", get_prevAlloc(carpincho->id, desplazamiento), get_nextAlloc(carpincho->id, desplazamiento), get_isFree(carpincho->id, desplazamiento));
-
-	return desplazamiento + TAMANIO_HEAP;
+	
+	log_info(logger, "Direccion logica asignada al carpincho #%d: %d", id_carpincho, main_heap + TAMANIO_HEAP);
+	return main_heap + TAMANIO_HEAP; 
 }
 
 void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
-	if(get_isFree(id_carpincho, dir_logica_heap))
+	// Verifico que el free es valido
+	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
+		log_warning(logger, "El puntero es invalido");
 		return false;
+	}
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 	
@@ -197,16 +162,20 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
-	// Verifico que el free es válido
-	if(get_isFree(id_carpincho, dir_logica_heap))
+	// Verifico que el free es valido
+	if(!dir_logica_es_valida(id_carpincho, dir_logica) || get_isFree(id_carpincho, dir_logica_heap)) {
+		log_warning(logger, "El puntero es invalido");
 		return false;
+	}
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 	uint32_t tamanio_data = strlen(contenido);
-	int32_t diferencia_tamanios = tamanio_alocado - strlen(contenido);
 
-	if(diferencia_tamanios < 0)
+	if(tamanio_alocado < tamanio_data) {
+		log_warning(logger, "El contenido es mayor al tamanio asignado. %d >> %d", tamanio_data, tamanio_alocado);
 		return false;
+	}
+	uint32_t diferencia_tamanios = tamanio_alocado - tamanio_data;
 
 	void *data = malloc(tamanio_alocado);
 	memcpy(data, contenido, tamanio_data);
@@ -222,38 +191,8 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	return true;
 }
 
-void liberar_paginas_carpincho(uint32_t id_carpincho, uint32_t desplazamiento) {
-	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
-		return;
-	
-	t_list *tabla_de_paginas = ((t_carpincho *)carpincho_de_lista(id_carpincho))->tabla_paginas;
-	t_entrada_tp *entrada;
-	t_marco *marco;
-
-	div_t posicion_compuesta = div(desplazamiento, config_memoria.tamanio_pagina);
-	
-	uint32_t paginas_minimas = posicion_compuesta.quot;
-	if(posicion_compuesta.rem)
-		paginas_minimas++;
-	
-	while(config_memoria.tipo_asignacion == FIJA_LOCAL && paginas_minimas < list_size(tabla_de_paginas)) {
-		entrada = list_remove(tabla_de_paginas, list_size(tabla_de_paginas) - 1);
-		// liberar marco, avisar a swap y quitar ultimo elemento de la lista de paginas del carpincho
-		if(entrada->presencia) {
-			pthread_mutex_lock(&mutex_asignacion_marcos);
-			marco = memoria_ram.mapa_fisico[entrada->nro_marco];
-			marco->libre = true;
-			marco->duenio = 0;
-			pthread_mutex_unlock(&mutex_asignacion_marcos);
-		}
-		free(entrada);
-		crear_movimiento_swap(RM_PAGE, id_carpincho, 0, NULL);
-	}
-
-	// Esto se hace para evitar swap out innecesarios
-	uint32_t nro_paginas_vacias = list_size(tabla_de_paginas) - paginas_minimas;
-	for(int i = paginas_minimas; i < nro_paginas_vacias; i++) {
-		entrada = list_get(tabla_de_paginas, i);
-		entrada->esta_vacia = true;
-	}
+bool dir_logica_es_valida(uint32_t id_carpincho, uint32_t dir_logica) {
+	t_carpincho *carpincho = carpincho_de_lista(id_carpincho);
+	log_info(logger, "Offset: %d", carpincho->offset);
+	return carpincho->offset > dir_logica;
 }
