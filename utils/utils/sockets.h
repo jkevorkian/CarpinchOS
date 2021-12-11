@@ -39,7 +39,6 @@
 #define S_SEM_POST		"%s"		// NOMBRE_SEMAFORO
 #define S_SEM_DESTROY	"%s"		// NOMBRE_SEMAFORO
 // Otros
-
 #define S_CALL_IO		"%s"		// NOMBRE_DISPOSITIVO
 #define S_DATA_CHAR		"%s"		// CONTENIDO_STRING
 #define S_DATA_INT		"%d"		// CONTENIDO_INT

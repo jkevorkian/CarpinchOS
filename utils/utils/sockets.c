@@ -288,9 +288,9 @@ t_list* recibir_mensaje(int socket) {
 	case DATA_INT:		recibir_parametros(socket, lista_parametros, S_DATA_INT);		break;
 	case DATA_PAGE:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);		break;
 	case SEND_PORT:		recibir_parametros(socket, lista_parametros, S_SEND_PORT);		break;
+
 	case SUSPEND:
 	case UNSUSPEND:
-		break;
 	default:
 		break;
 	}

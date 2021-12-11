@@ -8,6 +8,5 @@ void iniciar_planificadores();
 
 void* planificador_largo_plazo();
 void* planificador_corto_plazo();
-void* planificador_mediano_plazo();
 
 #endif /* PLANIFICADORES_H_ */
