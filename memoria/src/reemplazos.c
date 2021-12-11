@@ -30,9 +30,6 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 		}
 	}
 	
-	pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
-	marco_referencia->bit_uso = false;
-	pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
 
 	return marco_referencia;
 }
@@ -52,10 +49,6 @@ t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas) {
 
 		if(!primero_mas_viejo)	marco_referencia = marco_siguiente;
 	}
-
-	pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
-	marco_referencia->bit_uso = false;
-	pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
 
 	return marco_referencia;
 }

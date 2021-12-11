@@ -22,19 +22,26 @@ bool iniciar_memoria(t_config *config) {
 	memset(memoria_ram.inicio, 0, config_memoria.tamanio_memoria);
 	
 	char * algoritmo_reemplazo_mmu = config_get_string_value(config, "ALGORITMO_REEMPLAZO_MMU");
-	if(!strcmp(algoritmo_reemplazo_mmu, "LRU"))
+	if(!strcmp(algoritmo_reemplazo_mmu, "LRU")) {
+		log_info(logger, "Algoritmo de reemplazo MMU: LRU");
 		config_memoria.algoritmo_reemplazo = LRU;
+	}
 	else {
+		log_info(logger, "Algoritmo de reemplazo MMU: Clock modificado");
 		config_memoria.algoritmo_reemplazo = CLOCK;
 		// memoria_ram.puntero_clock = 0;
 	}
 	free(algoritmo_reemplazo_mmu);
 
 	char * tipo_asignacion = config_get_string_value(config, "TIPO_ASIGNACION");
-	if(!strcmp(tipo_asignacion, "FIJA"))
+	if(!strcmp(tipo_asignacion, "FIJA")) {
+		log_info(logger, "Tipo de asignacion de marcos: Fija y Local");
 		config_memoria.tipo_asignacion = FIJA_LOCAL;
-	else
+	}
+	else {
+		log_info(logger, "Tipo de asignacion de marcos: Dinamica y global");
 		config_memoria.tipo_asignacion = DINAMICA_GLOBAL;
+	}
 	free(tipo_asignacion);
 
 	iniciar_marcos(config_memoria.cant_marcos);
@@ -50,8 +57,7 @@ void iniciar_marcos(uint32_t cant_marcos){
 	for(int i = 0; i < cant_marcos; i++) {
 		t_marco* marco_auxiliar = malloc(sizeof(t_marco));
 		memoria_ram.mapa_fisico[i] = marco_auxiliar;
-
-		marco_auxiliar->libre = true;
+		marco_auxiliar->duenio = 0;
 		marco_auxiliar->nro_real = i;
 		marco_auxiliar->bit_uso = false;
 		marco_auxiliar->bit_modificado = false;
@@ -128,10 +134,19 @@ uint32_t nro_paginas_reemplazo() {		// Mmm, no deberia ir aca esto. O si, no si,
 }
 
 t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {
+	if(nro_pagina == -1) {
+		return NULL;
+	}
+
 	t_carpincho *carpincho = carpincho_de_lista(id);
-	t_entrada_tp *entrada;
-	pthread_mutex_lock(&carpincho->mutex_tabla);
-	entrada = (t_entrada_tp *)list_get(carpincho->tabla_paginas, nro_pagina);
-	pthread_mutex_unlock(&carpincho->mutex_tabla);
-	return entrada;
+	if(carpincho) {
+		pthread_mutex_lock(&carpincho->mutex_tabla);
+		t_entrada_tp *entrada = (t_entrada_tp *)list_get(carpincho->tabla_paginas, nro_pagina);
+		pthread_mutex_unlock(&carpincho->mutex_tabla);
+
+		pthread_mutex_lock(&entrada->mutex);
+		return entrada;
+	}
+	else
+		return NULL;
 }

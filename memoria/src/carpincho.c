@@ -1,5 +1,4 @@
 #include "carpincho.h"
-#include "memoria.h"
 
 void *rutina_carpincho(void *info_carpincho) {
 	bool seguir = true;
@@ -12,7 +11,6 @@ void *rutina_carpincho(void *info_carpincho) {
 	t_mensaje* mensaje_out;
 	uint32_t desplazamiento_d;
 	char* marioneta;
-	uint32_t tamanio_mensaje;
 	uint32_t dir_logica;
 
 	while(seguir) {
@@ -69,14 +67,9 @@ void *rutina_carpincho(void *info_carpincho) {
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
 			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
 			marioneta = (char *)list_get(mensaje_in, 2);
-			tamanio_mensaje = strlen(marioneta);
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 
 			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
-				free(marioneta);
-				marioneta = obtener_bloque_paginacion(carpincho->id, desplazamiento_d, tamanio_mensaje);
-				log_info(logger, "Escribi: %s", marioneta);
-				free(marioneta);
 				mensaje_out = crear_mensaje(TODOOK);
 			}
 			else {
@@ -121,8 +114,6 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	carpincho->id = id;
 	carpincho->tabla_paginas = list_create();
 	pthread_mutex_init(&carpincho->mutex_tabla, NULL);
-	// carpincho->sem_tlb = malloc(sizeof(sem_t));	// No se bien para qué sirve
-	// sem_init(carpincho->sem_tlb, 0 , 1);
 	carpincho->offset = 0;
 
 	pthread_mutex_lock(&mutex_lista_carpinchos);
@@ -144,12 +135,12 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 	// Limpio entradas de la tlb
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		t_entrada_tlb* entrada = tlb.mapa[i];
-		if(entrada->id_car == id_carpincho){
-			pthread_mutex_lock(&asignacion_entradas_tlb);
+		if(entrada->id == id_carpincho){
+			pthread_mutex_lock(&mutex_asignacion_tlb);
 			pthread_mutex_lock(&entrada->mutex);
-			entrada->id_car = 0;
+			entrada->id = 0;
 			pthread_mutex_unlock(&entrada->mutex);
-			pthread_mutex_unlock(&asignacion_entradas_tlb);
+			pthread_mutex_unlock(&mutex_asignacion_tlb);
 		}
 	}
 
@@ -162,7 +153,6 @@ void eliminar_carpincho(uint32_t id_carpincho) {
 	for(int i = 0; i < nro_marcos_carpincho; i++) {
 		pthread_mutex_lock(&marcos_de_carpincho[i]->mutex_espera_uso);
 		marcos_de_carpincho[i]->duenio = 0;
-		marcos_de_carpincho[i]->libre = true;
 		pthread_mutex_unlock(&marcos_de_carpincho[i]->mutex_espera_uso);
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);

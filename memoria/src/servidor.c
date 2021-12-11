@@ -6,7 +6,7 @@ void iniciar_servidor(char *ip, int puerto) {
 	if(server_fd < 0) {
 		return;
 	}
-	log_info(logger, "Servidor swap listo");
+	log_info(logger, "Servidor memoria listo para recibir carpinchos");
 	bool seguir = true;
 
 	int id = 1;
@@ -49,6 +49,13 @@ void iniciar_servidor(char *ip, int puerto) {
 bool iniciar_swap(char *ip_swap, char *puerto_swap) {
 	int socket_swap = crear_conexion_cliente(ip_swap, puerto_swap);
 	// Creo un hilo para reslover las solicitudes de swap de los carpinchos
+	if(socket_swap < 0) {
+		log_error(logger, "Conexion con swap fallo. %d", perror);
+		return false;
+	}
+
+	log_info(logger, "Servidor swap listo");
+
 	pthread_t cliente_swap;
 	pthread_create(&cliente_swap, NULL, manejar_swap, (void *)socket_swap);
 	return true;

@@ -12,6 +12,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	}
 
 	// Coloco el bit esFree del heap en 1 (ahora esta libre)
+	log_info(logger, "Seteo heap como libre");
 	set_isFree(id_carpincho, dir_logica_heap);
 
 	// UNIFICO EL NUEVO FREE CON LOS ADYACENTES
@@ -22,6 +23,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t first_heap, last_heap;
 
 	// BUSCO EL ALLOC ANTERIOR y, si corresponde, los integro
+	log_info(logger, "Ananlizo alloc anterior");
 	prev_heap = get_prevAlloc(id_carpincho, main_heap);
 	if(HEAP_NULL == prev_heap || !get_isFree(id_carpincho, prev_heap)) {
 		first_heap = main_heap;
@@ -31,6 +33,7 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 	}
 
 	// BUSCO EL ALLOC SIGUIENTE y, si corresponde, los integro
+	log_info(logger, "Ananlizo alloc siguiente");
 	foot_heap = get_nextAlloc(id_carpincho, main_heap);
 	if(!get_isFree(id_carpincho, foot_heap)) {
 		last_heap = foot_heap;
@@ -43,7 +46,9 @@ bool mem_free(uint32_t id_carpincho, uint32_t dir_logica) {
 		uint32_t bytes_ocupados = 1;
 		if(last_heap == HEAP_NULL) {
 			bytes_ocupados = first_heap > 0 ? first_heap + TAMANIO_HEAP : 0;
+			log_info(logger, "Libero paginas de carpicho");
 			liberar_paginas_carpincho(id_carpincho, bytes_ocupados);
+			log_info(logger, "Nuevo offset: %d", bytes_ocupados);
 		}
 		else {
 			set_prevAlloc(id_carpincho, last_heap, first_heap);
@@ -67,6 +72,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	t_carpincho* carpincho = carpincho_de_lista(id_carpincho);
 
 	if(config_memoria.tipo_asignacion == FIJA_LOCAL && list_size(carpincho->tabla_paginas) == 0) {
+		log_info(logger, "Inicio paginas carpincho en asignacion fija");
 		if(!asignacion_fija(carpincho)) return 0;
 	}
 
@@ -77,7 +83,9 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 
 	while(!encontre_alloc) {
 		alloc_sig = get_nextAlloc(id_carpincho, main_heap);
+		log_info(logger, "Obtuve %d alloc_sig", alloc_sig);
 		bool is_free = get_isFree(id_carpincho, main_heap);
+		log_info(logger, "Obtuve %d is_free", is_free);
 		
 		if(!is_free) {
 			main_heap = alloc_sig;
@@ -108,6 +116,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		uint32_t offset_final = main_heap + tamanio + 2*TAMANIO_HEAP;
 		uint32_t nro_frames_necesarios = cant_marcos_faltantes(id_carpincho, offset_final);
 		if(nro_frames_necesarios) {
+			log_info(logger, "Necesito %d pagina/s mas", nro_frames_necesarios);
 			if(crear_movimiento_swap(NEW_PAGE, id_carpincho, nro_frames_necesarios, NULL)) {
 				for(int i = 0; i < nro_frames_necesarios; i++) {
 					agregar_pagina(id_carpincho);
@@ -118,10 +127,12 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 		carpincho->offset = offset_final;	// La variable solo la usa el carpincho, no hace falta mutex
 	}
 	
+	log_info(logger, "Seteo el bit de libre de main_heap en 0");
 	reset_isFree(id_carpincho, main_heap);
 	if(!main_heap)	set_prevAlloc(id_carpincho, main_heap, HEAP_NULL);	
 
 	if(foot_heap) {
+		log_info(logger, "Seteo foot heap en posicion %d", foot_heap);
 		set_nextAlloc(id_carpincho, main_heap, foot_heap);
 		set_prevAlloc(id_carpincho, foot_heap, main_heap);
 		set_nextAlloc(id_carpincho, foot_heap, next_heap);

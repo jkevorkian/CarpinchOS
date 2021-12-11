@@ -12,7 +12,7 @@
 
 typedef struct {
     uint32_t nro_entrada;
-	uint32_t id_car;
+	uint32_t id;
 	uint32_t pagina;
 	uint32_t marco;
     char* tiempo_lru;
@@ -41,18 +41,18 @@ typedef struct {
 t_tlb tlb;
 t_list *cola_fifo_tlb;
 pthread_mutex_t mutex_fifo_tlb;
-pthread_mutex_t asignacion_entradas_tlb;
+pthread_mutex_t mutex_asignacion_tlb;
 
 t_list *historico_hit_miss;
 pthread_mutex_t mutex_historico_hit_miss;
 
-void 				iniciar_tlb(t_config* config);
-t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+void 				iniciar_tlb(t_config*);
+// t_entrada_tlb* 		asignar_entrada_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 void                borrar_pagina_carpincho_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
 
-void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
+// void                entrada_nueva(uint32_t id_carpincho, uint32_t nro_pagina, t_entrada_tlb* entrada);
 
-t_entrada_tlb*		leer_tlb(uint32_t id_carpincho, uint32_t nro_pagina);
+t_entrada_tlb*		leer_tlb(t_entrada_tp *entrada_tp);
 
 void 				obtener_control_tlb();
 void 				liberar_control_tlb();
@@ -64,6 +64,9 @@ void 				print_hit_miss(void);
 void 				cant_hit_carpincho(void* item);
 void 				cant_miss_carpincho(void* item);
 
-t_entrada_tlb *obtener_entrada_intercambio_tlb(uint32_t id, uint32_t nro_pagina);
+t_entrada_tlb* reemplazar_entrada_tlb(t_entrada_tp *entrada_vieja_tp, t_entrada_tp *entrada_nueva_tp);
+
+void entrada_nueva(t_entrada_tlb*, t_entrada_tp *);
+t_entrada_tlb* asignar_entrada_tlb(t_entrada_tp *);
 
 #endif /* _TLB_H_ */

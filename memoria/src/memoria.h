@@ -40,7 +40,6 @@ typedef struct{
     
 	uint32_t duenio;
 	uint32_t pagina_duenio;
-    bool libre;
     pthread_mutex_t mutex_espera_uso;
     // Para reemplazo de paginas
     bool bit_uso;
@@ -56,9 +55,12 @@ typedef struct {
 } t_memoria_ram;
 
 typedef struct {
+    uint32_t id;
+    uint32_t pagina;
+    uint32_t marco;
+
 	bool presencia;		// demuestra que esta actualizada la entrada
 	bool esta_vacia;
-    uint32_t nro_marco;
     pthread_mutex_t mutex;
 } t_entrada_tp;
 
