@@ -4,6 +4,11 @@ int inicializar_kernel(char* direccion_config) {
 	logger = log_create("kernel.log", "KERNEL", 1, LOG_LEVEL_INFO);
 	config = config_create(direccion_config);
 
+	if(config == NULL) {
+		log_error(logger, "FALLO EN EL ARCHIVO DE CONFIGURACION");
+		exit(1);
+	}
+
 	leer_configuraciones();
 
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)

@@ -8,11 +8,6 @@ int main(int argc, char *argv[]) {
 	else
 		direccion_config = argv[1];
 
-	if(config == NULL) {
-		log_error(logger, "FALLO EN EL ARCHIVO DE CONFIGURACION");
-		exit(1);
-	}
-
 	if(inicializar_kernel(direccion_config)) {
 		log_error(logger, "FALLO AL INICIAR EL KERNEL");
 		exit(1);
