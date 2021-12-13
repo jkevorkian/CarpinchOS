@@ -209,33 +209,37 @@ int mate_sem_destroy(mate_instance *lib_ref, char *sem)
 
 mate_pointer mate_memalloc(mate_instance *lib_ref, int size)
 {
+	int puntero_auxiliar;
+
 	t_mensaje *mensaje_out = crear_mensaje(MEM_ALLOC);
 	agregar_a_mensaje(mensaje_out, "%d", size);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
+
 	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == NO_MEMORY)
+	if ((int)list_get(mensaje_in, 0) == DATA_INT)
 	{
-		log_error(logger,
-				  "Ocurrió un fallo al intentar alocar la memoria. quizá no hay mas memoria disponible?");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
-	else if ((int)list_get(mensaje_in, 0) == DATA_INT){
 		log_info(logger, "La memoria fue alocada correctamente");
-		int puntero_auxiliar = (int)list_get(mensaje_in, 1); //TODO: no se si está bien casteado el puntero que se retornó adentro del mensaje ni si es la posición correcta dentro de la lista.
-		liberar_mensaje_in(mensaje_in);
-		return puntero_auxiliar;
+		puntero_auxiliar = (int)list_get(mensaje_in, 1); //TODO: no se si está bien casteado el puntero que se retornó adentro del mensaje ni si es la posición correcta dentro de la lista.
+	}
+	else if ((int)list_get(mensaje_in, 0) == NO_MEMORY)
+	{
+		log_warning(logger,
+			"Ocurrió un fallo al intentar alocar la memoria. quizá no hay mas memoria disponible?");
+		puntero_auxiliar = 0;
 	} else {
 		log_error(logger, "Ocurrió un fallo en la comunicacion (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		liberar_mensaje_in(mensaje_in);
-		return 1;
+		puntero_auxiliar = -1;
 	}
+	liberar_mensaje_in(mensaje_in);
+	return puntero_auxiliar;
 }
 
 int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
 {
+	int error;
+
 	t_mensaje *mensaje_out = crear_mensaje(MEM_FREE);
 	agregar_a_mensaje(mensaje_out, "%d", addr);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
@@ -246,15 +250,23 @@ int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
 	if ((int)list_get(mensaje_in, 0) == TODOOK)
 	{
 		log_info(logger, "La memoria fue liberada correctamente");
-		liberar_mensaje_in(mensaje_in);
-		return 0;
+		error = 0;
 	}
-	else
+	else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
 	{
-		log_error(logger, "Ocurrió un fallo al intentar liberar la memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		liberar_mensaje_in(mensaje_in);
-		return 1;
+		log_warning(logger, "Segmentation fault (core dumped)");
+		error = (int)list_get(mensaje_in, 1);
+		log_warning(logger, "Código de error: %d", error);
+		
+	} else
+	{
+		log_error(logger, "Ocurrió un fallo al intentar liberar la memoria (%s)",
+			string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		error = -1;
 	}
+	
+	liberar_mensaje_in(mensaje_in);
+	return error;
 }
 
 //Se decidió retornar en "void* dest" lo que se encuentre en la dirección de memoria "mate_pointer origin"
@@ -274,32 +286,29 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 		log_info(logger, "La memoria fue leida correctamente (%s)", list_get(mensaje_in, 1));
 
 		dest = list_get(mensaje_in, 1);
-		liberar_mensaje_in(mensaje_in);
+		
 		error = 0;
-	}
-	else
-	{
-		//TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
-		log_error(logger,
-				  "Ocurrió un fallo al intentar leer en la direccion enviada memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		liberar_mensaje_in(mensaje_in);
-		error = 1;
-	}
-	// Para cuando ande el mem_read
-	/*
-	if ((int)list_get(mensaje_in, 0) == SEG_FAULT)
+	} else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
 	{
 		log_warning(logger, "Segmentation fault (core dumped)");
-		log_warning(logger, "Código de error: %d", list_get(mensaje_in, 1));
-		error = list_get(mensaje_in, 1);
-	}	
-	*/
+		error = (int)list_get(mensaje_in, 1);
+		log_warning(logger, "Código de error: %d", error);
+	} else
+	{
+		log_error(logger, "Ocurrió un fallo al intentar leer en la direccion enviada memoria (%s)",
+			string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		error = -1;
+	}
+	
+	liberar_mensaje_in(mensaje_in);
 	return error;
 }
 
 //se decidió escribir lo que sea que apunte "void* origin" enla direccion apuntada por "mate_pointer dest"
 int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size)
 {
+	int error;
+
 	t_mensaje *mensaje_out = crear_mensaje(MEM_WRITE);
 	agregar_a_mensaje(mensaje_out, "%d%s", dest, origin);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
@@ -309,14 +318,20 @@ int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int s
 
 	if ((int)list_get(mensaje_in, 0) == TODOOK) {
 		log_info(logger, "La memoria fue escrita correctamente");
-		liberar_mensaje_in(mensaje_in);
-		return 0;
+		error = 0;
 	}
-	else
-	{//TODO: el mensaje que contesta la memoria en caso de que falle el memwrite todavía no está definido, el SEG_FAULT se puso provisoriamente
-		log_error(logger,
-				  "Ocurrió un fallo al intentar escribir en la memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		liberar_mensaje_in(mensaje_in);
-		return 1;
+	else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
+	{
+		log_warning(logger, "Segmentation fault (core dumped)");
+		error = (int)list_get(mensaje_in, 1);
+		log_warning(logger, "Código de error: %d", error);
+	} else
+	{
+		log_error(logger, "Ocurrió un fallo al intentar escribir en la direccion enviada memoria (%s)",
+			string_desde_mensaje((int)list_get(mensaje_in, 0)));
+		error = -1;
 	}
+
+	liberar_mensaje_in(mensaje_in);
+	return error;
 }

@@ -1,8 +1,8 @@
 #include "inicializador.h"
 
-int inicializar_kernel() {
+int inicializar_kernel(char* direccion_config) {
 	logger = log_create("kernel.log", "KERNEL", 1, LOG_LEVEL_INFO);
-	config = config_create("kernel.config");
+	config = config_create(direccion_config);
 
 	leer_configuraciones();
 
@@ -34,6 +34,9 @@ int inicializar_kernel() {
 
 	id_proximo_carpincho = 0;
 	id_proximo_semaforo = 0;
+
+	if(INFORMADOR_LISTAS)
+		pthread_create(&hilo_informador, NULL, informador, NULL);
 
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tKernel listo");

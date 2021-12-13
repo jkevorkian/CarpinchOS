@@ -20,5 +20,6 @@ semaforo* buscar_sem_por_id(t_list *lista, int id);
 bool no_tiene_asignado_este_semaforo(carpincho* carp,semaforo* sem);
 
 void desbloquear(carpincho* carp);
+void* informador();
 
 #endif /* UTILIDADES_H_ */

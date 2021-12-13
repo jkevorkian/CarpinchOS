@@ -205,3 +205,23 @@ bool no_tiene_asignado_este_semaforo(carpincho* carp,semaforo* sem){
 	return buscar_sem_en_lista(carp->semaforos_asignados,sem->nombre)==-1;
 }
 
+void* informador() {
+	int socket_informador = crear_conexion_servidor(ip_kernel, 10217, 1);
+	while(1) {
+		int socket = esperar_cliente(socket_informador);
+
+		log_info(logger_colas, "--------------------------------------------------------");
+		log_info(logger_colas, "LISTANDO INFORMACION SOBRE LA PLANIFICACION");
+		log_info(logger_colas, "Grado Multiprogramacion Actual: %d", grado_multiprogramacion);
+		log_info(logger_colas, "Grado Multiprocesamiento Actual: %d", grado_multiprocesamiento);
+		log_info(logger_colas, "Cantidad de carpinchos en new: %d", queue_size(cola_new));
+		log_info(logger_colas, "Cantidad de carpinchos en ready: %d", list_size(lista_ready));
+		log_info(logger_colas, "Cantidad de carpinchos en bloqued: %d", list_size(lista_blocked));
+		log_info(logger_colas, "Cantidad de carpinchos en suspendidosReady: %d", queue_size(cola_suspendidosReady));
+		log_info(logger_colas, "Cantidad de carpinchos en suspendidosBloqued: %d", list_size(lista_suspendidosBlocked));
+		log_info(logger_colas, "--------------------------------------------------------");
+
+		close(socket);
+	}
+}
+

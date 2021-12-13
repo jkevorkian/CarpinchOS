@@ -6,7 +6,7 @@ void agregar_new(carpincho* carp) {
 	sem_post(&carpinchos_new);
 	pthread_mutex_unlock(&mutex_cola_new);
 
-	if(list_is_empty(lista_ready) && !list_is_empty(lista_blocked) && grado_multiprogramacion > 0) {
+	if(list_is_empty(lista_ready) && !list_is_empty(lista_blocked) && grado_multiprogramacion < 1) {
 		pthread_mutex_lock(&mutex_lista_blocked);
 		carpincho* carp = (carpincho*)list_remove(lista_blocked, list_size(lista_blocked)-1); //remuevo el ultimo de la lista de bloqueados
 		pthread_mutex_unlock(&mutex_lista_blocked);
@@ -49,6 +49,15 @@ void agregar_blocked(carpincho* carp) {
 }
 
 void agregar_suspendidosReady(carpincho* carp) {
+/*
+	//se podria agregar esto para que si no hay nadie en ready este carpincho que esta listo salga y meta a otro que este bloqueado (no lo pide el tp)
+	if(list_is_empty(lista_ready) && !list_is_empty(lista_blocked) && grado_multiprogramacion < 1) {
+		pthread_mutex_lock(&mutex_lista_blocked);
+		carpincho* carp = (carpincho*)list_remove(lista_blocked, list_size(lista_blocked)-1); //remuevo el ultimo de la lista de bloqueados
+		pthread_mutex_unlock(&mutex_lista_blocked);
+		agregar_suspendidosBlocked(carp); //para que se añada un nuevo carpincho a ready
+	}
+*/
 	pthread_mutex_lock(&mutex_cola_suspendidosReady);
 	queue_push(cola_suspendidosReady, carp);
 	sem_post(&carpinchos_new);
@@ -62,6 +71,7 @@ void agregar_suspendidosBlocked(carpincho* carp) {
 		t_mensaje* mensaje_out = crear_mensaje(SUSPEND);
 		enviar_mensaje(carp->socket_memoria, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(recibir_mensaje(carp->socket_memoria));
 	}
 
 	carp->esta_suspendido = true;
@@ -71,7 +81,7 @@ void agregar_suspendidosBlocked(carpincho* carp) {
 	grado_multiprogramacion++;
 	pthread_mutex_unlock(&mutex_lista_suspendidosBlocked);
 
-	log_info(logger_colas, " \tAgregado a suspendidosBlocked el carpincho %d", carp->id);
+	log_error(logger_colas, " \tAgregado a suspendidosBlocked el carpincho %d", carp->id);
 }
 
 carpincho* quitar_new() {
@@ -140,6 +150,7 @@ carpincho* quitar_suspendidosReady() {
 		t_mensaje* mensaje_out = crear_mensaje(UNSUSPEND);
 		enviar_mensaje(carp->socket_memoria, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(recibir_mensaje(carp->socket_memoria));
 	}
 
 	carp->esta_suspendido = false;

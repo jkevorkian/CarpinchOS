@@ -68,25 +68,7 @@ void* cpu() {
 
 							log_info(logger, "Carpincho %d esperando respuesta", carp->id);
 
-							//cuando te ande eliminar desde aca
-							t_list *mensaje_mateLib;
-
-							if (parametro == MEM_READ){ //esto es para ver si falla el MEM_READ, si funciona bien es como si no estuviese
-								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
-								int i = 1;
-								while((int)list_get(mensaje_mateLib, 0) == TODOOK) {
-									log_info(logger, "%d) Carpincho %d recibio de la memoria (%s)", i, carp->id, string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
-									mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
-									i++;
-								}
-
-								log_info(logger, "Carpincho %d recibio de la memoria (%s)", carp->id, string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
-							} else
-								mensaje_mateLib = recibir_mensaje(carp->socket_memoria);
-
-							//hasta aca y descomentar la linea de abajo
-
-							//t_list *mensaje_mateLib mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
+							t_list *mensaje_mateLib = recibir_mensaje(carp->socket_memoria); //espero la respuesta de la ram
 
 							int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 
@@ -332,7 +314,7 @@ void* cpu() {
 
 		free(tiempo_inicio);
 		sem_post(&multiprocesamiento);
-		grado_multiprocesamiento--;
+		grado_multiprocesamiento++;
 	}
 }
 

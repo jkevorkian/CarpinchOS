@@ -1,7 +1,13 @@
 #include "main.h"
 
-int main(void) {
-	t_config *config = config_create("memoria.config");
+int main(int argc, char *argv[]) {
+	char* direccion_config;
+
+	if(argc < 2)
+		direccion_config = "memoria.config";
+	else
+		direccion_config = argv[1];
+	t_config *config = config_create(direccion_config);
 
 	if(!iniciar_memoria(config)) {
 		log_info(logger, "FALLO EN EL ARCHIVO DE CONFIGURACION");
