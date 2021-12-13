@@ -71,6 +71,7 @@ void agregar_suspendidosBlocked(carpincho* carp) {
 		t_mensaje* mensaje_out = crear_mensaje(SUSPEND);
 		enviar_mensaje(carp->socket_memoria, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(recibir_mensaje(carp->socket_memoria));
 	}
 
 	carp->esta_suspendido = true;
@@ -149,6 +150,7 @@ carpincho* quitar_suspendidosReady() {
 		t_mensaje* mensaje_out = crear_mensaje(UNSUSPEND);
 		enviar_mensaje(carp->socket_memoria, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
+		liberar_mensaje_in(recibir_mensaje(carp->socket_memoria));
 	}
 
 	carp->esta_suspendido = false;

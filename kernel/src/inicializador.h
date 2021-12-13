@@ -8,7 +8,7 @@
 #include "utilidades.h"
 #include "deadlock.h"
 
-int inicializar_kernel();
+int inicializar_kernel(char* direccion_config);
 
 void leer_configuraciones();
 void crear_estructuras_planificacion();

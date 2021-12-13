@@ -1,7 +1,15 @@
 #include "kernel.h"
 
-int main() {
-	if(inicializar_kernel() == 1)
+int main(int argc, char *argv[]) {
+	char* direccion_config;
+
+	if(argc < 2)
+		direccion_config = "kernel.config";
+	else
+		direccion_config = argv[1];
+
+
+	if(inicializar_kernel(direccion_config) == 1)
 		return -1;
 
 	bool seguir = true;
