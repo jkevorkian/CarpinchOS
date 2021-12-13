@@ -1,10 +1,23 @@
 #include "swamp.h"
 
 
-int main(){
+int main(int argc, char *argv[]) {
+	char* direccion_config;
+
+	if(argc < 2)
+		direccion_config = "swamp.config";
+	else
+		direccion_config = argv[1];
+
 	logger = log_create("swamp.log", "SWAMP", 1, LOG_LEVEL_INFO);
 	log_info(logger, "Iniciando SWAmP");
-	config = config_create("swamp.config");
+	config = config_create(direccion_config);
+
+	if(config == NULL) {
+		log_error(logger, "FALLO EN EL ARCHIVO DE CONFIGURACION");
+		exit(1);
+	}
+
 	file_locations = config_get_array_value(config, "ARCHIVOS_SWAP"); //es char**
 	cantidad_archivos = config_get_int_value(config, "CANTIDAD_ARCHIVOS");
 	ip_swamp = config_get_string_value(config, "IP");
@@ -60,7 +73,7 @@ int main(){
 
 	log_info(logger, "Conexion establecida con la memoria");
 	int i = 0;
-	bool conexion = 1;
+	bool conexion = true;
 	while(conexion) {
 
 			t_list* mensaje_in = recibir_mensaje(socket_memoria);
@@ -68,7 +81,7 @@ int main(){
 
 			if (!validar_mensaje(mensaje_in, logger)) {
 				log_error(logger, "Cliente desconectado");
-				//salir_proceso = true;
+				conexion = false;
 			} else {
 				usleep(config_get_int_value(config, "RETARDO_SWAP"));
 				switch((int)list_get(mensaje_in, 0)) {
