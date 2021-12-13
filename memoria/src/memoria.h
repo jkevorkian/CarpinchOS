@@ -51,7 +51,7 @@ typedef struct{
 typedef struct {
     void* inicio;
     t_marco** mapa_fisico;
-    // uint32_t puntero_clock;
+    uint32_t puntero_clock;
 } t_memoria_ram;
 
 typedef struct {

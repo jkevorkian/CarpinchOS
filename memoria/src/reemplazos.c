@@ -3,10 +3,10 @@
 t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 	bool encontre_marco = false;
 	t_marco* marco_referencia;
-	uint32_t puntero_clock = 0;
+	// uint32_t puntero_clock = 0;
 	uint8_t ciclo = 0;
 	while(!encontre_marco) {
-		marco_referencia = lista_paginas[puntero_clock];
+		marco_referencia = lista_paginas[memoria_ram.puntero_clock];
 
 		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
 		switch(ciclo) {
@@ -23,9 +23,9 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 		}
 		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
 
-		puntero_clock++;
-		if(puntero_clock == nro_paginas) {
-			puntero_clock = 0;
+		memoria_ram.puntero_clock++;
+		if(memoria_ram.puntero_clock == nro_paginas) {
+			memoria_ram.puntero_clock = 0;
 			ciclo = ciclo ? 0 : 1;
 		}
 	}

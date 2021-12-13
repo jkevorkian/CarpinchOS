@@ -5,8 +5,9 @@ int main(int argc, char *argv[]) {
 
 	if(argc < 2)
 		direccion_config = "memoria.config";
-	else
+	else {
 		direccion_config = argv[1];
+	}
 	t_config *config = config_create(direccion_config);
 
 	if(!iniciar_memoria(config)) {

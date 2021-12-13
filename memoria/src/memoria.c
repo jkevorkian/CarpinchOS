@@ -5,6 +5,10 @@ void iniciar_marcos(uint32_t);
 
 bool iniciar_memoria(t_config *config) {
 	logger = log_create("memoria.log", "memoria", 1, LOG_LEVEL_DEBUG);
+
+	if(config == NULL) {
+		return false;
+	}
 	
 	config_memoria.tamanio_memoria = config_get_int_value(config, "TAMANIO");
 	config_memoria.tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
@@ -29,7 +33,7 @@ bool iniciar_memoria(t_config *config) {
 	else {
 		log_info(logger, "Algoritmo de reemplazo MMU: Clock modificado");
 		config_memoria.algoritmo_reemplazo = CLOCK;
-		// memoria_ram.puntero_clock = 0;
+		memoria_ram.puntero_clock = 0;
 	}
 	free(algoritmo_reemplazo_mmu);
 
