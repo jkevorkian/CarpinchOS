@@ -23,6 +23,8 @@
 #define LOGUEAR_MENSAJES_COLAS 1
 #define LOGUEAR_MENSAJES_DEADLOCK 1
 
+#define INFORMADOR_LISTAS 0
+
 //carpincho
 typedef struct {
 	int id;
@@ -97,5 +99,9 @@ pthread_t detector;
 
 t_list *carpinchos_en_deadlock;
 t_list *lista_a_evaluar;
+
+/////////////INFORMADOR_LISTAS/////////////
+pthread_t hilo_informador;
+
 
 #endif /* GLOBAL_H_ */

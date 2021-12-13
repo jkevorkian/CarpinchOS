@@ -332,7 +332,7 @@ void* cpu() {
 
 		free(tiempo_inicio);
 		sem_post(&multiprocesamiento);
-		grado_multiprocesamiento--;
+		grado_multiprocesamiento++;
 	}
 }
 

@@ -35,6 +35,9 @@ int inicializar_kernel() {
 	id_proximo_carpincho = 0;
 	id_proximo_semaforo = 0;
 
+	if(INFORMADOR_LISTAS)
+		pthread_create(&hilo_informador, NULL, informador, NULL);
+
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tKernel listo");
 
