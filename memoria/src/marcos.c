@@ -55,8 +55,10 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL) {
 		// Obtengo un marco libre de la memoria
 		marco_a_reemplazar = obtener_marco_libre();
-		if(marco_a_reemplazar)
+		if(marco_a_reemplazar) {
+			log_info(logger, "Obtuve marco libre %d", marco_a_reemplazar->nro_real);
 			soltar_marco(marco_a_reemplazar);
+		}
 	}
 	else {
 		// Si una de las paginas asignadas del carpincho est libre, la uso.
