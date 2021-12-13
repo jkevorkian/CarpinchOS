@@ -2,13 +2,13 @@
 #falta implementar la regla de compilacion de los carpinchos (que los linkee con la mateLib) (no se si hace falta igual)
 CC=gcc
 
-RUTA_MATELIB=/home/utnso/tp-2021-2c-AprobadOS/mateLib/src
+RUTA_MATELIB=/home/utnso/compartida/tp-2021-2c-AprobadOS/mateLib/src
 RUTA_UTILS=utils
 RUTA_LIBRERIAS_SISTEMA= /usr/lib
-RUTA_SWAMP=/home/utnso/tp-2021-2c-AprobadOS/SWAmP
-RUTA_MEMORIA=/home/utnso/tp-2021-2c-AprobadOS/memoria
-RUTA_KERNEL=/home/utnso/tp-2021-2c-AprobadOS/kernel
-RUTA_RAIZ_PROYECTO=/home/utnso/tp-2021-2c-AprobadOS
+RUTA_SWAMP=/home/utnso/compartida/tp-2021-2c-AprobadOS/SWAmP
+RUTA_MEMORIA=/home/utnso/compartida/tp-2021-2c-AprobadOS/memoria
+RUTA_KERNEL=/home/utnso/compartida/tp-2021-2c-AprobadOS/kernel
+RUTA_RAIZ_PROYECTO=/home/utnso/compartida/tp-2021-2c-AprobadOS
 
 build-utils:
 	cd $(RUTA_UTILS) && \

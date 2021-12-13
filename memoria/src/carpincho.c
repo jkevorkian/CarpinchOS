@@ -10,7 +10,7 @@ void *rutina_carpincho(void *info_carpincho) {
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
 	uint32_t desplazamiento_d;
-	char* marioneta;
+	char* contenido;
 	uint32_t dir_logica;
 
 	while(seguir) {
@@ -48,10 +48,10 @@ void *rutina_carpincho(void *info_carpincho) {
 			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 			
-			if((marioneta = mem_read(carpincho->id, desplazamiento_d))) {
-				log_info(logger, "El contenido del alloc es: %s", marioneta);
+			if((contenido = mem_read(carpincho->id, desplazamiento_d))) {
+				log_info(logger, "El contenido del alloc es: %s", contenido);
 				mensaje_out = crear_mensaje(DATA_CHAR);
-				agregar_a_mensaje(mensaje_out, "%s", marioneta);
+				agregar_a_mensaje(mensaje_out, "%s", contenido);
 			}
 			else {
 				log_info(logger, "SEGMENTATION FAULT");
@@ -65,10 +65,10 @@ void *rutina_carpincho(void *info_carpincho) {
 		case MEM_WRITE:
 			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
 			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
-			marioneta = (char *)list_get(mensaje_in, 2);
+			contenido = (char *)list_get(mensaje_in, 2);
 			desplazamiento_d = (int)list_get(mensaje_in, 1);
 
-			if(mem_write(carpincho->id, desplazamiento_d, marioneta)) {
+			if(mem_write(carpincho->id, desplazamiento_d, contenido)) {
 				mensaje_out = crear_mensaje(TODOOK);
 			}
 			else {

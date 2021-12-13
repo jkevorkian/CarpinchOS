@@ -145,7 +145,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	return main_heap + TAMANIO_HEAP; 
 }
 
-void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
+char *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
 	// Verifico que el free es valido
@@ -159,13 +159,16 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	void *data;
 	char *aux = obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
 
-	if(aux[tamanio_alocado-1] != '\0') {
-		data = malloc(tamanio_alocado+1);
-		memcpy(data, aux, tamanio_alocado);
-		char relleno = '\0';
-		memcpy(data+tamanio_alocado, &relleno, 1);
-	} else
-		data = aux;
+	uint32_t bytex_ocupados = tamanio_alocado;
+	while(aux[bytes_ocupados - 1] == '\0') {
+		bytes_ocupados--;
+	}
+
+	data = malloc(bytes_ocupados + 1);
+	memcpy(data, aux, bytes_ocupados);
+	char relleno = '\0';
+	memcpy(data + bytes_ocupados, &relleno, 1);
+	free(aux);
 
 	return data;
 }

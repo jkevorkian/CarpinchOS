@@ -260,6 +260,8 @@ int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
 //Se decidió retornar en "void* dest" lo que se encuentre en la dirección de memoria "mate_pointer origin"
 int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size)
 {
+	int error;
+
 	t_mensaje *mensaje_out = crear_mensaje(MEM_READ);
 	agregar_a_mensaje(mensaje_out, "%d", origin);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
@@ -273,7 +275,7 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 
 		dest = list_get(mensaje_in, 1);
 		liberar_mensaje_in(mensaje_in);
-		return 0;
+		error = 0;
 	}
 	else
 	{
@@ -281,8 +283,18 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 		log_error(logger,
 				  "Ocurrió un fallo al intentar leer en la direccion enviada memoria (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
 		liberar_mensaje_in(mensaje_in);
-		return 1;
+		error = 1;
 	}
+	// Para cuando ande el mem_read
+	/*
+	if ((int)list_get(mensaje_in, 0) == SEG_FAULT)
+	{
+		log_warning(logger, "Segmentation fault (core dumped)");
+		log_warning(logger, "Código de error: %d", list_get(mensaje_in, 1));
+		error = list_get(mensaje_in, 1);
+	}	
+	*/
+	return error;
 }
 
 //se decidió escribir lo que sea que apunte "void* origin" enla direccion apuntada por "mate_pointer dest"
