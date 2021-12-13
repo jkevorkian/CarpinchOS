@@ -87,14 +87,17 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 		void* buffer = malloc(config_memoria.tamanio_pagina);
 		crear_movimiento_swap(GET_PAGE, entrada_tp->id, entrada_tp->pagina, buffer);
 		memcpy(inicio_memoria(marco_a_reemplazar->nro_real, 0), buffer, config_memoria.tamanio_pagina);
-		free(buffer);
+		// free(buffer);
 		
 		// >>>>>>>>>>>>>>>>>>> Para testear
 		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
 		memcpy(pagina_generica, inicio_memoria(marco_a_reemplazar->nro_real, 0), config_memoria.tamanio_pagina);
 		loggear_pagina(logger, pagina_generica);
+		loggear_pagina(logger, buffer);
 		free(pagina_generica);
 		// <<<<<<<<<<<<<<<<<<<
+
+		free(buffer);
 	}
 	else {
 		memset(inicio_memoria(marco_a_reemplazar->nro_real, 0), 0, config_memoria.tamanio_pagina);
