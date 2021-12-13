@@ -100,4 +100,6 @@ t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);
 // Para testear
 void loggear_pagina(t_log *logger, void *pagina);
 
+void print_marcos();
+
 #endif /* _MEMORIA_H_ */

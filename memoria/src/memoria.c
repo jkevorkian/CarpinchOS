@@ -160,3 +160,16 @@ t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina) {
 	else
 		return NULL;
 }
+
+void print_marcos() {
+	log_info(logger, "Loggeo marcos de la memoria");
+	pthread_mutex_lock(&mutex_asignacion_marcos);
+	for(int i = 0; i < config_memoria.cant_marcos; i++) {
+		log_info(logger, "Marco %d, Id %d, Nro. Pagina %d",
+			memoria_ram.mapa_fisico[i]->nro_real,
+			memoria_ram.mapa_fisico[i]->duenio,
+			memoria_ram.mapa_fisico[i]->pagina_duenio
+			);
+	}
+	pthread_mutex_unlock(&mutex_asignacion_marcos);
+}

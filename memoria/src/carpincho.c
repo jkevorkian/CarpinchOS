@@ -1,5 +1,7 @@
 #include "carpincho.h"
 
+bool imprimo = true;
+
 void *rutina_carpincho(void *info_carpincho) {
 	bool seguir = true;
 	data_carpincho* carpincho = (data_carpincho *)info_carpincho;
@@ -99,6 +101,12 @@ void *rutina_carpincho(void *info_carpincho) {
 		default:
 			seguir = false;
 			log_info(logger, "Murio el carpincho, nos vemos.");
+			pthread_mutex_lock(&mutex_lista_carpinchos);
+			if(imprimo) {
+				print_marcos();
+				imprimo = false;
+			}
+			pthread_mutex_unlock(&mutex_lista_carpinchos);
 			break;
 		}
 	}

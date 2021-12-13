@@ -160,7 +160,7 @@ char *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	char *aux = obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
 
 	uint32_t bytes_ocupados = tamanio_alocado;
-	while(aux[bytes_ocupados - 1] == '\0') {
+	while(aux[bytes_ocupados - 1] == '\0' && bytes_ocupados != 0) {
 		bytes_ocupados--;
 	}
 

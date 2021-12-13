@@ -37,13 +37,16 @@ void cargar_particion_en_tabla(char tabla_paginas[][paginas_por_particion], int 
 }
 
 void cargar_pagina_en_tabla(char tabla_paginas[][cantidad_total_paginas],int n_particion, int id_carpincho, int n_pagina){
-	int lugar_libre;
-	log_info(logger, "Cargando Pagina %d del Carpincho %d en la tabla", n_pagina, id_carpincho);
-	for(lugar_libre = (n_particion * paginas_por_particion); (tabla_paginas[0][lugar_libre] == itoc(n_particion) && tabla_paginas[1][lugar_libre] != itoc(id_carpincho)); lugar_libre++);
-	int i;
-	for(i = lugar_libre; tabla_paginas[1][i] == itoc(id_carpincho) && tabla_paginas[2][i] != 'V'; i++);
-	tabla_paginas[2][i] = itoc(n_pagina);
-
+    int lugar_libre;
+    log_info(logger, "Cargando Pagina %d del Carpincho %d en la tabla", n_pagina, id_carpincho);
+    int aux = 0;
+    for(lugar_libre = (n_particion * paginas_por_particion); tabla_paginas[0][lugar_libre] == itoc(n_particion) && aux == 0; lugar_libre++){
+        if(tabla_paginas[1][lugar_libre] == itoc(id_carpincho) && tabla_paginas[2][lugar_libre] == 'V'){
+            aux++;
+            tabla_paginas[2][lugar_libre] = itoc(n_pagina);
+            return;
+        }
+    }
 }
 
 int proximo_marco_libre(char tabla_paginas[][cantidad_total_paginas],int n_particion){
