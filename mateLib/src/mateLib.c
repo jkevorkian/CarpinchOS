@@ -1,6 +1,7 @@
 #include "mateLib.h"
 
 t_log *logger;
+int id_proxima_instancia = 0;
 //---------------------------FUNCIONES GENERALES----------------------
 
 int mate_init(mate_instance *lib_ref, char *config)
@@ -86,252 +87,221 @@ int mate_init(mate_instance *lib_ref, char *config)
 			close(socket_auxiliar);
 		}
 	}
+
+	lib_ref->id = id_proxima_instancia;
+	lib_ref->murio = false;
+	id_proxima_instancia++;
+
 	return 0;
 }
 
-int mate_close(mate_instance *lib_ref)
-{
-	t_mensaje *mensaje_out = crear_mensaje(MATE_CLOSE);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
-	//free(lib_ref);
+int mate_close(mate_instance *lib_ref) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(MATE_CLOSE);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
+		lib_ref->murio = true;
+		log_info(logger, "Carpincho %d: mate_close realizado", lib_ref->id);
+	}
 	return 0;
 }
 
 //---------------------------FUNCIONES DE KERNEL----------------------
 
-int mate_call_io(mate_instance *lib_ref, char *io, void *msg)
-{
-	t_mensaje *mensaje_out = crear_mensaje(CALL_IO);
-	agregar_a_mensaje(mensaje_out, "%s", io);
-	//agregar_a_mensaje(mensaje_out, "%s", (char *)msg);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
-	log_info(logger, "%s", string_desde_mensaje((int)list_get(mensaje_in, 0))); //se imprime el mensaje de IO que llega
-	liberar_mensaje_in(mensaje_in);
+int mate_call_io(mate_instance *lib_ref, char *io, void *msg) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(CALL_IO);
+		agregar_a_mensaje(mensaje_out, "%s", io); //agregamos el dispositivo de io al cual llama pero no hacemos nada con el mensaje
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+
+		if((int)list_get(mensaje_in, 0) == TODOOK)
+			log_info(logger, "Carpincho %d: volvio de IO correctamente", lib_ref->id);
+		else {
+			log_error(logger, "Carpincho %d: hubo un fallo al realizar IO", lib_ref->id);
+			lib_ref->murio = true;
+		}
+
+		liberar_mensaje_in(mensaje_in);
+	}
+
 	return 0;
 }
 
-int mate_sem_init(mate_instance *lib_ref, char *sem, unsigned int value)
-{
-	t_mensaje *mensaje_out = crear_mensaje(SEM_INIT);
-	agregar_a_mensaje(mensaje_out, "%s%d", sem, value);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+int mate_sem_init(mate_instance *lib_ref, char *sem, unsigned int value) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(SEM_INIT);
+		agregar_a_mensaje(mensaje_out, "%s%d", sem, value);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == TODOOK)
-	{
-		log_info(logger, "La inicializacion del semaforo fue exitosa");
+		if ((int)list_get(mensaje_in, 0) == TODOOK) {
+			log_info(logger, "Carpincho %d: La inicializacion del semaforo fue exitosa", lib_ref->id);
+		} else {
+			log_error(logger, "Carpincho %d: Error en la inicializacion del semaforo", lib_ref->id);
+			lib_ref->murio = true;
+		}
+
 		liberar_mensaje_in(mensaje_in);
-		return 0;
 	}
-	else
-	{
-		log_error(logger, "Error en la inicializacion del semaforo");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
+
+	return 0;
 }
 
-int mate_sem_wait(mate_instance *lib_ref, char *sem)
-{
-	t_mensaje *mensaje_out = crear_mensaje(SEM_WAIT);
-	agregar_a_mensaje(mensaje_out, "%s", sem);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+int mate_sem_wait(mate_instance *lib_ref, char *sem) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(SEM_WAIT);
+		agregar_a_mensaje(mensaje_out, "%s", sem);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == TODOOK)
-	{
-		log_info(logger, "El wait del semaforo fue exitoso");
+		if ((int)list_get(mensaje_in, 0) == TODOOK)
+			log_info(logger, "Carpincho %d: El wait del semaforo fue exitoso", lib_ref->id);
+		else {
+			log_error(logger, "Carpincho %d: Error en el wait del semaforo", lib_ref->id);
+			lib_ref->murio = true;
+		}
+
 		liberar_mensaje_in(mensaje_in);
-		return 0;
 	}
-	else
-	{
-		log_error(logger, "Error en el wait del semaforo");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
+	return 0;
 }
 
-int mate_sem_post(mate_instance *lib_ref, char *sem)
-{
-	t_mensaje *mensaje_out = crear_mensaje(SEM_POST);
-	agregar_a_mensaje(mensaje_out, "%s", sem);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+int mate_sem_post(mate_instance *lib_ref, char *sem) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(SEM_POST);
+		agregar_a_mensaje(mensaje_out, "%s", sem);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == TODOOK)
-	{
-		log_info(logger, "El post del semaforo fue exitoso");
+		if ((int)list_get(mensaje_in, 0) == TODOOK)
+			log_info(logger, "Carpincho %d: El post del semaforo fue exitoso", lib_ref->id);
+		else {
+			log_error(logger, "Carpincho %d: Error en el post del semaforo", lib_ref->id);
+			lib_ref->murio = true;
+		}
 		liberar_mensaje_in(mensaje_in);
-		return 0;
 	}
-	else
-	{
-		log_error(logger, "Error en el post del semaforo");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
+	return 0;
 }
 
-int mate_sem_destroy(mate_instance *lib_ref, char *sem)
-{
-	t_mensaje *mensaje_out = crear_mensaje(SEM_DESTROY);
-	agregar_a_mensaje(mensaje_out, "%s", sem);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+int mate_sem_destroy(mate_instance *lib_ref, char *sem) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(SEM_DESTROY);
+		agregar_a_mensaje(mensaje_out, "%s", sem);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	if ((int)list_get(mensaje_in, 0) == TODOOK)
-	{
-		log_info(logger, "El cierre del semaforo fue exitoso");
+		if ((int)list_get(mensaje_in, 0) == TODOOK)
+			log_info(logger, "Carpincho %d: El cierre del semaforo fue exitoso", lib_ref->id);
+		else {
+			log_error(logger, "Carpincho %d: Error en cierre del semaforo", lib_ref->id);
+			lib_ref->murio = true;
+		}
 		liberar_mensaje_in(mensaje_in);
-		return 0;
 	}
-	else
-	{
-		log_error(logger, "Error en cierre del semaforo");
-		liberar_mensaje_in(mensaje_in);
-		return 1;
-	}
+	return 0;
 }
 
 //---------------------------FUNCIONES DE MEMORIA RAM----------------------
 
-mate_pointer mate_memalloc(mate_instance *lib_ref, int size)
-{
-	int puntero_auxiliar;
+mate_pointer mate_memalloc(mate_instance *lib_ref, int size) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(MEM_ALLOC);
+		agregar_a_mensaje(mensaje_out, "%d", size);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_mensaje *mensaje_out = crear_mensaje(MEM_ALLOC);
-	agregar_a_mensaje(mensaje_out, "%d", size);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		if((int)list_get(mensaje_in, 0) == DATA_INT) {
+			log_info(logger, "Carpincho %d: La memoria fue alocada correctamente en la posicion %d", lib_ref->id, (int)list_get(mensaje_in, 1));
+			return (int)list_get(mensaje_in, 1);
+		} else {
+			if((int)list_get(mensaje_in, 0) == NO_MEMORY)
+				log_error(logger, "Carpincho %d: Error al alocar la memoria, no hay mas espacio", lib_ref->id);
+			else
+				log_error(logger, "Carpincho %d: Fallo en la comunicacion (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 
-	if ((int)list_get(mensaje_in, 0) == DATA_INT)
-	{
-		log_info(logger, "La memoria fue alocada correctamente");
-		puntero_auxiliar = (int)list_get(mensaje_in, 1); //TODO: no se si está bien casteado el puntero que se retornó adentro del mensaje ni si es la posición correcta dentro de la lista.
+			lib_ref->murio = true;
+		}
+		liberar_mensaje_in(mensaje_in);
 	}
-	else if ((int)list_get(mensaje_in, 0) == NO_MEMORY)
-	{
-		log_warning(logger,
-			"Ocurrió un fallo al intentar alocar la memoria. quizá no hay mas memoria disponible?");
-		puntero_auxiliar = 0;
-	} else {
-		log_error(logger, "Ocurrió un fallo en la comunicacion (%s)", string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		puntero_auxiliar = -1;
-	}
-	liberar_mensaje_in(mensaje_in);
-	return puntero_auxiliar;
+	return 0;
 }
 
-int mate_memfree(mate_instance *lib_ref, mate_pointer addr)
-{
-	int error;
+int mate_memfree(mate_instance *lib_ref, mate_pointer addr) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(MEM_FREE);
+		agregar_a_mensaje(mensaje_out, "%d", addr);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_mensaje *mensaje_out = crear_mensaje(MEM_FREE);
-	agregar_a_mensaje(mensaje_out, "%d", addr);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
-
-	if ((int)list_get(mensaje_in, 0) == TODOOK)
-	{
-		log_info(logger, "La memoria fue liberada correctamente");
-		error = 0;
-	}
-	else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{
-		log_warning(logger, "Segmentation fault (core dumped)");
-		error = (int)list_get(mensaje_in, 1);
-		log_warning(logger, "Código de error: %d", error);
+		if ((int)list_get(mensaje_in, 0) == TODOOK)
+			log_info(logger, "Carpincho %d: La memoria fue liberada correctamente", lib_ref->id);
+		else {
+			log_error(logger, "Carpincho %d: Error al liberar la memoria (Codigo de error: %s - %d)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)), (int)list_get(mensaje_in, 1));
+			lib_ref->murio = true;
+		}
 		
-	} else
-	{
-		log_error(logger, "Ocurrió un fallo al intentar liberar la memoria (%s)",
-			string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		error = -1;
+		liberar_mensaje_in(mensaje_in);
 	}
-	
-	liberar_mensaje_in(mensaje_in);
-	return error;
+	return 0;
 }
 
 //Se decidió retornar en "void* dest" lo que se encuentre en la dirección de memoria "mate_pointer origin"
-int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size)
-{
-	int error;
+int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(MEM_READ);
+		agregar_a_mensaje(mensaje_out, "%d", origin);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_mensaje *mensaje_out = crear_mensaje(MEM_READ);
-	agregar_a_mensaje(mensaje_out, "%d", origin);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
-
-	if ((int)list_get(mensaje_in, 0) == DATA_CHAR)
-	{
-		log_info(logger, "La memoria fue leida correctamente (%s)", list_get(mensaje_in, 1));
-
-		dest = list_get(mensaje_in, 1);
+		if ((int)list_get(mensaje_in, 0) == DATA_CHAR) {
+			log_info(logger, "Carpincho %d: La memoria fue leida correctamente (%s)", lib_ref->id, list_get(mensaje_in, 1));
+			list_get(mensaje_in, 1);
+		} else {
+			log_error(logger, "Carpincho %d: Error al leer la memoria (Codigo de error: %s - %d)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)), (int)list_get(mensaje_in, 1));
+			lib_ref->murio = true;
+		}
 		
-		error = 0;
-	} else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{
-		log_warning(logger, "Segmentation fault (core dumped)");
-		error = (int)list_get(mensaje_in, 1);
-		log_warning(logger, "Código de error: %d", error);
-	} else
-	{
-		log_error(logger, "Ocurrió un fallo al intentar leer en la direccion enviada memoria (%s)",
-			string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		error = -1;
+		liberar_mensaje_in(mensaje_in);
 	}
-	
-	liberar_mensaje_in(mensaje_in);
-	return error;
+	return 0;
 }
 
 //se decidió escribir lo que sea que apunte "void* origin" enla direccion apuntada por "mate_pointer dest"
-int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size)
-{
-	int error;
+int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size) {
+	if(!lib_ref->murio) {
+		t_mensaje *mensaje_out = crear_mensaje(MEM_WRITE);
+		agregar_a_mensaje(mensaje_out, "%d%s", dest, origin);
+		enviar_mensaje(lib_ref->socket, mensaje_out);
+		liberar_mensaje_out(mensaje_out);
 
-	t_mensaje *mensaje_out = crear_mensaje(MEM_WRITE);
-	agregar_a_mensaje(mensaje_out, "%d%s", dest, origin);
-	enviar_mensaje(lib_ref->socket, mensaje_out);
-	liberar_mensaje_out(mensaje_out);
+		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
+		if ((int)list_get(mensaje_in, 0) == TODOOK) {
+			log_info(logger, "Carpincho %d: La memoria fue escrita correctamente", lib_ref->id);
+			list_get(mensaje_in, 1);
+		} else {
+			log_error(logger, "Carpincho %d: Error al escribir la memoria (Codigo de error: %s - %d)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)), (int)list_get(mensaje_in, 1));
+			lib_ref->murio = true;
+		}
 
-	if ((int)list_get(mensaje_in, 0) == TODOOK) {
-		log_info(logger, "La memoria fue escrita correctamente");
-		error = 0;
+		liberar_mensaje_in(mensaje_in);
 	}
-	else if((int)list_get(mensaje_in, 0) == SEG_FAULT)
-	{
-		log_warning(logger, "Segmentation fault (core dumped)");
-		error = (int)list_get(mensaje_in, 1);
-		log_warning(logger, "Código de error: %d", error);
-	} else
-	{
-		log_error(logger, "Ocurrió un fallo al intentar escribir en la direccion enviada memoria (%s)",
-			string_desde_mensaje((int)list_get(mensaje_in, 0)));
-		error = -1;
-	}
-
-	liberar_mensaje_in(mensaje_in);
-	return error;
+	return 0;
 }

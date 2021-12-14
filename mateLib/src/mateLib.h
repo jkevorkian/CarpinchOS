@@ -28,6 +28,8 @@
 
 typedef struct {
 	int socket;
+	int id;
+	bool murio;
 } mate_instance;
 
 typedef char *mate_io_resource;
