@@ -71,7 +71,7 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 	}
 	
 	if(!marco_a_reemplazar) {
-		log_info(logger, "No encontre marco libre. Hago reemplazo");
+		log_warning(logger, "No encontre marco libre. Hago reemplazo");
 		if(config_memoria.algoritmo_reemplazo == LRU)
 			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
 		if(config_memoria.algoritmo_reemplazo == CLOCK)
