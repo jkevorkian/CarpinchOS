@@ -1,9 +1,12 @@
 #include "reemplazos.h"
 
 t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
-	bool encontre_marco = false;
 	t_marco* marco_referencia;
-	// uint32_t puntero_clock = 0;
+	uint32_t puntero_clock_inicial = memoria_ram.puntero_clock;
+	// log_info(logger, "Puntero clock en posicion inicial %d", memoria_ram.puntero_clock);
+	// print_marcos_clock();
+
+	bool encontre_marco = false;
 	uint8_t ciclo = 0;
 	while(!encontre_marco) {
 		marco_referencia = lista_paginas[memoria_ram.puntero_clock];
@@ -24,13 +27,16 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
 
 		memoria_ram.puntero_clock++;
-		if(memoria_ram.puntero_clock == nro_paginas) {
-			memoria_ram.puntero_clock = 0;
-			ciclo = ciclo ? 0 : 1;
-		}
-	}
-	
 
+		if(memoria_ram.puntero_clock == nro_paginas)
+			memoria_ram.puntero_clock = 0;
+
+		if(memoria_ram.puntero_clock == puntero_clock_inicial)
+			ciclo = ciclo ? 0 : 1;
+	}
+	// log_info(logger, "Puntero clock en posicion final %d", memoria_ram.puntero_clock);
+	// print_marcos_clock();
+	
 	return marco_referencia;
 }
 

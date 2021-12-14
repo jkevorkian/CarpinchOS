@@ -125,6 +125,8 @@ t_entrada_tlb *reemplazar_entrada_tlb(t_entrada_tp *entrada_vieja_tp, t_entrada_
 	entrada_tlb->id = entrada_nueva_tp->id;
 	entrada_tlb->pagina = entrada_nueva_tp->pagina;
 	entrada_tlb->marco = entrada_nueva_tp->marco;
+
+	loggear_tlb();
 	
 	return entrada_tlb;
 }
@@ -199,6 +201,8 @@ t_entrada_tlb* asignar_entrada_tlb(t_entrada_tp *entrada_tp) {
 	entrada_tlb->id = entrada_tp->id;
 	entrada_tlb->pagina = entrada_tp->pagina;
 	entrada_tlb->marco = entrada_tp->marco;
+
+	loggear_tlb();
 	
 	return entrada_tlb;
 }
@@ -327,4 +331,19 @@ void liberar_control_tlb() {
 		entrada = tlb.mapa[i];
 		pthread_mutex_unlock(&entrada->mutex);
 	}
+}
+
+void loggear_tlb() {
+	log_info(logger, "Imprimo valores de tlb");
+	pthread_mutex_lock(&mutex_asignacion_tlb);
+	for(int i = 0; i < tlb.cant_entradas; i++) {
+		t_entrada_tlb* entrada = tlb.mapa[i];
+		if(entrada->id == 0){
+			log_info(logger, "Entrada:%d\tEstado:Libre\tCarpincho:%c\tPagina:%c\tMarco:%c\n", i, '-', '-', '-');
+		}
+		else {
+			log_info(logger, "Entrada:%d\tEstado:Ocupado\tCarpincho:%d\tPagina:%d\tMarco:%d\n", i, entrada->id, entrada->pagina, entrada->marco);
+		}
+	}
+	pthread_mutex_unlock(&mutex_asignacion_tlb);
 }

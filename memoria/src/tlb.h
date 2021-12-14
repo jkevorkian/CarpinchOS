@@ -69,4 +69,6 @@ t_entrada_tlb* reemplazar_entrada_tlb(t_entrada_tp *entrada_vieja_tp, t_entrada_
 void entrada_nueva(t_entrada_tlb*, t_entrada_tp *);
 t_entrada_tlb* asignar_entrada_tlb(t_entrada_tp *);
 
+void loggear_tlb();
+
 #endif /* _TLB_H_ */

@@ -101,6 +101,8 @@ void *inicio_memoria(uint32_t nro_marco, uint32_t offset) {
 }
 
 void loggear_pagina(t_log *logger, void *pagina) {
+	return;
+	
 	if(config_memoria.tamanio_pagina != 32) {
 		log_info(logger, "No puedo loggear paginas de tamanio distinto de 32");
 		return;
@@ -172,4 +174,17 @@ void print_marcos() {
 			);
 	}
 	pthread_mutex_unlock(&mutex_asignacion_marcos);
+}
+
+void print_marcos_clock() {
+	log_info(logger, "Loggeo marcos de la memoria");
+	for(int i = 0; i < config_memoria.cant_marcos; i++) {
+		log_info(logger, "Marco %d. Id %d. Nro. pagina %d. Modif: %d. Uso: %d",
+			memoria_ram.mapa_fisico[i]->nro_real,
+			memoria_ram.mapa_fisico[i]->duenio,
+			memoria_ram.mapa_fisico[i]->pagina_duenio,
+			memoria_ram.mapa_fisico[i]->bit_modificado,
+			memoria_ram.mapa_fisico[i]->bit_uso
+			);
+	}
 }
