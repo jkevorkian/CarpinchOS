@@ -23,6 +23,8 @@ void agregar_ready(carpincho* carp) {
 	grado_multiprogramacion--;
 	pthread_mutex_unlock(&mutex_lista_ready);
 
+	carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");
+
 	log_info(logger_colas, " \tAgregado a ready el carpincho %d", carp->id);
 }
 
@@ -103,6 +105,8 @@ carpincho* quitar_ready() {
 	index--;
 
 	if(!strcmp(algoritmo_planificacion,"SJF")) {
+		log_info(logger_colas, "Proximo carpincho a eliminar elejido mediante SJF");
+
 		while(index >= 0) {
 			carpincho* posible_carp = (carpincho*)list_get(lista_ready, index);
 
@@ -114,12 +118,16 @@ carpincho* quitar_ready() {
 			index--;
 		}
 	} else { //HRRN
+		log_info(logger_colas, "Proximo carpincho a eliminar elejido mediante HRRN");
+
 		char* tiempo_actual = temporal_get_string_time("%H:%M:%S:%MS");
 		float HRRN_carp = calcular_HRRN(carp, tiempo_actual);
 
 		while(index >= 0) {
 			carpincho* posible_carp = (carpincho*)list_get(lista_ready, index);
 			float HRRN_posible_carp = calcular_HRRN(posible_carp, tiempo_actual);
+
+			log_info(logger_colas, "HRRN carp %d: %f - HRRN carp %d: %f", carp->id, HRRN_carp, posible_carp->id, HRRN_posible_carp);
 
 			if(HRRN_posible_carp >= HRRN_carp) {
 				carp = posible_carp;

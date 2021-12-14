@@ -286,6 +286,7 @@ void* cpu() {
 						free(carp->tiempo_llegada);
 						free(carp);
 						grado_multiprogramacion++;
+						sem_post(&multiprogramacion);
 						carpincho_finalizado = true;
 						seguir = false;
 						log_info(logger, "El carpincho ha sido finalizado");

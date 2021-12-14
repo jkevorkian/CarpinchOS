@@ -16,7 +16,6 @@ void* planificador_largo_plazo() {
 
 		queue_is_empty(cola_suspendidosReady) ? (carp = quitar_new()) : (carp = quitar_suspendidosReady());
 
-		carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");
 		agregar_ready(carp);
 	}
 }

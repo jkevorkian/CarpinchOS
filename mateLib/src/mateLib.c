@@ -104,7 +104,7 @@ int mate_call_io(mate_instance *lib_ref, char *io, void *msg)
 {
 	t_mensaje *mensaje_out = crear_mensaje(CALL_IO);
 	agregar_a_mensaje(mensaje_out, "%s", io);
-	agregar_a_mensaje(mensaje_out, "%s", (char *)msg);
+	//agregar_a_mensaje(mensaje_out, "%s", (char *)msg);
 	enviar_mensaje(lib_ref->socket, mensaje_out);
 	liberar_mensaje_out(mensaje_out);
 	t_list *mensaje_in = recibir_mensaje(lib_ref->socket);

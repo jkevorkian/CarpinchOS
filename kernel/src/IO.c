@@ -41,7 +41,7 @@ void* manejador_io(void* d) {
 		carpincho *carp = (carpincho*)queue_pop(disp->cola_espera);
 		pthread_mutex_unlock(&disp->mutex_espera);
 
-		sleep(disp->duracion);
+		sleep(disp->duracion/1000);
 
 		log_info(logger, "El carpincho %d finalizo io", carp->id);
 		carp->responder = true;

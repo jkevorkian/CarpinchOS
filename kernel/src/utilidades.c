@@ -1,5 +1,15 @@
 #include "utilidades.h"
 
+float calcular_HRRN(carpincho* carp, char* tiempo_actual) {
+	int tiempo_espera = obtener_rafaga_real(carp->tiempo_llegada, tiempo_actual);
+	log_info(logger_colas, "Carp %d: Tiempo_espera = %d - Estimacion proxima rafaga = %d", carp->id, tiempo_espera, (int)carp->estimacion_proxima_rafaga);
+	return 1 + (tiempo_espera / carp->estimacion_proxima_rafaga); // (s+w)/s = 1 + w/s
+}
+
+double obtener_estimacion_proxima_rafaga(int rafaga_real, int estimacion) {
+	return alfa*rafaga_real + (1-alfa)*estimacion;
+}
+
 int obtener_rafaga_real(char *tiempo_i, char *tiempo_f) { //El tiempo tiene el formato "12:51:59:331" Hora:Minuto:Segundo:MiliSegundo
 	char** tiempo_inicio = string_split(tiempo_i, ":");
 	char** tiempo_fin = string_split(tiempo_f, ":");
@@ -12,10 +22,6 @@ int obtener_rafaga_real(char *tiempo_i, char *tiempo_f) { //El tiempo tiene el f
 	liberar_split(tiempo_fin);
 
 	return (((tiempo_rafaga[0]*60 + tiempo_rafaga[1])*60 + tiempo_rafaga[2]))*1000 + tiempo_rafaga[3];
-}
-
-double obtener_estimacion_proxima_rafaga(int rafaga_real, int estimacion) {
-	return alfa*rafaga_real + (1-alfa)*estimacion;
 }
 
 void liberar_split(char** split) {
@@ -46,11 +52,6 @@ void iniciar_semaforo(char* nombre, int valor) {
 		log_info(logger, "Iniciado exitosamente el semaforo: %s - Valor inicial %d", sem->nombre, sem->instancias_iniciadas);
 	} else
 		log_info(logger, "El semaforo ya estaba inicializado");
-}
-
-float calcular_HRRN(carpincho* carp, char* tiempo_actual) {
-	int tiempo_espera = obtener_rafaga_real(carp->tiempo_llegada, tiempo_actual);
-	return 1 + (tiempo_espera / carp->estimacion_proxima_rafaga); // (s+w)/s = 1 + w/s
 }
 
 int encontrar_carpincho(t_list *lista, carpincho *carp_buscar) {

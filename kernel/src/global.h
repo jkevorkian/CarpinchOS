@@ -16,7 +16,7 @@
 #include <commons/temporal.h>
 #include <utils/sockets.h>
 
-#define MEMORIA_ACTIVADA 1
+#define MEMORIA_ACTIVADA 0
 #define DEADLOCK_ACTIVADO 0
 
 #define LOGUEAR_MENSAJES_INICIALIZADOR 0
@@ -78,8 +78,8 @@ int id_proximo_carpincho;
 /////////////PLANIFICACION/////////////
 
 char *algoritmo_planificacion;
-int grado_multiprogramacion, grado_multiprocesamiento, estimacion_inicial;
-double alfa;
+int grado_multiprogramacion, grado_multiprocesamiento;
+double alfa, estimacion_inicial;
 
 int id_proximo_carpincho, id_proximo_semaforo;
 
