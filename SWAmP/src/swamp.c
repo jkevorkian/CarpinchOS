@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 						log_info(logger, "Memoria me pidio actualizar la pagina % del carpincho %d", (uint32_t)list_get(mensaje_in, 2), (uint32_t)list_get(mensaje_in, 1));
 						char* buffer;
 						buffer = malloc(pagina_size);
-						memcpy(buffer, (void *)list_get(mensaje_in, 3), pagina_size);
+						memcpy(buffer, (void *)list_get(mensaje_in, 4), pagina_size);	// Actualice el 3 por el 4 segun lo que cambie en las utils
 						loggear_pagina(logger, buffer);
 						int aux = recibir_carpincho((int)list_get(mensaje_in, 1), (int)list_get(mensaje_in, 2), buffer, tabla_paginas, particiones);
 						//printf("El contenido de la pagina es %s \n",buffer);
