@@ -264,15 +264,16 @@ int mate_memfree(mate_instance *lib_ref, mate_pointer addr) {
 int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size) {
 	if(!lib_ref->murio) {
 		t_mensaje *mensaje_out = crear_mensaje(MEM_READ);
-		agregar_a_mensaje(mensaje_out, "%d", origin);
+		agregar_a_mensaje(mensaje_out, "%d%d", origin, size);
 		enviar_mensaje(lib_ref->socket, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
 
 		t_list *mensaje_in = recibir_mensaje(lib_ref->socket);
 
-		if ((int)list_get(mensaje_in, 0) == DATA_CHAR) {
-			log_info(logger, "Carpincho %d: La memoria fue leida correctamente (%s)", lib_ref->id, list_get(mensaje_in, 1));
-			list_get(mensaje_in, 1);
+		if ((int)list_get(mensaje_in, 0) == DATA_PAGE) {
+			log_info(logger, "Carpincho %d: La memoria fue leida correctamente", lib_ref->id);
+			memcpy(dest, list_get(mensaje_in, 2), size);
+			data_bloque(list_get(mensaje_in, 2), (int)list_get(mensaje_in, 1));
 		} else {
 			log_error(logger, "Carpincho %d: Error al leer la memoria (Codigo de error: %s - %d)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)), (int)list_get(mensaje_in, 1));
 			lib_ref->murio = true;
@@ -287,7 +288,7 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size) {
 	if(!lib_ref->murio) {
 		t_mensaje *mensaje_out = crear_mensaje(MEM_WRITE);
-		agregar_a_mensaje(mensaje_out, "%d%s", dest, origin);
+		agregar_a_mensaje(mensaje_out, "%d%sd", dest, size, origin);
 		enviar_mensaje(lib_ref->socket, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
 
@@ -295,13 +296,22 @@ int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int s
 
 		if ((int)list_get(mensaje_in, 0) == TODOOK) {
 			log_info(logger, "Carpincho %d: La memoria fue escrita correctamente", lib_ref->id);
-			list_get(mensaje_in, 1);
 		} else {
 			log_error(logger, "Carpincho %d: Error al escribir la memoria (Codigo de error: %s - %d)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)), (int)list_get(mensaje_in, 1));
 			lib_ref->murio = true;
 		}
-
 		liberar_mensaje_in(mensaje_in);
 	}
 	return 0;
+}
+
+void data_bloque(void *data, uint32_t tamanio) {
+	// log_info(logger, "Contenido data:");
+	printf("Contenido data: ");
+	uint8_t byte;
+	for(int i = 0; i < tamanio; i++) {
+		memcpy(&byte, data + i, 1);
+		printf("%3d|", byte);
+	}
+	printf("\n");
 }
