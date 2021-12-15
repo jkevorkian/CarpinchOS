@@ -95,7 +95,7 @@ int buscar_io(char* nombre) {
 	while(index >= 0) {
 		IO *io = (IO*)list_get(lista_IO, index);
 
-		if(!strcmp(nombre, io->nombre))
+		if(!strcasecmp(nombre, io->nombre))
 			return index;
 
 		index--;
@@ -166,29 +166,12 @@ void hacer_posts_semaforo(sem_deadlock *semaforo_asignado, carpincho* carp) {
 					desbloquear(carp_desbloquear);
 					carp_desbloquear->responder = true;
 					carp_desbloquear->id_semaforo_bloqueante = -1;
-				}//
+				}
 
 				semaforo_asignado->cantidad_asignada--;
 			}
 		}
 	pthread_mutex_unlock(&sem->mutex_espera);
-
-	/*pthread_mutex_lock(&sem->mutex_espera);
-	if (queue_is_empty(sem->cola_espera)){
-		log_error(logger, "ERROR EN EL DEADLOCK: nunca se deberia haber ingresado aca, sumando instancias iniciadas a un semaforo que bloqueaba un proceso en deadlock!");
-		sem->instancias_iniciadas++;
-	}
-	else {
-		while(semaforo_asignado->cantidad_asignada > 0){
-			carpincho *carp_a_desbloquear = queue_pop(sem->cola_espera);
-			desbloquear(carp_a_desbloquear);
-			carp_a_desbloquear->responder = true;
-			carp_a_desbloquear->id_semaforo_bloqueante = -1;
-			semaforo_asignado->cantidad_asignada--;
-		}
-
-	}
-	pthread_mutex_unlock(&sem->mutex_espera);*/
 }
 
 void liberar_lista(t_list* lista) {
@@ -213,6 +196,8 @@ void* informador() {
 
 		log_info(logger_colas, "--------------------------------------------------------");
 		log_info(logger_colas, "LISTANDO INFORMACION SOBRE LA PLANIFICACION");
+		log_info(logger_colas, "Cantidad de carpinchos iniciados: %d", mate_init);
+		log_info(logger_colas, "Cantidad de carpinchos finalizados: %d", mate_close);
 		log_info(logger_colas, "Grado Multiprogramacion Actual: %d", grado_multiprogramacion);
 		log_info(logger_colas, "Grado Multiprocesamiento Actual: %d", grado_multiprocesamiento);
 		log_info(logger_colas, "Cantidad de carpinchos en new: %d", queue_size(cola_new));

@@ -177,11 +177,15 @@ int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
 	close(carp_matar->socket_mateLib);
 	close(carp_matar->socket_memoria);
 	free(carp_matar->tiempo_llegada);
-	//free(carp_matar);
+	//free(carp_matar);(%d, %d)", grado_multiprogramacion, mate_close
 	carp_matar->id = -1;
 	grado_multiprogramacion++;
 	sem_post(&multiprogramacion);
+	mate_close++;
 
+	if(LOGUEAR_MENSAJES_DEADLOCK)
+		//log_info(logger, "matando el carpincho %d (%d, %d)", carp_matar->id, grado_multiprogramacion, mate_close);
+		log_info(logger, "matando el carpincho %d", carp_matar->id);
 	return 0;
 }
 

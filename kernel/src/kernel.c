@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
+			mate_init++;
 		}
 	}
 

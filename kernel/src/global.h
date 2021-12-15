@@ -16,14 +16,14 @@
 #include <commons/temporal.h>
 #include <utils/sockets.h>
 
-#define MEMORIA_ACTIVADA 0
-#define DEADLOCK_ACTIVADO 1
 
 #define LOGUEAR_MENSAJES_INICIALIZADOR 0
-#define LOGUEAR_MENSAJES_COLAS 0
 #define LOGUEAR_MENSAJES_DEADLOCK 1
 
 #define INFORMADOR_LISTAS 0
+
+int MEMORIA_ACTIVADA, DEADLOCK_ACTIVADO, LOGUEAR_MENSAJES_COLAS;
+int mate_init, mate_close;
 
 //carpincho
 typedef struct {

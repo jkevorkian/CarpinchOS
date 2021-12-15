@@ -39,6 +39,8 @@ int inicializar_kernel(char* direccion_config) {
 
 	id_proximo_carpincho = 0;
 	id_proximo_semaforo = 0;
+	mate_init = 0;
+	mate_close = 0;
 
 	if(INFORMADOR_LISTAS)
 		pthread_create(&hilo_informador, NULL, informador, NULL);
@@ -59,7 +61,14 @@ void leer_configuraciones() {
 	grado_multiprocesamiento 	= config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
 	alfa 						= config_get_double_value(config, "ALFA");
 	estimacion_inicial 			= config_get_double_value(config, "ESTIMACION_INICIAL");
-	tiempo_deadlock = config_get_int_value(config, "TIEMPO_DEADLOCK");
+	tiempo_deadlock 			= config_get_int_value(config, "TIEMPO_DEADLOCK");
+
+	MEMORIA_ACTIVADA 			= config_get_int_value(config, "MEMORIA_ACTIVADA");
+	DEADLOCK_ACTIVADO 			= config_get_int_value(config, "DEADLOCK_ACTIVADO");
+	LOGUEAR_MENSAJES_COLAS		= config_get_int_value(config, "LOGUEAR_MENSAJES_COLAS");
+
+	if(INFORMADOR_LISTAS)
+		LOGUEAR_MENSAJES_COLAS = 1;
 
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tConfiguracion leida correctamente");
