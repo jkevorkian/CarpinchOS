@@ -20,7 +20,6 @@ void agregar_ready(carpincho* carp) {
 	pthread_mutex_lock(&mutex_lista_ready);
 	list_add(lista_ready, carp);
 	sem_post(&carpinchos_ready);
-	grado_multiprogramacion--;
 	pthread_mutex_unlock(&mutex_lista_ready);
 
 	carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");

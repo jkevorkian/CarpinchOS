@@ -12,8 +12,9 @@ void* planificador_largo_plazo() {
 	while(1){
 		sem_wait(&carpinchos_new);
 		sem_wait(&multiprogramacion);
-		carpincho* carp;
+		grado_multiprogramacion--;
 
+		carpincho* carp;
 		queue_is_empty(cola_suspendidosReady) ? (carp = quitar_new()) : (carp = quitar_suspendidosReady());
 
 		agregar_ready(carp);

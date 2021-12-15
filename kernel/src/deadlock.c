@@ -177,7 +177,7 @@ int matar_proximo_carpincho(t_list *carpinchos_deadlock) {
 	close(carp_matar->socket_mateLib);
 	close(carp_matar->socket_memoria);
 	free(carp_matar->tiempo_llegada);
-	//free(carp_matar);(%d, %d)", grado_multiprogramacion, mate_close
+	//free(carp_matar);
 	carp_matar->id = -1;
 	grado_multiprogramacion++;
 	sem_post(&multiprogramacion);
