@@ -14,7 +14,7 @@ void *detectar_deadlock(void* d) {
 		log_info(logger, "\tDetector de deadLock iniciado exitosamente");
 
 	while (1) {
-		sleep(tiempo_deadlock / 1000);
+		usleep(tiempo_deadlock * 1000);
 		log_warning(logger, "Corriendo algoritmo de deteccion de DeadLock");
 		algoritmo_deteccion();
 

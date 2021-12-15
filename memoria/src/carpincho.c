@@ -11,19 +11,19 @@ void *rutina_carpincho(void *info_carpincho) {
 
 	t_list *mensaje_in;
 	t_mensaje* mensaje_out;
-	uint32_t desplazamiento_d;
-	char* contenido;
+	void* contenido;
 	uint32_t dir_logica;
+	uint32_t tamanio;
 
 	while(seguir) {
 		mensaje_in = recibir_mensaje(socket);
 
 		switch((int)list_get(mensaje_in, 0)) { // protocolo del mensaje
 		case MEM_ALLOC:
-			log_info(logger, "Me llego un mem_alloc de tamanio %d", (int)list_get(mensaje_in, 1));
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			tamanio = (int)list_get(mensaje_in, 1);
+			log_warning(logger, "Me llego un mem_alloc de tamanio %d", tamanio);
 			
-			if((dir_logica = mem_alloc(carpincho->id, desplazamiento_d))) {
+			if((dir_logica = mem_alloc(carpincho->id, tamanio))) {
 				mensaje_out = crear_mensaje(DATA_INT);
 				agregar_a_mensaje(mensaje_out, "%d", dir_logica);
 			}
@@ -32,10 +32,10 @@ void *rutina_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_FREE:
-			log_info(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			log_warning(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
+			dir_logica = (int)list_get(mensaje_in, 1);
 			
-			if(mem_free(carpincho->id, desplazamiento_d))
+			if(mem_free(carpincho->id, dir_logica))
 				mensaje_out = crear_mensaje(TODOOK);
 			else {
 				log_info(logger, "SEGMENTATION FAULT");
@@ -47,13 +47,14 @@ void *rutina_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_READ:
-			log_info(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			log_warning(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
+			dir_logica = (int)list_get(mensaje_in, 1);
+			tamanio = (int)list_get(mensaje_in, 2);
 			
-			if((contenido = mem_read(carpincho->id, desplazamiento_d))) {
-				log_info(logger, "El contenido del alloc es: %s", contenido);
-				mensaje_out = crear_mensaje(DATA_CHAR);
-				agregar_a_mensaje(mensaje_out, "%s", contenido);
+			if((contenido = mem_read(carpincho->id, dir_logica, tamanio))) {
+				loggear_data(contenido, tamanio);
+				mensaje_out = crear_mensaje(DATA_PAGE);
+				agregar_a_mensaje(mensaje_out, "%sd", tamanio, contenido);
 			}
 			else {
 				log_info(logger, "SEGMENTATION FAULT");
@@ -65,12 +66,13 @@ void *rutina_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case MEM_WRITE:
-			log_info(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
-			log_info(logger, "El contenido es %s", (char *)list_get(mensaje_in, 2));
-			contenido = (char *)list_get(mensaje_in, 2);
-			desplazamiento_d = (int)list_get(mensaje_in, 1);
+			log_warning(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
+			dir_logica = (int)list_get(mensaje_in, 1);
+			tamanio = (int)list_get(mensaje_in, 2);
+			contenido = list_get(mensaje_in, 3);
 
-			if(mem_write(carpincho->id, desplazamiento_d, contenido)) {
+			if(mem_write(carpincho->id, dir_logica, contenido, tamanio)) {
+				loggear_data(contenido, tamanio);
 				mensaje_out = crear_mensaje(TODOOK);
 			}
 			else {
@@ -83,7 +85,7 @@ void *rutina_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case SUSPEND:
-			log_info(logger, "Me llego una orden de suspension");
+			log_warning(logger, "Me llego una orden de suspension");
 			
 			suspend(carpincho->id);
 			
@@ -91,7 +93,7 @@ void *rutina_carpincho(void *info_carpincho) {
 			enviar_mensaje(socket, mensaje_out);
 			break;
 		case UNSUSPEND:
-			log_info(logger, "Me llego un permiso para volver a memoria (unsuspend)");
+			log_warning(logger, "Me llego un permiso para volver a memoria (unsuspend)");
 			unsuspend(carpincho->id);
 
 			mensaje_out = crear_mensaje(TODOOK);
@@ -100,7 +102,7 @@ void *rutina_carpincho(void *info_carpincho) {
 		case MATE_CLOSE:
 		default:
 			seguir = false;
-			log_info(logger, "Murio el carpincho, nos vemos.");
+			log_warning(logger, "Murio el carpincho, nos vemos.");
 			pthread_mutex_lock(&mutex_lista_carpinchos);
 			if(imprimo) {
 				print_marcos();

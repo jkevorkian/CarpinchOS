@@ -61,7 +61,7 @@ void* manejar_swap(void* socket_swap) {
 			if((uint32_t)list_get(mensaje_in, 0) == DATA_PAGE) {
 				mov->respuesta = true;
 				mov->buffer = malloc(config_memoria.tamanio_pagina);
-				memcpy(mov->buffer, (void *)list_get(mensaje_in, 1), config_memoria.tamanio_pagina);
+				memcpy(mov->buffer, (void *)list_get(mensaje_in, 2), config_memoria.tamanio_pagina);
 			}
         	break;
 		case RM_PAGE:

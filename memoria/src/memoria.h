@@ -100,6 +100,8 @@ t_entrada_tp *pagina_de_carpincho(uint32_t id, uint32_t nro_pagina);
 // Para testear
 void loggear_pagina(t_log *logger, void *pagina);
 
+void loggear_data(void *data, uint32_t tamanio);
+
 void print_marcos();
 void print_marcos_clock();
 

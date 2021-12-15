@@ -188,3 +188,15 @@ void print_marcos_clock() {
 			);
 	}
 }
+
+void loggear_data(void *data, uint32_t tamanio) {
+	// log_info(logger, "Contenido data:");
+	printf("Contenido data: ");
+	uint8_t byte;
+	for(int i = 0; i < tamanio; i++) {
+		memcpy(&byte, data + i, 1);
+		printf("%3d|", byte);
+		// log_info(logger, "\t\t%d", byte);
+	}
+	printf("\n");
+}

@@ -145,7 +145,7 @@ uint32_t mem_alloc(uint32_t id_carpincho, uint32_t tamanio) {
 	return main_heap + TAMANIO_HEAP; 
 }
 
-char *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
+void *mem_read(uint32_t id_carpincho, uint32_t dir_logica, uint32_t tamanio) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
 	// Verifico que el free es valido
@@ -155,25 +155,16 @@ char *mem_read(uint32_t id_carpincho, uint32_t dir_logica) {
 	}
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
-	
-	void *data;
-	char *aux = obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio_alocado);
 
-	uint32_t bytes_ocupados = tamanio_alocado;
-	while(aux[bytes_ocupados - 1] == '\0' && bytes_ocupados != 0) {
-		bytes_ocupados--;
+	if(tamanio_alocado < tamanio) {
+		log_warning(logger, "El tamanio pedido es mayor que el tamanio asignado. %d >> %d", tamanio, tamanio_alocado);
+		return false;
 	}
-
-	data = malloc(bytes_ocupados + 1);
-	memcpy(data, aux, bytes_ocupados);
-	char relleno = '\0';
-	memcpy(data + bytes_ocupados, &relleno, 1);
-	free(aux);
-
-	return data;
+	
+	return obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio);
 }
 
-bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
+bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido, uint32_t tamanio) {
 	uint32_t dir_logica_heap = dir_logica - TAMANIO_HEAP;
 
 	// Verifico que el free es valido
@@ -183,24 +174,13 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido) {
 	}
 	
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
-	uint32_t tamanio_data = strlen(contenido);
 
-	if(tamanio_alocado < tamanio_data) {
-		log_warning(logger, "El contenido es mayor al tamanio asignado. %d >> %d", tamanio_data, tamanio_alocado);
+	if(tamanio_alocado < tamanio) {
+		log_warning(logger, "El tamanio pedido es mayor que el tamanio asignado. %d >> %d", tamanio, tamanio_alocado);
 		return false;
 	}
-	uint32_t diferencia_tamanios = tamanio_alocado - tamanio_data;
 
-	void *data = malloc(tamanio_alocado);
-	memcpy(data, contenido, tamanio_data);
-	char relleno = '\0';
-	
-	while(diferencia_tamanios > 0) {
-		memcpy(data + tamanio_alocado - diferencia_tamanios, &relleno, 1);
-		diferencia_tamanios--;
-	}
-
-	actualizar_bloque_paginacion(id_carpincho, dir_logica, data, tamanio_alocado);
+	actualizar_bloque_paginacion(id_carpincho, dir_logica, contenido, tamanio);
 	return true;
 }
 
