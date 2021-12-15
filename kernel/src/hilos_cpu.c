@@ -57,11 +57,12 @@ void* cpu() {
 							mensaje_out = crear_mensaje(parametro);									   //creo el mismo mensaje que recibi
 							agregar_a_mensaje(mensaje_out, "%d", (int)list_get(mensaje_in, 1));		   //le agrego el parametro recibido
 
-							if (parametro == MEM_WRITE){												   //si es un MEM_WRITE mateLib manda un parametro extra,
-								agregar_a_mensaje(mensaje_out, "%s", (char *)list_get(mensaje_in, 2)); //asi que tengo que agregarlo
-								log_info(logger, "Carpincho %d creo el mensaje %s, va a escribir en la direccion %d el texto %s", carp->id,  string_desde_mensaje(parametro),  (int)list_get(mensaje_in, 1), (char*)list_get(mensaje_in, 2));
-							} else
-								log_info(logger, "Carpincho %d creo el mensaje %s, agrega el parametro %d", carp->id,  string_desde_mensaje(parametro),  (int)list_get(mensaje_in, 1));
+							if (parametro == MEM_WRITE)											   //si es un MEM_WRITE mateLib manda un parametro extra,
+								agregar_a_mensaje(mensaje_out, "%sd", list_get(mensaje_in, 2), list_get(mensaje_in, 3)); //asi que tengo que agregarlo
+							else if (parametro == MEM_READ)
+								agregar_a_mensaje(mensaje_out, "%d", list_get(mensaje_in, 2));
+
+							log_info(logger, "Carpincho %d creo el mensaje %s", carp->id,  string_desde_mensaje(parametro));
 
 							enviar_mensaje(carp->socket_memoria, mensaje_out);
 							liberar_mensaje_out(mensaje_out);
@@ -73,8 +74,8 @@ void* cpu() {
 							int codigo_respuesta = (int)list_get(mensaje_mateLib, 0);
 
 							mensaje_out = crear_mensaje(codigo_respuesta); //tal cual llega genero el mismo mensaje para enviarselo a mateLib
-							if (codigo_respuesta == DATA_CHAR)					//si es un MEM_READ la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
-								agregar_a_mensaje(mensaje_out, "%s", (char *)list_get(mensaje_mateLib, 1));
+							if (codigo_respuesta == DATA_PAGE)					//si es un MEM_READ la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
+								agregar_a_mensaje(mensaje_out, "%sd", list_get(mensaje_mateLib, 1), list_get(mensaje_mateLib, 2));
 							if (codigo_respuesta == DATA_INT || codigo_respuesta == SEG_FAULT)					//si es un MEM_ALLOC la memoria me devuelve el mensaje DATA con un parametro, asi que en ese caso tengo que agregarlo
 								agregar_a_mensaje(mensaje_out, "%d", (char *)list_get(mensaje_mateLib, 1));
 

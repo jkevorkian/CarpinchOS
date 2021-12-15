@@ -2,6 +2,8 @@
 
 t_log *logger;
 int id_proxima_instancia = 0;
+void data_bloque(void *data, uint32_t tamanio);
+
 //---------------------------FUNCIONES GENERALES----------------------
 
 int mate_init(mate_instance *lib_ref, char *config)
