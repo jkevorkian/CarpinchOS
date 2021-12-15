@@ -64,6 +64,8 @@ int main() {
 			}
 			list_clean(instancias);
 			id_inst = 0;
+		} else if(!strcasecmp(buffer_consola, "info" )) {
+			crear_conexion_cliente(ip_kernel, "10217");
 		} else {
 			char** input = string_split(buffer_consola, " ");
 
@@ -110,9 +112,11 @@ int main() {
 
 					t_list* mensaje_mateLib = recibir_mensaje(inst->socket);
 
-					if((int)list_get(mensaje_mateLib, 0) == DATA)
-						log_info(logger, "Mensaje Recibido DATA | %s", (char *)list_get(mensaje_mateLib, 1));
-					else
+					if((int)list_get(mensaje_mateLib, 0) == DATA_CHAR)
+						log_info(logger, "Mensaje Recibido DATA_CHAR | %s", (char *)list_get(mensaje_mateLib, 1));
+					else if((int)list_get(mensaje_mateLib, 0) == DATA_INT)
+						log_info(logger, "Mensaje Recibido DATA_INT | %d", (int)list_get(mensaje_mateLib, 1));
+					else					
 						log_info(logger, "Mensaje Recibido %s", string_desde_mensaje((int)list_get(mensaje_mateLib, 0)));
 
 					liberar_mensaje_in(mensaje_mateLib);
