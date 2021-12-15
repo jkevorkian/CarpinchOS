@@ -211,7 +211,6 @@ void recibir_parametros(int socket, t_list* parametros, char* formato) {
 		ptr_form++;
 
 		uint32_t tamanio_buffer;
-		uint32_t num_cadenas;
 		switch(*ptr_form) {
 		case 'd':
 			tamanio_buffer = sizeof(uint32_t);
@@ -219,15 +218,15 @@ void recibir_parametros(int socket, t_list* parametros, char* formato) {
 			list_add(parametros, (void *)parametro);
 			break;
 		case 's':
-			if(*(ptr_form + 1) == 's') num_cadenas = (uint32_t)list_get(parametros, list_size(parametros) - 1);
-			else num_cadenas = 1;
-			for(int i = 0; i < num_cadenas; i++) {
-				tamanio_buffer = sizeof(uint32_t);
-				recv(socket, &tamanio_buffer, tamanio_buffer, MSG_WAITALL);
-				char *buffer = malloc(tamanio_buffer * sizeof(char));
-				recv(socket, buffer, tamanio_buffer, MSG_WAITALL);
-				list_add(parametros, buffer);
-			}
+			tamanio_buffer = sizeof(uint32_t);
+			recv(socket, &tamanio_buffer, tamanio_buffer, MSG_WAITALL);
+
+			char *buffer = malloc(tamanio_buffer * sizeof(char));
+			recv(socket, buffer, tamanio_buffer, MSG_WAITALL);
+			
+			if(*(ptr_form + 1) == 'd')
+				list_add(parametros, (void *)tamanio_buffer);
+			list_add(parametros, buffer);
 			break;
 		}
 	}
@@ -286,7 +285,7 @@ t_list* recibir_mensaje(int socket) {
 	case CALL_IO:		recibir_parametros(socket, lista_parametros, S_CALL_IO);		break;
 	case DATA_CHAR:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);		break;
 	case DATA_INT:		recibir_parametros(socket, lista_parametros, S_DATA_INT);		break;
-	case DATA_PAGE:		recibir_parametros(socket, lista_parametros, S_DATA_CHAR);		break;
+	case DATA_PAGE:		recibir_parametros(socket, lista_parametros, S_DATA_PAGE);		break;
 	case SEND_PORT:		recibir_parametros(socket, lista_parametros, S_SEND_PORT);		break;
 
 	case SUSPEND:

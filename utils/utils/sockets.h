@@ -25,8 +25,8 @@
 // Memoria
 #define S_MEM_ALLOC		"%d"		// TAMANIO
 #define S_MEM_FREE		"%d"		// DIR_LOGICA
-#define S_MEM_READ		"%d"		// DIR_LOGICA
-#define S_MEM_WRITE		"%d%s"		// DIR_LOGICA + CONTENIDO_STRING
+#define S_MEM_READ		"%d%d"		// DIR_LOGICA + TAMANIO
+#define S_MEM_WRITE		"%d%sd"		// DIR_LOGICA + TAMANIO_CONTENIDO + CONTENIDO
 // SWAMP
 #define S_NEW_PAGE		"%d%d"		// ID + NRO_PAGINAS
 #define S_GET_PAGE		"%d%d"		// ID + NRO_PAGINA
