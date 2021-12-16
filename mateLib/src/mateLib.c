@@ -11,12 +11,14 @@ int mate_init(mate_instance *lib_ref, char *config) {
 
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
 
-	char *ip_kernel, *ip_memoria, *puerto_kernel, *puerto_memoria;
+	char *ip_kernel 					= config_get_string_value(mateConfig, "IP_KERNEL");
+	char *ip_memoria 					= config_get_string_value(mateConfig, "IP_MEMORIA");
+	char *puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
+	char *puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
 
-	ip_kernel 					= config_get_string_value(mateConfig, "IP_KERNEL");
-	ip_memoria 					= config_get_string_value(mateConfig, "IP_MEMORIA");
-	puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
-	puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
+	lib_ref->id = id_proxima_instancia;
+	lib_ref->murio = false;
+	id_proxima_instancia++;
 
 	int socket_auxiliar_kernel = crear_conexion_cliente(ip_kernel, puerto_kernel);
 
@@ -32,33 +34,35 @@ int mate_init(mate_instance *lib_ref, char *config) {
 			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 			lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
-		} else {
-			log_error(logger, "Error en la comunicacion con el kernel, intentando con la memoria");
-			int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
-
-			if (validar_socket(socket_auxiliar_memoria, logger)) {
-				log_info(logger, "Socket auxiliar con la memoria funcionando");
-
-				t_list *mensaje_in = recibir_mensaje(socket_auxiliar_memoria);
-
-				if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
-					log_info(logger, "Recibido el puerto para comunicacion exclusiva con la memoria");
-
-					char puerto[7];
-					sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
-
-					lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
-					data_socket(lib_ref->socket, logger);
-				} else
-					log_error(logger, "Error en la comunicacion con la memoria");
-			}
 		}
-		liberar_mensaje_in(mensaje_in);
-	}
 
-	lib_ref->id = id_proxima_instancia;
-	lib_ref->murio = false;
-	id_proxima_instancia++;
+		liberar_mensaje_in(mensaje_in);
+	} else {
+		log_error(logger, "Error en la comunicacion con el kernel, intentando con la memoria");
+		int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
+
+		if (validar_socket(socket_auxiliar_memoria, logger)) {
+			log_info(logger, "Socket auxiliar con la memoria funcionando");
+
+			t_list *mensaje_in = recibir_mensaje(socket_auxiliar_memoria);
+
+			if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
+				log_info(logger, "Recibido el puerto para comunicacion exclusiva con la memoria");
+
+				char puerto[7];
+				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
+
+				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
+				data_socket(lib_ref->socket, logger);
+			} else {
+				log_error(logger, "Error en la comunicacion con la memoria");
+				lib_ref->murio = true;
+			}
+
+			liberar_mensaje_in(mensaje_in);
+		} else
+			lib_ref->murio = true;
+	}
 
 	return 0;
 }
