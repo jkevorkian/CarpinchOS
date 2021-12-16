@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 			seguir = false;
 		}
 		else {
-			log_warning(logger, "Se ha conectado un carpincho");
+			log_warning(logger, "Se ha conectado un carpincho (%d)", id_proximo_carpincho);
 
 			//creo la estructura para el nuevo carpincho
 			carpincho* nuevo_carpincho = malloc(sizeof(carpincho));
@@ -95,7 +95,7 @@ int crear_socket_carpincho(int socket_auxiliar_carpincho) {
 		liberar_mensaje_out(mensaje_out);
 
 		//espero a que el carpincho me hable y ese va a ser el socket por el cual nos vamos a comunicar
-		socket_mate_carpincho = esperar_cliente(socket_aux_carpincho);
+		//socket_mate_carpincho = esperar_cliente(socket_aux_carpincho);
 
 		close(socket_aux_carpincho);
 		close(socket_auxiliar_carpincho);

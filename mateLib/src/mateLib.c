@@ -6,10 +6,7 @@ void data_bloque(void *data, uint32_t tamanio);
 
 //---------------------------FUNCIONES GENERALES----------------------
 
-int mate_init(mate_instance *lib_ref, char *config)
-{
-	//Asigno un espacio de memoria a la referencia a un mate_instance que me pasa por parametro el carpincho
-
+int mate_init(mate_instance *lib_ref, char *config) {
 	t_config *mateConfig = config_create(config); //"../mateLib/mateLib.config"
 
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
@@ -21,73 +18,42 @@ int mate_init(mate_instance *lib_ref, char *config)
 	puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
 	puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
 
-	//intento conectar al socket público por default del kernel
-	int socket_auxiliar = crear_conexion_cliente(ip_kernel, puerto_kernel); //todavia son un define en el mateLib.h
+	int socket_auxiliar_kernel = crear_conexion_cliente(ip_kernel, puerto_kernel);
 
-	//este bool hace que se pueda intentar conectar a la memoria la lib CUANDO (a partir de que) FALLA EL KERNEL
-	bool fallo_kernel = true;
+	if (validar_socket(socket_auxiliar_kernel, logger)) {
+		log_info(logger, "Socket auxiliar con el kernel funcionando");
 
-	if (validar_socket(socket_auxiliar, logger))
-	{
-		log_info(logger, "Socket auxiliar funcionando");
+		t_list *mensaje_in = recibir_mensaje(socket_auxiliar_kernel);
 
-		//espera el mensaje de handshake entre el kernel y la lib, en el que el kernel tiene que enviar el nuevo puerto de conexión para que el carpincho se comunique
-		t_list *mensaje_in = recibir_mensaje(socket_auxiliar);
+		if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
+			log_info(logger, "Recibido el puerto para comunicacion exclusiva con el kernel");
 
-		printf("recibido un %d", (int)list_get(mensaje_in, 0));
-
-		//si el mensaje del handshake es el adecuado, se conecta al kernel ahora por el puerto recibido
-		if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-		{
-			fallo_kernel = false;
-
-			//las siguientes 2 lineas están para castear el puerto que llega como string a un int
 			char puerto[7];
 			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 			lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
-			data_socket(lib_ref->socket, logger);
-		}
-		else
-		{
-			log_error(logger, "Error en la comunicacion");
-			return 1;
-		}
+		} else {
+			log_error(logger, "Error en la comunicacion con el kernel, intentando con la memoria");
+			int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
 
+			if (validar_socket(socket_auxiliar_memoria, logger)) {
+				log_info(logger, "Socket auxiliar con la memoria funcionando");
+
+				t_list *mensaje_in = recibir_mensaje(socket_auxiliar_memoria);
+
+				if ((int)list_get(mensaje_in, 0) == SEND_PORT) {
+					log_info(logger, "Recibido el puerto para comunicacion exclusiva con la memoria");
+
+					char puerto[7];
+					sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
+
+					lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
+					data_socket(lib_ref->socket, logger);
+				} else
+					log_error(logger, "Error en la comunicacion con la memoria");
+			}
+		}
 		liberar_mensaje_in(mensaje_in);
-		close(socket_auxiliar);
-	}
-
-	if (fallo_kernel)
-	{
-		int socket_auxiliar = crear_conexion_cliente(ip_memoria,
-													 puerto_memoria); //todavia son un define en el mateLib.h
-
-		if (validar_socket(socket_auxiliar, logger))
-		{
-			log_info(logger, "Socket auxiliar funcionando");
-
-			t_list *mensaje_in = recibir_mensaje(socket_auxiliar);
-
-			if ((int)list_get(mensaje_in, 0) == SEND_PORT)
-			{ //el mensaje puede que sea SND_PO (por lo que vi en iniciar_servidor(), en servidor.c en la memoria, en rama-pato) pero como no aparece dentro de cod_op no lo  puse.
-				log_info(logger, "Puerto recibido");
-
-				char puerto[7];
-				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
-
-				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
-				data_socket(lib_ref->socket, logger);
-			}
-			else
-			{
-				log_error(logger, "Error en la comunicacion");
-				return 1;
-			}
-
-			liberar_mensaje_in(mensaje_in);
-			close(socket_auxiliar);
-		}
 	}
 
 	lib_ref->id = id_proxima_instancia;
