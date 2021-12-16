@@ -18,6 +18,14 @@ void* cpu() {
 		sem_wait(&carpinchos_running);
 		carpincho* carp = quitar_running();
 
+		if(carp->esperar_cliente) {
+			log_info(logger, "Carpincho %d creando conexion exclusiva", carp->id);
+			int socket_m = esperar_cliente(carp->socket_mateLib);
+			close(carp->socket_mateLib);
+			carp->socket_mateLib = socket_m;
+			carp->esperar_cliente = false;
+		}
+
 		char *tiempo_inicio = temporal_get_string_time("%H:%M:%S:%MS"); // "12:51:59:331"
 
 		log_info(logger, "Carpincho %d empezando a trabajar en el instante %s", carp->id, tiempo_inicio);

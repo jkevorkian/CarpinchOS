@@ -14,7 +14,7 @@ int inicializar_kernel(char* direccion_config) {
 	if(LOGUEAR_MENSAJES_INICIALIZADOR)
 		log_info(logger, "\tCreando el socket en la IP %s con Puerto %d", ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"));
 
-	socket_kernel = crear_conexion_servidor(ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"), 1);
+	socket_kernel = crear_conexion_servidor(ip_kernel, config_get_int_value(config, "PUERTO_ESCUCHA"), SOMAXCONN);
 
 	if(!validar_socket(socket_kernel, logger)) {
 		close(socket_kernel);

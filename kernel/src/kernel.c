@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
 			nuevo_carpincho->id_semaforo_bloqueante = -1;
 			nuevo_carpincho->debe_morir = false;
 			nuevo_carpincho->semaforos_asignados = list_create();
+			nuevo_carpincho->esperar_cliente = true;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;
@@ -78,8 +79,6 @@ int conectar_memoria(int socket_auxiliar_carpincho) {
 }
 
 int crear_socket_carpincho(int socket_auxiliar_carpincho) {
-	int socket_mate_carpincho = 0;
-
 	//creo un nuevo servidor en un puerto libre que asigne el SO
 	int socket_aux_carpincho = crear_conexion_servidor(ip_kernel, 0, 1);
 
@@ -88,18 +87,13 @@ int crear_socket_carpincho(int socket_auxiliar_carpincho) {
 		log_error(logger, "Error al crear un socket para comunicacion exclusiva con el carpincho");
 	} else {
 		//comunico al carpincho el puerto por el cual me tiene que hablar
-		//log_info(logger, "Devolviendo el puerto para el carpincho");
 		t_mensaje* mensaje_out = crear_mensaje(SEND_PORT);
 		agregar_a_mensaje(mensaje_out, "%d", puerto_desde_socket(socket_aux_carpincho));
 		enviar_mensaje(socket_auxiliar_carpincho, mensaje_out);
 		liberar_mensaje_out(mensaje_out);
 
-		//espero a que el carpincho me hable y ese va a ser el socket por el cual nos vamos a comunicar
-		//socket_mate_carpincho = esperar_cliente(socket_aux_carpincho);
-
-		close(socket_aux_carpincho);
 		close(socket_auxiliar_carpincho);
 	}
 
-	return socket_mate_carpincho;
+	return socket_aux_carpincho;
 }
