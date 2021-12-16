@@ -124,6 +124,7 @@ t_carpincho* crear_carpincho(uint32_t id) {
 	carpincho->tabla_paginas = list_create();
 	pthread_mutex_init(&carpincho->mutex_tabla, NULL);
 	carpincho->offset = 0;
+	carpincho->puntero_clock = 0;
 
 	pthread_mutex_lock(&mutex_lista_carpinchos);
 	list_add(lista_carpinchos, carpincho);

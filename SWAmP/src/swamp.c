@@ -31,6 +31,8 @@ int main(int argc, char *argv[]) {
 
 	remove("/home/utnso/SWAmP_files/swap1.bin");
 	remove("/home/utnso/SWAmP_files/swap2.bin");
+	remove("/home/utnso/SWAmP_files/swap3.bin");
+	remove("/home/utnso/SWAmP_files/swap4.bin");
 	rmdir("/home/utnso/SWAmP_files");
 	char* punto_montaje = "/home/utnso/SWAmP_files/";
 	mkdir(punto_montaje,0755);

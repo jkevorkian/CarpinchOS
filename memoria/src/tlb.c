@@ -42,6 +42,8 @@ void iniciar_tlb(t_config* config) {
 		}
 	}
 
+    mkdir(tlb.path_dump, 0755);
+
 	log_info(logger,"TLB inicializada. Nro de entradas: %d", tlb.cant_entradas);
 }
 
@@ -254,6 +256,7 @@ void print_tlb() {
 	log_info(logger, "Imprimo valores de tlb");
 	char* timestamp = temporal_get_string_time("%d/%m/%y %H:%M:%S");
     char* filename = string_from_format("%s/Dump_<%s>.dmp", tlb.path_dump, temporal_get_string_time("%d_%m_%y-%H_%M_%S"));
+
     FILE* dump_file = fopen(filename, "w");
 	if(!dump_file) {
 		log_warning(logger, "El archivo no pudo ser creado");

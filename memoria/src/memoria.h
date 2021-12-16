@@ -70,8 +70,9 @@ typedef struct {
     pthread_mutex_t mutex_tabla;
     
     uint32_t offset;
+    uint32_t puntero_clock;   // Para asignacion fija  
     // TLB
-    pthread_mutex_t mutex_tlb; // Revisar
+    pthread_mutex_t mutex_tlb;
     uint32_t cant_hit;
     uint32_t cant_miss;
 } t_carpincho;

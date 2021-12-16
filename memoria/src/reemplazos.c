@@ -2,14 +2,26 @@
 
 t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 	t_marco* marco_referencia;
-	uint32_t puntero_clock_inicial = memoria_ram.puntero_clock;
-	// log_info(logger, "Puntero clock en posicion inicial %d", memoria_ram.puntero_clock);
-	// print_marcos_clock();
+	t_carpincho *carpincho;
+	
+	uint32_t puntero_clock_inicial;
+
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL)
+		puntero_clock_inicial = memoria_ram.puntero_clock;
+	else {
+		carpincho = carpincho_de_lista(lista_paginas[0]->duenio);
+		puntero_clock_inicial = carpincho->puntero_clock;
+	}
+	
+	log_info(logger, "Puntero clock en posicion inicial %d. Nro paginas %d", puntero_clock_inicial, nro_paginas);
+	print_marcos_clock();
 
 	bool encontre_marco = false;
 	uint8_t ciclo = 0;
+	uint32_t puntero_clock = puntero_clock_inicial;
+
 	while(!encontre_marco) {
-		marco_referencia = lista_paginas[memoria_ram.puntero_clock];
+		marco_referencia = lista_paginas[puntero_clock];
 
 		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);
 		switch(ciclo) {
@@ -26,16 +38,30 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 		}
 		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
 
-		memoria_ram.puntero_clock++;
+		puntero_clock++;
+
+		if(puntero_clock == nro_paginas)
+			puntero_clock = 0;
+
+		if(puntero_clock == puntero_clock_inicial)
+			ciclo = ciclo ? 0 : 1;
+
+		/*memoria_ram.puntero_clock++;
 
 		if(memoria_ram.puntero_clock == nro_paginas)
 			memoria_ram.puntero_clock = 0;
 
 		if(memoria_ram.puntero_clock == puntero_clock_inicial)
-			ciclo = ciclo ? 0 : 1;
+			ciclo = ciclo ? 0 : 1;*/
 	}
-	// log_info(logger, "Puntero clock en posicion final %d", memoria_ram.puntero_clock);
-	// print_marcos_clock();
+	log_info(logger, "Puntero clock en posicion final %d", memoria_ram.puntero_clock);
+	print_marcos_clock();
+
+	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL)
+		memoria_ram.puntero_clock = puntero_clock;
+	else {
+		carpincho->puntero_clock = puntero_clock;
+	}
 	
 	return marco_referencia;
 }

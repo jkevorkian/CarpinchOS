@@ -7,6 +7,7 @@
 #include <stdio.h>   // sprintf
 #include <arpa/inet.h>
 #include <commons/string.h>
+#include <sys/stat.h>
 
 #include "reemplazos.h"
 

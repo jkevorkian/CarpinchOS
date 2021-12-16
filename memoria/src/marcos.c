@@ -289,6 +289,9 @@ void suspend(uint32_t id) {
 void unsuspend(uint32_t id) {
 	if(config_memoria.tipo_asignacion == DINAMICA_GLOBAL)
 		return;
+
+	t_carpincho *carpincho = carpincho_de_lista(id);
+	carpincho->puntero_clock = 0;
 	
 	pthread_mutex_lock(&mutex_asignacion_marcos);
 	for(int i = 0; i < config_memoria.cant_marcos_carpincho; i++) {

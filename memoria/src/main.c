@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 }
 
 void signal_handler_1(int sig) {	// SIGUSR1
-	// print_tlb();
+	print_tlb();
 	print_marcos();
 }
 
