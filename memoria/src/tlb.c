@@ -31,6 +31,7 @@ void iniciar_tlb(t_config* config) {
 	for(int i = 0; i < tlb.cant_entradas; i++) {
 		t_entrada_tlb* entrada = malloc(sizeof(t_entrada_tlb));
 		entrada->nro_entrada = i;
+		entrada->tiempo_lru = NULL;
 		entrada->id = 0;
 		entrada->pagina = -1;
 		entrada->marco = -1;
@@ -66,6 +67,10 @@ t_entrada_tlb *leer_tlb(t_entrada_tp *entrada_tp) {
 		historico_carpincho->cant_hit++;
 		tlb.cant_hit++;
 		if(tlb.algoritmo_reemplazo == LRU) {
+
+			if(entrada_tlb->tiempo_lru)
+				free(entrada_tlb->tiempo_lru);
+
 			entrada_tlb->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
 		}
 		log_info(logger, "TLB Hit - Carpincho #%d, Numero de pagina: %d, Numero de marco: %d", entrada_tp->id, entrada_tp->pagina, entrada_tp->marco);
@@ -117,6 +122,9 @@ t_entrada_tlb *reemplazar_entrada_tlb(t_entrada_tp *entrada_vieja_tp, t_entrada_
 		pthread_mutex_unlock(&mutex_fifo_tlb);
 	}
 	else {
+		if(entrada_tlb->tiempo_lru)
+			free(entrada_tlb->tiempo_lru);
+
 		entrada_tlb->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
 	}
 	// pthread_mutex_unlock(&entrada_tlb->mutex);
@@ -225,6 +233,9 @@ void entrada_nueva(t_entrada_tlb* entrada_tlb, t_entrada_tp *entrada_tp){
 		pthread_mutex_unlock(&mutex_fifo_tlb);
 	}
 	else {
+		if(entrada_tlb->tiempo_lru)
+			free(entrada_tlb->tiempo_lru);
+
 		entrada_tlb->tiempo_lru = temporal_get_string_time("%H:%M:%S:%MS");
 	}
 }

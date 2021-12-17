@@ -30,6 +30,9 @@ void *rutina_carpincho(void *info_carpincho) {
 			else
 				mensaje_out = crear_mensaje(NO_MEMORY);
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
 			break;
 		case MEM_FREE:
 			log_warning(logger, "Me llego un mem_free para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -45,6 +48,9 @@ void *rutina_carpincho(void *info_carpincho) {
 			}
 
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
 			break;
 		case MEM_READ:
 			log_warning(logger, "Me llego un mem_read para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -64,6 +70,10 @@ void *rutina_carpincho(void *info_carpincho) {
 			}
 
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
+			free(contenido);
 			break;
 		case MEM_WRITE:
 			log_warning(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));
@@ -83,6 +93,9 @@ void *rutina_carpincho(void *info_carpincho) {
 			}
 			
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
 			break;
 		case SUSPEND:
 			log_warning(logger, "Me llego una orden de suspension");
@@ -91,6 +104,9 @@ void *rutina_carpincho(void *info_carpincho) {
 			
 			mensaje_out = crear_mensaje(TODOOK);
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
 			break;
 		case UNSUSPEND:
 			log_warning(logger, "Me llego un permiso para volver a memoria (unsuspend)");
@@ -98,6 +114,9 @@ void *rutina_carpincho(void *info_carpincho) {
 
 			mensaje_out = crear_mensaje(TODOOK);
 			enviar_mensaje(socket, mensaje_out);
+
+			liberar_mensaje_in(mensaje_in);
+			liberar_mensaje_out(mensaje_out);
 			break;
 		case MATE_CLOSE:
 		default:
@@ -109,6 +128,8 @@ void *rutina_carpincho(void *info_carpincho) {
 				imprimo = false;
 			}
 			pthread_mutex_unlock(&mutex_lista_carpinchos);
+
+			liberar_mensaje_in(mensaje_in);
 			break;
 		}
 	}

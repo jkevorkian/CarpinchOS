@@ -91,6 +91,11 @@ void* cpu() {
 							log_info(logger, "Carpincho %d devolvio la respuesta proporcionada por la ram (%s)", carp->id, string_desde_mensaje(codigo_respuesta));
 							liberar_mensaje_out(mensaje_out);
 
+							if (parametro == MEM_WRITE)
+								free(list_get(mensaje_in, 3));
+							if (codigo_respuesta == DATA_PAGE)
+								free(list_get(mensaje_mateLib, 2));
+
 							liberar_mensaje_in(mensaje_mateLib);
 						}else {
 							if (parametro == MEM_READ) {
@@ -116,6 +121,7 @@ void* cpu() {
 						mensaje_out = crear_mensaje(TODOOK);
 						enviar_mensaje(carp->socket_mateLib, mensaje_out);
 						liberar_mensaje_out(mensaje_out);
+						free(list_get(mensaje_in, 1));
 						break;
 					case SEM_WAIT:
 						posicion = buscar_semaforo((char *)list_get(mensaje_in, 1));
@@ -167,6 +173,7 @@ void* cpu() {
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
 							liberar_mensaje_out(mensaje_out);
 						}
+						free(list_get(mensaje_in, 1));
 						break;
 					case SEM_POST:
 						posicion = buscar_semaforo((char *)list_get(mensaje_in, 1));
@@ -231,6 +238,7 @@ void* cpu() {
 
 						enviar_mensaje(carp->socket_mateLib, mensaje_out);
 						liberar_mensaje_out(mensaje_out);
+						free(list_get(mensaje_in, 1));
 						break;
 					case SEM_DESTROY:
 						posicion = buscar_semaforo((char *)list_get(mensaje_in, 1));
@@ -260,6 +268,7 @@ void* cpu() {
 
 						enviar_mensaje(carp->socket_mateLib, mensaje_out);
 						liberar_mensaje_out(mensaje_out);
+						free(list_get(mensaje_in, 1));
 						break;
 					case CALL_IO:
 						posicion = buscar_io((char *)list_get(mensaje_in, 1));
@@ -282,6 +291,7 @@ void* cpu() {
 							enviar_mensaje(carp->socket_mateLib, mensaje_out);
 							liberar_mensaje_out(mensaje_out);
 						}
+						free(list_get(mensaje_in, 1));
 						break;
 					case MATE_CLOSE:
 						if(MEMORIA_ACTIVADA) {

@@ -32,19 +32,12 @@ int main(int argc, char *argv[]) {
 	printf("MAIN - Utilizando el archivo de config: %s\n", argv[1]);
 
 	pthread_create(&carpincho1, NULL, carpincho1_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho2, NULL, carpincho2_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho3, NULL, carpincho3_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho4, NULL, carpincho4_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho5, NULL, carpincho5_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho6, NULL, carpincho6_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho7, NULL, carpincho7_func, argv[1]);
-	sleep(1);
 	pthread_create(&carpincho8, NULL, carpincho8_func, argv[1]);
 
 	pthread_join(carpincho8, NULL);
@@ -301,7 +294,7 @@ void* carpincho8_func(void *config) {
 	mate_init(&instance, (char*) config);
 
 	printf("C8 - Soy el carpincho vago, no pienso hacer nada\n");
-	sleep(60);
+	sleep(6);
 
 	printf("C8 - Se retira a descansar de nuevo...\n");
 	mate_close(&instance);

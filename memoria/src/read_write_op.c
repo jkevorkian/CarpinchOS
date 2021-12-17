@@ -107,6 +107,7 @@ uint32_t get_prevAlloc(uint32_t id, uint32_t inicio_heap) {
 	uint32_t pos_alloc;
 	void * bloque = obtener_bloque_paginacion(id, inicio_heap, 4);
 	memcpy(&pos_alloc, bloque, 4);
+	free(bloque);
 	return pos_alloc;
 }
 
@@ -114,6 +115,7 @@ uint32_t get_nextAlloc(uint32_t id, uint32_t inicio_heap) {
 	uint32_t pos_alloc;
 	void * bloque = obtener_bloque_paginacion(id, inicio_heap + 4, 4);
 	memcpy(&pos_alloc, bloque, 4);
+	free(bloque);
 	return pos_alloc;
 }
 

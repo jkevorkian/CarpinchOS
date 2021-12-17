@@ -7,6 +7,9 @@ void data_bloque(void *data, uint32_t tamanio);
 //---------------------------FUNCIONES GENERALES----------------------
 
 int mate_init(mate_instance *lib_ref, char *config) {
+	int tiempo_random = rand() %1000;
+	usleep(tiempo_random*1000);
+
 	t_config *mateConfig = config_create(config); //"../mateLib/mateLib.config"
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
 

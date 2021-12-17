@@ -181,6 +181,7 @@ bool mem_write(uint32_t id_carpincho, uint32_t dir_logica, void* contenido, uint
 	}
 
 	actualizar_bloque_paginacion(id_carpincho, dir_logica, contenido, tamanio);
+	free(contenido);
 	return true;
 }
 

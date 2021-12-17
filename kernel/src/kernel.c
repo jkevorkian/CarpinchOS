@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
 			nuevo_carpincho->debe_morir = false;
 			nuevo_carpincho->semaforos_asignados = list_create();
 			nuevo_carpincho->esperar_cliente = true;
+			nuevo_carpincho->tiempo_llegada = NULL;
 
 			agregar_new(nuevo_carpincho);
 			id_proximo_carpincho++;

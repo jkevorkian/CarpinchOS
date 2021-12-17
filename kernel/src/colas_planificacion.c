@@ -22,6 +22,9 @@ void agregar_ready(carpincho* carp) {
 	sem_post(&carpinchos_ready);
 	pthread_mutex_unlock(&mutex_lista_ready);
 
+	if(carp->tiempo_llegada)
+		free(carp->tiempo_llegada);
+
 	carp->tiempo_llegada = temporal_get_string_time("%H:%M:%S:%MS");
 
 	log_info(logger_colas, " \tAgregado a ready el carpincho %d", carp->id);
