@@ -1,7 +1,7 @@
 #include "mateLib.h"
 
 t_log *logger;
-int id_proxima_instancia = 0;
+int id_proxima_instancia = 1;
 void data_bloque(void *data, uint32_t tamanio);
 
 //---------------------------FUNCIONES GENERALES----------------------
@@ -11,10 +11,10 @@ int mate_init(mate_instance *lib_ref, char *config) {
 
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
 
-	char *ip_kernel 					= config_get_string_value(mateConfig, "IP_KERNEL");
-	char *ip_memoria 					= config_get_string_value(mateConfig, "IP_MEMORIA");
-	char *puerto_kernel 				= config_get_string_value(mateConfig, "PUERTO_KERNEL");
-	char *puerto_memoria 				= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
+	char *ip_kernel 		= config_get_string_value(mateConfig, "IP_KERNEL");
+	char *ip_memoria 		= config_get_string_value(mateConfig, "IP_MEMORIA");
+	char *puerto_kernel 	= config_get_string_value(mateConfig, "PUERTO_KERNEL");
+	char *puerto_memoria 	= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
 
 	lib_ref->id = id_proxima_instancia;
 	lib_ref->murio = false;
@@ -53,7 +53,6 @@ int mate_init(mate_instance *lib_ref, char *config) {
 				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
-				data_socket(lib_ref->socket, logger);
 			} else {
 				log_error(logger, "Error en la comunicacion con la memoria");
 				lib_ref->murio = true;
@@ -91,7 +90,7 @@ int mate_call_io(mate_instance *lib_ref, char *io, void *msg) {
 		if((int)list_get(mensaje_in, 0) == TODOOK)
 			log_info(logger, "Carpincho %d: volvio de IO correctamente", lib_ref->id);
 		else {
-			log_error(logger, "Carpincho %d: hubo un fallo al realizar IO", lib_ref->id);
+			log_error(logger, "Carpincho %d: hubo un fallo al realizar IO (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 			lib_ref->murio = true;
 		}
 
@@ -113,7 +112,7 @@ int mate_sem_init(mate_instance *lib_ref, char *sem, unsigned int value) {
 		if ((int)list_get(mensaje_in, 0) == TODOOK) {
 			log_info(logger, "Carpincho %d: La inicializacion del semaforo fue exitosa", lib_ref->id);
 		} else {
-			log_error(logger, "Carpincho %d: Error en la inicializacion del semaforo", lib_ref->id);
+			log_error(logger, "Carpincho %d: Error en la inicializacion del semaforo (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 			lib_ref->murio = true;
 		}
 
@@ -135,7 +134,7 @@ int mate_sem_wait(mate_instance *lib_ref, char *sem) {
 		if ((int)list_get(mensaje_in, 0) == TODOOK)
 			log_info(logger, "Carpincho %d: El wait del semaforo fue exitoso", lib_ref->id);
 		else {
-			log_error(logger, "Carpincho %d: Error en el wait del semaforo", lib_ref->id);
+			log_error(logger, "Carpincho %d: Error en el wait del semaforo (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 			lib_ref->murio = true;
 		}
 
@@ -156,7 +155,7 @@ int mate_sem_post(mate_instance *lib_ref, char *sem) {
 		if ((int)list_get(mensaje_in, 0) == TODOOK)
 			log_info(logger, "Carpincho %d: El post del semaforo fue exitoso", lib_ref->id);
 		else {
-			log_error(logger, "Carpincho %d: Error en el post del semaforo", lib_ref->id);
+			log_error(logger, "Carpincho %d: Error en el post del semaforo (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 			lib_ref->murio = true;
 		}
 		liberar_mensaje_in(mensaje_in);
@@ -176,7 +175,7 @@ int mate_sem_destroy(mate_instance *lib_ref, char *sem) {
 		if ((int)list_get(mensaje_in, 0) == TODOOK)
 			log_info(logger, "Carpincho %d: El cierre del semaforo fue exitoso", lib_ref->id);
 		else {
-			log_error(logger, "Carpincho %d: Error en cierre del semaforo", lib_ref->id);
+			log_error(logger, "Carpincho %d: Error en cierre del semaforo (Codigo de error: %s)", lib_ref->id, string_desde_mensaje((int)list_get(mensaje_in, 0)));
 			lib_ref->murio = true;
 		}
 		liberar_mensaje_in(mensaje_in);
