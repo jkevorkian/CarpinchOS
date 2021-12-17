@@ -80,7 +80,7 @@ int conectar_memoria(int socket_auxiliar_carpincho) {
 
 int crear_socket_carpincho(int socket_auxiliar_carpincho) {
 	//creo un nuevo servidor en un puerto libre que asigne el SO
-	int socket_aux_carpincho = crear_conexion_servidor(ip_kernel, 0, 1);
+	int socket_aux_carpincho = crear_conexion_servidor(ip_kernel, 0, SOMAXCONN);
 
 	if(!validar_socket(socket_aux_carpincho, logger)) {
 		close(socket_aux_carpincho);

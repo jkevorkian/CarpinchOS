@@ -1,7 +1,5 @@
 #include "mateLib.h"
 
-#include <pthread.h>
-
 t_log *logger;
 int id_proxima_instancia = 1;
 void data_bloque(void *data, uint32_t tamanio);
