@@ -1,5 +1,7 @@
 #include "mateLib.h"
 
+#include <pthread.h>
+
 t_log *logger;
 int id_proxima_instancia = 1;
 void data_bloque(void *data, uint32_t tamanio);
@@ -8,7 +10,6 @@ void data_bloque(void *data, uint32_t tamanio);
 
 int mate_init(mate_instance *lib_ref, char *config) {
 	t_config *mateConfig = config_create(config); //"../mateLib/mateLib.config"
-
 	logger = log_create("mateLib.log", "MATELIB", 1, LOG_LEVEL_INFO);
 
 	char *ip_kernel 		= config_get_string_value(mateConfig, "IP_KERNEL");
@@ -16,9 +17,7 @@ int mate_init(mate_instance *lib_ref, char *config) {
 	char *puerto_kernel 	= config_get_string_value(mateConfig, "PUERTO_KERNEL");
 	char *puerto_memoria 	= config_get_string_value(mateConfig, "PUERTO_MEMORIA");
 
-	lib_ref->id = id_proxima_instancia;
-	lib_ref->murio = false;
-	id_proxima_instancia++;
+	bool fallo_kernel = false;
 
 	int socket_auxiliar_kernel = crear_conexion_cliente(ip_kernel, puerto_kernel);
 
@@ -34,10 +33,19 @@ int mate_init(mate_instance *lib_ref, char *config) {
 			sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 			lib_ref->socket = crear_conexion_cliente(ip_kernel, puerto);
-		}
+
+			/*if (!validar_socket(lib_ref->socket, logger))
+				log_error(logger, "Error en la comunicacion con el kernel");
+			else
+				data_socket(lib_ref->socket, logger);*/
+		} else
+			fallo_kernel = true;
 
 		liberar_mensaje_in(mensaje_in);
-	} else {
+	} else
+		fallo_kernel = true;
+
+	if(fallo_kernel) {
 		log_error(logger, "Error en la comunicacion con el kernel, intentando con la memoria");
 		int socket_auxiliar_memoria = crear_conexion_cliente(ip_memoria, puerto_memoria);
 
@@ -53,15 +61,22 @@ int mate_init(mate_instance *lib_ref, char *config) {
 				sprintf(puerto, "%d", (int)list_get(mensaje_in, 1));
 
 				lib_ref->socket = crear_conexion_cliente(ip_memoria, puerto);
-			} else {
+
+				/*if (!validar_socket(lib_ref->socket, logger))
+					log_error(logger, "Error en la comunicacion con la memoria");
+				else
+					data_socket(lib_ref->socket, logger);*/
+			} else
 				log_error(logger, "Error en la comunicacion con la memoria");
-				lib_ref->murio = true;
-			}
 
 			liberar_mensaje_in(mensaje_in);
 		} else
-			lib_ref->murio = true;
+			log_error(logger, "Error en la comunicacion con la memoria");
 	}
+
+	lib_ref->id = id_proxima_instancia;
+	lib_ref->murio = false;
+	id_proxima_instancia++;
 
 	return 0;
 }
