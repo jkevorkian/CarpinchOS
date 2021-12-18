@@ -153,14 +153,14 @@ void *mem_read(uint32_t id_carpincho, uint32_t dir_logica, uint32_t tamanio) {
 		log_warning(logger, "El puntero es invalido");
 		return false;
 	}
-	
+	log_info(logger, "Obtengo next alloc");
 	uint32_t tamanio_alocado = get_nextAlloc(id_carpincho, dir_logica_heap) - dir_logica;
 
 	if(tamanio_alocado < tamanio) {
 		log_warning(logger, "El tamanio pedido es mayor que el tamanio asignado. %d >> %d", tamanio, tamanio_alocado);
 		return false;
 	}
-	
+	log_info(logger, "Obtengo bloque paginacion");
 	return obtener_bloque_paginacion(id_carpincho, dir_logica, tamanio);
 }
 

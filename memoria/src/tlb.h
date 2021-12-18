@@ -44,6 +44,9 @@ t_list *cola_fifo_tlb;
 pthread_mutex_t mutex_fifo_tlb;
 pthread_mutex_t mutex_asignacion_tlb;
 
+t_list *lista_lru_tlb;
+pthread_mutex_t mutex_lista_lru_tlb;
+
 t_list *historico_hit_miss;
 pthread_mutex_t mutex_historico_hit_miss;
 

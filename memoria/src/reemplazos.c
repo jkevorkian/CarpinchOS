@@ -66,33 +66,64 @@ t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas) {
 	return marco_referencia;
 }
 
-t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas) {
-	t_marco *marco_referencia = lista_paginas[0];
-	t_marco *marco_siguiente;
-	bool primero_mas_viejo;
-
-	for(int i = 1; i < nro_paginas; i++) {
-		marco_siguiente = lista_paginas[i];
-		pthread_mutex_lock(&marco_referencia->mutex_info_algoritmo);	// TODO eliminar mutex
-		pthread_mutex_lock(&marco_siguiente->mutex_info_algoritmo);
-		primero_mas_viejo = primer_tiempo_mas_chico(marco_referencia->temporal, marco_siguiente->temporal);
-		pthread_mutex_unlock(&marco_referencia->mutex_info_algoritmo);
-		pthread_mutex_unlock(&marco_siguiente->mutex_info_algoritmo);
-
-		if(!primero_mas_viejo)	marco_referencia = marco_siguiente;
+t_marco *buscar_por_lru(uint32_t id, uint32_t pagina) {
+	bool entrada_a_remover_fija(void *entrada_fake) {
+		if(((t_entrada_lru *)entrada_fake)->id == id)
+			return true;
+		else
+			return false;
 	}
+
+	pthread_mutex_lock(&mutex_lista_lru);
+	t_entrada_lru *entrada_lru;
+	if(config_memoria.tipo_asignacion == FIJA_LOCAL)
+		entrada_lru = list_remove_by_condition(lista_lru, entrada_a_remover_fija);
+	else
+		entrada_lru = list_remove(lista_lru, 0);
+
+	log_warning(logger, "Victima id %d pagina %d", entrada_lru->id, entrada_lru->pagina);
+
+	t_marco *marco_referencia;
+	for(int i = 0; i < config_memoria.cant_marcos; i++) {
+		marco_referencia = memoria_ram.mapa_fisico[i];
+		if(marco_referencia->duenio == entrada_lru->id && marco_referencia->pagina_duenio == entrada_lru->pagina)
+			break;
+	}
+
+	log_warning(logger, "Victima id %d pagina %d", marco_referencia->duenio, marco_referencia->pagina_duenio);
+	log_warning(logger, "Victimario id %d pagina %d", id, pagina);
+
+	entrada_lru->id = id;
+	entrada_lru->pagina = pagina;
+	list_add(lista_lru, entrada_lru);
+
+	for(int i = 0; i < config_memoria.cant_marcos; i++) {
+		log_warning(logger, "Entradé %d. Id: %d pagina %d", i, ((t_entrada_lru *)list_get(lista_lru, i))->id, ((t_entrada_lru *)list_get(lista_lru, i))->pagina);
+	}
+
+	pthread_mutex_unlock(&mutex_lista_lru);
 
 	return marco_referencia;
 }
 
 void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado) {
+	bool entrada_correcta(void *entrada) {
+		if(((t_entrada_lru *)entrada)->id == marco_auxiliar->duenio && ((t_entrada_lru *)entrada)->pagina == marco_auxiliar->pagina_duenio)
+			return true;
+		else
+			return false;
+	}
+
 	pthread_mutex_lock(&marco_auxiliar->mutex_info_algoritmo);
 	if(modificado)
 		marco_auxiliar->bit_modificado = true;
 
 	if(config_memoria.algoritmo_reemplazo == LRU) {
-		if(marco_auxiliar->temporal)	free(marco_auxiliar->temporal);
-		marco_auxiliar->temporal = temporal_get_string_time("%H:%M:%S:%MS");
+		log_warning(logger, "Actualizo info algoritmo id %d pagina %d", marco_auxiliar->duenio, marco_auxiliar->pagina_duenio);
+		pthread_mutex_lock(&mutex_lista_lru);
+		t_entrada_lru *entrada_lru = list_remove_by_condition(lista_lru, entrada_correcta);
+		list_add(lista_lru, entrada_lru);
+		pthread_mutex_unlock(&mutex_lista_lru);
 	}
 	else
 		marco_auxiliar->bit_uso = true;

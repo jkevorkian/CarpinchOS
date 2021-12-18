@@ -77,12 +77,20 @@ typedef struct {
     uint32_t cant_miss;
 } t_carpincho;
 
+typedef struct {
+    uint32_t id;
+    uint32_t pagina;
+} t_entrada_lru;
+
 pthread_mutex_t mutex_asignacion_marcos;
 
 t_memoria_ram memoria_ram;
 t_config_memoria config_memoria;
 
 t_log* logger;
+
+t_list *lista_lru;
+pthread_mutex_t mutex_lista_lru;
 
 pthread_mutex_t mutex_lista_carpinchos;
 t_list* lista_carpinchos;

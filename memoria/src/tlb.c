@@ -14,6 +14,8 @@ void iniciar_tlb(t_config* config) {
 	else {
 		log_info(logger, "Algoritmo de asignacion de entradas TLB: LRU");
 		tlb.algoritmo_reemplazo = LRU;
+		pthread_mutex_init(&mutex_lista_lru_tlb, NULL);
+		lista_lru_tlb = list_create();
 	}
 	
 	pthread_mutex_init(&mutex_asignacion_tlb, NULL);
@@ -40,6 +42,12 @@ void iniciar_tlb(t_config* config) {
 
 		if(tlb.algoritmo_reemplazo == FIFO) {
 			list_add(cola_fifo_tlb, entrada);
+		}
+		else {
+			t_entrada_lru *entrada_lru = malloc(sizeof(t_entrada_lru));
+			entrada_lru->id = 0;
+			entrada_lru->pagina = -1;
+			list_add(lista_lru_tlb, entrada_lru);
 		}
 	}
 

@@ -70,10 +70,11 @@ void *rutina_carpincho(void *info_carpincho) {
 			}
 
 			enviar_mensaje(socket, mensaje_out);
-
+			log_info(logger, "Envio mensaje");
 			liberar_mensaje_in(mensaje_in);
 			liberar_mensaje_out(mensaje_out);
 			free(contenido);
+			log_info(logger, "Libere contenido");
 			break;
 		case MEM_WRITE:
 			log_warning(logger, "Me llego un mem_write para la posicion %d", (int)list_get(mensaje_in, 1));

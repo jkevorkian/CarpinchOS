@@ -6,7 +6,7 @@
 
 t_marco *buscar_por_clock(t_marco **lista_paginas, uint32_t nro_paginas);
 
-t_marco *buscar_por_lru(t_marco **lista_paginas, uint32_t nro_paginas);
+t_marco *buscar_por_lru(uint32_t id, uint32_t pagina);
 
 void actualizar_info_algoritmo(t_marco *marco_auxiliar, bool modificado);
 

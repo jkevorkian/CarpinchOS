@@ -70,10 +70,28 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 		}
 	}
 	
-	if(!marco_a_reemplazar) {
+	if(marco_a_reemplazar) {
+		bool entrada_libre(void *entrada) {
+			if(((t_entrada_lru *)entrada)->id == 0)
+				return true;
+			else
+				return false;
+		}
+		if(config_memoria.algoritmo_reemplazo == LRU) {
+			pthread_mutex_lock(&mutex_lista_lru);
+			log_warning(logger, "Victima marco libre");
+			log_warning(logger, "Victimario id %d pagina %d", entrada_tp->id, entrada_tp->pagina);
+			t_entrada_lru *entrada_lru = list_remove_by_condition(lista_lru, entrada_libre);
+			entrada_lru->id = entrada_tp->id;
+			entrada_lru->pagina = entrada_tp->pagina;
+			list_add(lista_lru, entrada_lru);
+			pthread_mutex_unlock(&mutex_lista_lru);
+		}
+	}
+	else {
 		log_warning(logger, "No encontre marco libre. Hago reemplazo");
 		if(config_memoria.algoritmo_reemplazo == LRU)
-			marco_a_reemplazar = buscar_por_lru(marcos_carpincho, nro_paginas);
+			marco_a_reemplazar = buscar_por_lru(entrada_tp->id, entrada_tp->pagina);
 		if(config_memoria.algoritmo_reemplazo == CLOCK)
 			marco_a_reemplazar = buscar_por_clock(marcos_carpincho, nro_paginas);
 		
@@ -92,7 +110,7 @@ t_marco *incorporar_pagina(t_entrada_tp *entrada_tp) {
 		// >>>>>>>>>>>>>>>>>>> Para testear
 		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
 		memcpy(pagina_generica, inicio_memoria(marco_a_reemplazar->nro_real, 0), config_memoria.tamanio_pagina);
-		loggear_pagina(logger, pagina_generica);
+		// loggear_pagina(logger, pagina_generica);
 		loggear_pagina(logger, buffer);
 		free(pagina_generica);
 		// <<<<<<<<<<<<<<<<<<<
@@ -138,7 +156,7 @@ void reasignar_marco(t_marco* marco, t_entrada_tp *entrada_tp) {
 		// >>>>>>>>>>>>>>>>>>>
 		void *pagina_generica = malloc(config_memoria.tamanio_pagina);
 		memcpy(pagina_generica, inicio_memoria(marco->nro_real, 0), config_memoria.tamanio_pagina);
-		loggear_pagina(logger, pagina_generica);
+		// loggear_pagina(logger, pagina_generica);
 		free(pagina_generica);
 		// <<<<<<<<<<<<<<<<<<<
 	}
@@ -357,6 +375,22 @@ void eliminar_pagina(uint32_t id, uint32_t nro_pagina) {
 			marco->bit_uso = false;
 			memset(inicio_memoria(marco->nro_real, 0), 0, config_memoria.tamanio_pagina);
 			pthread_mutex_unlock(&mutex_asignacion_marcos);
+
+			bool entrada_correcta(void *entrada) {
+				if(((t_entrada_lru *)entrada)->id == id && ((t_entrada_lru *)entrada)->pagina == nro_pagina)
+					return true;
+				else
+					return false;
+			}
+
+			pthread_mutex_lock(&mutex_lista_lru);
+			log_warning(logger, "Victima id %d pagina %d", id, nro_pagina);
+			log_warning(logger, "Victimario nadie");
+			t_entrada_lru *entrada_lru = list_remove_by_condition(lista_lru, entrada_correcta);
+			entrada_lru->id = 0;
+			entrada_lru->pagina = -1;
+			list_add(lista_lru, entrada_lru);
+			pthread_mutex_unlock(&mutex_lista_lru);
 		}
 	}
 	else {

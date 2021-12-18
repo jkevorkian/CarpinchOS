@@ -29,6 +29,8 @@ bool iniciar_memoria(t_config *config) {
 	if(!strcmp(algoritmo_reemplazo_mmu, "LRU")) {
 		log_info(logger, "Algoritmo de reemplazo MMU: LRU");
 		config_memoria.algoritmo_reemplazo = LRU;
+		lista_lru = list_create();
+		pthread_mutex_init(&mutex_lista_lru, NULL);
 	}
 	else {
 		log_info(logger, "Algoritmo de reemplazo MMU: Clock modificado");
@@ -68,6 +70,14 @@ void iniciar_marcos(uint32_t cant_marcos){
 		marco_auxiliar->temporal = NULL;
 		pthread_mutex_init(&marco_auxiliar->mutex_espera_uso, NULL);
 		pthread_mutex_init(&marco_auxiliar->mutex_info_algoritmo, NULL);
+
+		t_entrada_lru *entrada_lru = malloc(sizeof(entrada_lru));
+		entrada_lru->id = 0;
+		entrada_lru->pagina = -1;
+
+		if(config_memoria.algoritmo_reemplazo == LRU) {
+			list_add(lista_lru, entrada_lru);
+		}
 	}
 	pthread_mutex_init(&mutex_asignacion_marcos, NULL);
 }
