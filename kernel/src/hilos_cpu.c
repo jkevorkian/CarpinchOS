@@ -158,7 +158,7 @@ void* cpu() {
 								liberar_mensaje_out(mensaje_out);
 							}
 							else {
-								log_info(logger, "No habian instancias disponibles del semaforo %s (cantidad en lista de espera: %d)", (char *)list_get(mensaje_in, 1), queue_size(sem->cola_espera), carp->id);
+								log_info(logger, "No habian instancias disponibles del semaforo %s (cantidad en lista de espera: %d)", (char *)list_get(mensaje_in, 1), queue_size(sem->cola_espera));
 								pthread_mutex_lock(&sem->mutex_espera);
 								queue_push(sem->cola_espera, carp);
 								pthread_mutex_unlock(&sem->mutex_espera);
@@ -180,7 +180,7 @@ void* cpu() {
 
 						if(posicion != -1) {
 							semaforo *sem = (semaforo*)list_get(lista_semaforos, posicion);
-							log_info(logger, "Cantidad de carpinchos esperando en el semaforo %s: %d", (char *)list_get(mensaje_in, 1), queue_size(sem->cola_espera), carp->id);
+							log_info(logger, "Cantidad de carpinchos esperando en el semaforo %s: %d", (char *)list_get(mensaje_in, 1), queue_size(sem->cola_espera));
 
 							pthread_mutex_lock(&sem->mutex_espera);
 								if(queue_is_empty(sem->cola_espera)) {
